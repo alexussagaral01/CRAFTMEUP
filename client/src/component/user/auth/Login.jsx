@@ -1,8 +1,8 @@
 // LoginForm.jsx
 import React, { useState } from 'react';
 import { FaEnvelope, FaEye, FaEyeSlash } from 'react-icons/fa';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { login } from '../../../services/api';
 
 const LoginForm = () => {
   const [formData, setFormData] = useState({
@@ -20,16 +20,30 @@ const LoginForm = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     
-    // Static credential check
-    if (formData.email === 'user@gmail.com' && formData.password === 'user') {
-      navigate('/dashboard');
-    } else if (formData.email === 'admin@gmail.com' && formData.password === 'admin') {
-      navigate('/admin-dashboard');
-    } else {
-      setError('Invalid credentials. Please try again.');
+    try {
+      const response = await login(formData.email, formData.password);
+      
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        
+        // Redirect based on user role
+        const userRole = response.data.user.role;
+        if (userRole === 'admin') {
+          navigate('/admin-dashboard');
+        } else {
+          navigate('/dashboard');
+        }
+      }
+    } catch (error) {
+      setError(
+        error.response?.data?.message || 
+        'Login failed. Please check your credentials.'
+      );
     }
   };
 

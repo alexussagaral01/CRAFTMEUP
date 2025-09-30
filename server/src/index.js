@@ -1,14 +1,38 @@
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const app = express();
+const dotenv = require('dotenv');
+const path = require('path');
 const authRoutes = require('./routes/authRoutes');
+const announcementRoutes = require('./routes/announcementRoutes');
+const serviceRoutes = require('./routes/serviceRoutes');
+const transactionRoutes = require('./routes/transactionRoutes');
+const pool = require('./config/database');
 
-app.use(cors()); // Add this line
+dotenv.config();
+
+const app = express();
+const port = process.env.PORT || 5000;
+
+app.use(cors());
 app.use(express.json());
-app.use('/api/auth', authRoutes);
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/announcements', announcementRoutes);
+app.use('/api/services', serviceRoutes);
+app.use('/api/transactions', transactionRoutes);
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+// Test database connection
+app.get('/api/test-db', async (req, res) => {
+    try {
+        const [result] = await pool.execute('SELECT 1');
+        res.json({ success: true, result });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
 });

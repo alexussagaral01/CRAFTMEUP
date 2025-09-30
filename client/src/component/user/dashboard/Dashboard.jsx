@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   HomeIcon,
   UserIcon,
@@ -18,23 +18,156 @@ import {
   BookmarkIcon,
 } from "@heroicons/react/24/outline";
 import { useNavigate } from 'react-router-dom';//
+import { getAnnouncements, getUserServices } from '../../../services/api';
 
 export default function Dashboard() {
   const navigate = useNavigate();//
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [userData, setUserData] = useState(null);
+  const [announcements, setAnnouncements] = useState([]);
+  const [services, setServices] = useState([]);
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    setUserData(user);
+    fetchAnnouncements();
+    if (user) {
+      fetchUserServices(user.id);
+    }
+  }, []);
+
+  const fetchAnnouncements = async () => {
+    try {
+      const response = await getAnnouncements();
+      setAnnouncements(response.data);
+    } catch (error) {
+      console.error('Error fetching announcements:', error);
+    }
+  };
+
+  const fetchUserServices = async (userId) => {
+    try {
+      const response = await getUserServices(userId);
+      setServices(response.data);
+    } catch (error) {
+      console.error('Error fetching services:', error);
+    }
+  };
+
+  const canSeeAnnouncement = (announcement) => {
+    const userRole = userData?.role?.toLowerCase() || '';
+    const target = announcement.target_audience?.toLowerCase() || '';
+
+    if (target === 'all users') return true;
+    if (target === 'tutors only' && userRole === 'tutor') return true;
+    if (target === 'learners only' && userRole === 'learner') return true;
+    return false;
+  };
 
   const navItems = [
-    { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
-    { name: "Profile", icon: <UserIcon className="h-5 w-5" />, path: "/profile" },
-    { name: "Messages", icon: <ChatBubbleLeftIcon className="h-5 w-5" />, path: "/messages" },
-    { name: "My Services", icon: <ClipboardDocumentListIcon className="h-5 w-5" />, path: "/my-services" },
-    { name: "Find Services", icon: <MagnifyingGlassIcon className="h-5 w-5" />, path: "/find-services" },
-    { name: "Saved", icon: <BookmarkIcon className="h-5 w-5" />, path: "/saved" },
-    { name: "Wallet", icon: <WalletIcon className="h-5 w-5" />, path: "/wallet" },
-    { name: "Transactions", icon: <ReceiptRefundIcon className="h-5 w-5" />, path: "/transactions" },
-    { name: "Feedback", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/feedback" },
-    { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
-  ];
+  { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
+  { name: "Profile", icon: <UserIcon className="h-5 w-5" />, path: "/profile" },
+  { name: "Messages", icon: <ChatBubbleLeftIcon className="h-5 w-5" />, path: "/messages" },
+  { name: "My Services", icon: <ClipboardDocumentListIcon className="h-5 w-5" />, path: "/my-services" },
+  { name: "Find Services", icon: <MagnifyingGlassIcon className="h-5 w-5" />, path: "/find-services" },
+  { name: "Saved", icon: <BookmarkIcon className="h-5 w-5" />, path: "/saved" },
+  { name: "Wallet", icon: <WalletIcon className="h-5 w-5" />, path: "/wallet" },
+  { name: "Transactions", icon: <ReceiptRefundIcon className="h-5 w-5" />, path: "/transactions" },
+  { name: "Feedback", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/view-past-feedback" },
+  { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
+];
+
+  const renderAnnouncements = () => (
+    <>
+      {/* Feature Announcement - Static */}
+     
+
+      {/* Dynamic Announcements */}
+      <div className="p-4 mx-4">
+      <h2 className="font-semibold mb-4">Announcements</h2>
+      {/* Scrollable container */}
+      <div className="space-y-4 max-h-40 overflow-y-auto pr-2">
+        {announcements
+          .filter(announcement => canSeeAnnouncement(announcement))
+          .map((announcement) => (
+            <div
+              key={announcement.id}
+              className="bg-white p-4 rounded-xl shadow-sm border border-gray-100"
+            >
+              <h3 className="font-medium">{announcement.title}</h3>
+              <p className="text-sm text-gray-600 mt-2">{announcement.content}</p>
+              <div className="flex justify-between items-center mt-3 text-xs text-gray-500">
+                <span>Target: {announcement.target_audience}</span>
+                <span>{new Date(announcement.created_at).toLocaleDateString()}</span>
+              </div>
+            </div>
+          ))}
+      </div>
+    </div>
+    </>
+  );
+
+  const renderServices = () => (
+    <div className="p-4 m-4">
+      <div className="flex items-center justify-between mb-4">
+        <span className="font-semibold text-lg">My Services</span>
+        <button 
+          onClick={() => navigate('/my-services')} 
+          className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-full text-sm"
+        >
+          <PlusIcon className="h-4 w-4 mr-1" /> Add New
+        </button>
+      </div>
+      
+      {/* Scrollable container */}
+      <div className="max-h-[300px] overflow-y-auto space-y-4 pr-2">
+        {services.length > 0 ? (
+          services.map((service) => (
+            <div
+              key={service.id}
+              className="bg-white rounded-2xl p-4 shadow-lg border border-gray-100 transform transition hover:scale-[1.02]"
+            >
+              <div className="flex justify-between items-center">
+                <span className="font-semibold">{service.title}</span>
+                <span
+                  className={`text-xs px-3 py-1 rounded-full ${
+                    service.status === "active"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-gray-100 text-gray-700"
+                  }`}
+                >
+                  {service.status || "Active"}
+                </span>
+              </div>
+              <div className="text-sm text-gray-600 mt-2">
+                {service.description}
+              </div>
+              <div className="flex justify-between items-center mt-3 pt-3 border-t">
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                  <span className="text-sm text-gray-600">
+                    {service.availability}
+                  </span>
+                </div>
+                <span className="font-bold text-blue-600">SC {service.price}</span>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="text-center py-8 bg-gray-50 rounded-2xl">
+            <p className="text-gray-500">No services found</p>
+            <button
+              onClick={() => navigate("/my-services")}
+              className="mt-2 text-blue-600 hover:text-blue-700"
+            >
+              Create your first service
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
 
   return (
     <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen flex flex-col w-full md:max-w-sm mx-auto relative">
@@ -78,7 +211,7 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <div className="overflow-y-auto flex-1">
-        {/* Welcome Section */}
+        {/* Welcome Section - Updated */}
         <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-b-3xl shadow-lg">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-3">
@@ -86,9 +219,11 @@ export default function Dashboard() {
                 <Bars3Icon className="h-6 w-6 text-white" />
               </button>
               <div>
-                <div className="text-lg font-semibold">Welcome back, John</div>
+                <div className="text-lg font-semibold">
+                  Welcome back, {userData?.fullName || 'User'}
+                </div>
                 <span className="bg-white/20 text-xs px-3 py-1 rounded-full mt-1 inline-block backdrop-blur-sm">
-                  Service Provider
+                  {userData?.role || 'User'}
                 </span>
               </div>
             </div>
@@ -113,46 +248,11 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Announcements */}
-        <div className="p-4 mx-4 mt-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border border-purple-100">
-          <div className="flex items-center mb-2">
-            <VideoCameraIcon className="h-5 w-5 text-purple-500 mr-2" />
-            <span className="font-medium">New Feature: Video Calls</span>
-            <StarIcon className="h-4 w-4 text-yellow-400 ml-auto" />
-          </div>
-          <div className="text-sm text-gray-600 ml-7">Connect with clients through integrated video calling.</div>
-        </div>
+        {/* Render Announcements */}
+        {renderAnnouncements()}
 
         {/* My Services */}
-        <div className="p-4 m-4">
-          <div className="flex items-center justify-between mb-4">
-            <span className="font-semibold text-lg">My Services</span>
-            <button className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-full text-sm">
-              <PlusIcon className="h-4 w-4 mr-1" /> Add New
-            </button>
-          </div>
-          
-          {/* Service Cards */}
-          <div className="space-y-4">
-            {/* Active Service Card */}
-            <div className="bg-white rounded-2xl p-4 shadow-lg border border-gray-100 transform transition hover:scale-[1.02]">
-              <div className="flex justify-between items-center">
-                <span className="font-semibold">Resin Art Tutoring</span>
-                <span className="bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full">Active</span>
-              </div>
-              <div className="text-sm text-gray-600 mt-2">Learn how to safely mix and pour resin, add pigments, and finish your crafts.</div>
-              <div className="flex justify-between items-center mt-3 pt-3 border-t">
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-                  <span className="text-sm text-gray-600">5 active bookings</span>
-                </div>
-                <span className="font-bold text-blue-600">SC 150/hr</span>
-              </div>
-            </div>
-            
-            {/* ...other service cards with similar styling... */}
-          </div>
-        </div>
+        {renderServices()}
 
         {/* Recent Activity */}
         <div className="p-4 m-4">
@@ -169,9 +269,11 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-            {/* ...other activity items... */}
+            {/** Render other activity items here **/}
           </div>
         </div>
+
+       
       </div>
     </div>
   );

@@ -10,7 +10,8 @@ import {
   ExclamationTriangleIcon,
   CalendarIcon,
   MagnifyingGlassIcon, // Changed from SearchIcon
-  ArrowRightOnRectangleIcon
+  ArrowRightOnRectangleIcon,
+  CheckCircleIcon // Import CheckCircleIcon
 } from "@heroicons/react/24/outline";
 
 export default function AdminDashboard() {
@@ -19,9 +20,10 @@ export default function AdminDashboard() {
 
   const sidebarItems = [
     { name: "Dashboard", icon: <HomeIcon className="w-5 h-5" />, path: "/admin-dashboard" },
-    { name: "User Reports", icon: <UsersIcon className="w-5 h-5" />, path: "/user-reports" }, // Updated path
-    { name: "Wallet Logs", icon: <WalletIcon className="w-5 h-5" />, path: "/wallet-logs" }, // Updated path
-    { name: "Post Announcement", icon: <MegaphoneIcon className="w-5 h-5" />, path: "/announcements" }, // Updated path
+    { name: "User Reports", icon: <UsersIcon className="w-5 h-5" />, path: "/user-reports" },
+    { name: "Account Verification", icon: <CheckCircleIcon className="w-5 h-5" />, path: "/account-verification" },
+    { name: "Wallet Logs", icon: <WalletIcon className="w-5 h-5" />, path: "/wallet-logs" },
+    { name: "Post Announcement", icon: <MegaphoneIcon className="w-5 h-5" />, path: "/announcements" },
     { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
   ];
 
