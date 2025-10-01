@@ -1,8 +1,9 @@
 // LoginForm.jsx
 import React, { useState } from 'react';
 import { FaEnvelope, FaEye, FaEyeSlash } from 'react-icons/fa';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { login } from '../../../services/api';
+import { getAdminDashboardData } from '../../../services/adminApi'; // Add this import
 
 const LoginForm = () => {
   const [formData, setFormData] = useState({
@@ -11,7 +12,13 @@ const LoginForm = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  const validateEmail = (email) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -20,16 +27,99 @@ const LoginForm = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Static credential check
-    if (formData.email === 'user@gmail.com' && formData.password === 'user') {
-      navigate('/dashboard');
-    } else if (formData.email === 'admin@gmail.com' && formData.password === 'admin') {
+    setError('');
+    setIsLoading(true);
+
+    // Hardcoded admin credentials
+    if (formData.email === 'admin@craftmeup.com' && formData.password === 'admin') {
+      const adminUser = {
+        id: 'admin1',
+        email: 'admin@craftmeup.com',
+        role: 'admin',
+        type: 'admin',
+        fullName: 'Admin User'
+      };
+
+      // Add mock admin dashboard data
+      const mockDashboardData = {
+        stats: [
+          { title: 'Total Users', value: '1,234', icon: 'UsersIcon' },
+          { title: 'Active Services', value: '856', icon: 'ClipboardIcon' },
+          { title: 'Total Revenue', value: '₱45,678', icon: 'WalletIcon' },
+          { title: 'Pending Reports', value: '23', icon: 'FlagIcon' },
+          { title: 'Active Sessions', value: '189', icon: 'ClockIcon' }
+        ],
+        reports: [
+          { id: 1, name: 'John Doe', type: 'Service', submittedBy: 'User', date: '2024-01-20', status: 'Pending' },
+          { id: 2, name: 'Jane Smith', type: 'User', submittedBy: 'Admin', date: '2024-01-19', status: 'Resolved' }
+        ],
+        dashboard: {
+          recentActivity: [],
+          notifications: []
+        }
+      };
+      
+      localStorage.setItem('token', 'admin-token');
+      localStorage.setItem('user', JSON.stringify(adminUser));
+      localStorage.setItem('adminDashboardData', JSON.stringify(mockDashboardData));
+      
+      setIsLoading(false);
       navigate('/admin-dashboard');
-    } else {
-      setError('Invalid credentials. Please try again.');
+      return;
+    }
+
+    // Continue with regular user login flow
+    try {
+      const response = await login(formData.email, formData.password);
+      console.log('Login response:', response.data); // Debug log
+
+      if (response.data && response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        
+        // Check if user has admin role (modify this according to your user object structure)
+        if (response.data.user && (response.data.user.role === 'admin' || response.data.user.type === 'admin')) {
+          try {
+            console.log('User is admin, fetching admin data...'); // Debug log
+            const adminDataRes = await getAdminDashboardData(response.data.token);
+            localStorage.setItem('adminDashboardData', JSON.stringify(adminDataRes.data));
+            navigate('/admin-dashboard');
+          } catch (adminErr) {
+            console.error('Admin dashboard error:', adminErr);
+            setError('Failed to retrieve admin dashboard data.');
+            localStorage.clear();
+          }
+        } else {
+          navigate('/dashboard');
+        }
+      } else {
+        setError('Invalid response format from server');
+        console.error('Invalid response format:', response);
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      console.error('Error response:', error.response); // Debug log
+      
+      let errorMessage = 'An error occurred during login';
+      
+      if (error.response) {
+        switch (error.response.status) {
+          case 401:
+            errorMessage = 'Invalid email or password';
+            break;
+          case 404:
+            errorMessage = 'Account not found';
+            break;
+          default:
+            errorMessage = error.response.data?.message || 'Server error';
+        }
+      }
+      
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -102,9 +192,11 @@ const LoginForm = () => {
             {/* Login Button */}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-xl font-medium text-lg hover:from-blue-700 hover:to-indigo-700 transform transition-all duration-200 hover:scale-[1.02] hover:shadow-lg"
+              disabled={isLoading}
+              className={`w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-xl font-medium text-lg 
+                ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:from-blue-700 hover:to-indigo-700 transform transition-all duration-200 hover:scale-[1.02] hover:shadow-lg'}`}
             >
-              Sign in
+              {isLoading ? 'Signing in...' : 'Sign in'}
             </button>
           </form>
 

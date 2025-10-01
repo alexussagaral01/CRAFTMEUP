@@ -9,7 +9,8 @@ import {
   WalletIcon,
   MegaphoneIcon,
   ShieldExclamationIcon,
-  ArrowRightOnRectangleIcon
+  ArrowRightOnRectangleIcon,
+  CheckCircleIcon, // Add this import
 } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 
@@ -47,6 +48,7 @@ export default function UserReports() {
   const sidebarItems = [
     { name: "Dashboard", icon: <HomeIcon className="w-5 h-5" />, path: "/admin-dashboard" },
     { name: "User Reports", icon: <UsersIcon className="w-5 h-5" />, path: "/user-reports" },
+    { name: "Account Verification", icon: <CheckCircleIcon className="w-5 h-5" />, path: "/account-verification" },
     { name: "Wallet Logs", icon: <WalletIcon className="w-5 h-5" />, path: "/wallet-logs" },
     { name: "Post Announcement", icon: <MegaphoneIcon className="w-5 h-5" />, path: "/announcements" },
     { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },

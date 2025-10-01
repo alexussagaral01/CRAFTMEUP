@@ -1,7 +1,5 @@
-// RegisterForm.jsx
 import React, { useState } from 'react';
 import { FaArrowLeft, FaUpload } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
 
 const RegisterForm = () => {
   const [formData, setFormData] = useState({
@@ -16,8 +14,7 @@ const RegisterForm = () => {
     studyLoadFile: null,
   });
   const [step, setStep] = useState(1);
-
-  const navigate = useNavigate();
+  const [error, setError] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -42,10 +39,54 @@ const RegisterForm = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Implement registration logic (API call)
-    // You can use formData here
+    setError('');
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    try {
+      // Create FormData for file upload
+      const formDataToSend = new FormData();
+      formDataToSend.append('fullName', formData.fullName);
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('password', formData.password);
+      formDataToSend.append('course', formData.course);
+      formDataToSend.append('year', formData.year);
+      formDataToSend.append('role', formData.role);
+      
+      if (formData.studentIdFile) {
+        formDataToSend.append('studentId', formData.studentIdFile);
+      }
+      if (formData.studyLoadFile) {
+        formDataToSend.append('studyLoad', formData.studyLoadFile);
+      }
+
+      // Simulated API call - replace with actual register function
+      console.log('Registration data:', Object.fromEntries(formDataToSend));
+      alert('Registration successful! (This is a demo)');
+      
+      // const response = await register(formDataToSend);
+      // if (response.data.token) {
+      //   navigate('/');
+      // }
+    } catch (error) {
+      setError(
+        error.response?.data?.message || 
+        'Registration failed. Please try again.'
+      );
+    }
+  };
+
+  const handleBack = () => {
+    if (step > 1) {
+      setStep(step - 1);
+    } else {
+      window.location.href = '/';
+    }
   };
 
   return (
@@ -53,7 +94,7 @@ const RegisterForm = () => {
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-8 rounded-b-[40px] shadow-lg">
         <button
-          onClick={() => (step > 1 ? setStep(step - 1) : navigate('/'))}
+          onClick={handleBack}
           className="flex items-center space-x-2"
         >
           <FaArrowLeft />
@@ -177,33 +218,39 @@ const RegisterForm = () => {
             {/* File Uploads */}
             <div className="space-y-4">
               <div className="bg-white p-6 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-500 transition-colors cursor-pointer text-center">
-                <div className="bg-blue-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <FaUpload className="text-blue-500" />
-                </div>
-                <p className="text-sm font-medium">Upload Student ID</p>
-                <p className="text-xs text-gray-500 mt-1">Max size: 5MB</p>
-                <input
-                  type="file"
-                  name="studentIdFile"
-                  accept="image/*,.pdf"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
+                <label htmlFor="studentIdFile" className="cursor-pointer">
+                  <div className="bg-blue-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <FaUpload className="text-blue-500" />
+                  </div>
+                  <p className="text-sm font-medium">Upload Student ID</p>
+                  <p className="text-xs text-gray-500 mt-1">Max size: 5MB</p>
+                  <input
+                    id="studentIdFile"
+                    type="file"
+                    name="studentIdFile"
+                    accept="image/*,.pdf"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </label>
               </div>
 
               <div className="bg-white p-6 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-500 transition-colors cursor-pointer text-center">
-                <div className="bg-blue-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <FaUpload className="text-blue-500" />
-                </div>
-                <p className="text-sm font-medium">Upload Study Load</p>
-                <p className="text-xs text-gray-500 mt-1">Max size: 5MB</p>
-                <input
-                  type="file"
-                  name="studyLoadFile"
-                  accept="image/*,.pdf"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
+                <label htmlFor="studyLoadFile" className="cursor-pointer">
+                  <div className="bg-blue-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <FaUpload className="text-blue-500" />
+                  </div>
+                  <p className="text-sm font-medium">Upload Study Load</p>
+                  <p className="text-xs text-gray-500 mt-1">Max size: 5MB</p>
+                  <input
+                    id="studyLoadFile"
+                    type="file"
+                    name="studyLoadFile"
+                    accept="image/*,.pdf"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </label>
               </div>
             </div>
           </div>
@@ -267,12 +314,20 @@ const RegisterForm = () => {
           ) : (
             <button
               type="submit"
+              onClick={handleSubmit}
               className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-xl font-medium text-lg hover:from-blue-700 hover:to-indigo-700 transform transition-all duration-200"
             >
               Create Account
             </button>
           )}
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm text-center">
+            {error}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   BellIcon,
@@ -9,10 +9,12 @@ import {
   StarIcon,
   ArrowLeftIcon,
 } from "@heroicons/react/24/outline";
+import { getUserBookings, updateTransactionStatus } from '../../../services/api';
 
 export default function Notifications() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("All");
+  const [pendingBookings, setPendingBookings] = useState([]);
 
   const tabs = ["All", "Unread", "Messages", "Transactions"];
 
@@ -45,8 +47,7 @@ export default function Notifications() {
       id: 4,
       type: "reminder",
       title: "Team Meeting Reminder",
-      content:
-        "Don't forget about the team meeting scheduled for tomorrow at 10 AM.",
+      content: "Don't forget about the team meeting scheduled for tomorrow at 10 AM.",
       time: "3h ago",
       action: "View Message",
     },
@@ -54,12 +55,50 @@ export default function Notifications() {
       id: 5,
       type: "update",
       title: "Feature Update",
-      content:
-        "New dashboard features are now available. Check out the updated interface.",
+      content: "New dashboard features are now available. Check out the updated interface.",
       time: "1d ago",
       action: "View Details",
     },
   ];
+
+  useEffect(() => {
+    fetchPendingBookings();
+  }, []);
+
+  const fetchPendingBookings = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem('user'));
+      const response = await getUserBookings(user.id);
+      const pending = response.data.filter(booking => booking.status === 'pending');
+      setPendingBookings(pending);
+    } catch (error) {
+      console.error('Error fetching pending bookings:', error);
+    }
+  };
+
+  const handleAcceptBooking = async (bookingId) => {
+    try {
+      const response = await updateTransactionStatus(bookingId, 'ongoing');
+      if (response.data) {
+        setPendingBookings(prev => prev.filter(b => b.id !== bookingId));
+        alert('Booking accepted successfully!');
+      }
+    } catch (error) {
+      console.error('Error accepting booking:', error);
+      alert('Failed to accept booking: ' + (error.response?.data?.message || 'Unknown error'));
+    }
+  };
+
+  const handleRejectBooking = async (bookingId) => {
+    try {
+      await updateTransactionStatus(bookingId, 'rejected');
+      setPendingBookings(prev => prev.filter(b => b.id !== bookingId));
+      alert('Booking rejected');
+    } catch (error) {
+      console.error(error);
+      alert('Failed to reject booking');
+    }
+  };
 
   const getIcon = (type) => {
     switch (type) {
@@ -80,14 +119,11 @@ export default function Notifications() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col w-full md:max-w-sm mx-auto">
-      {/* Header - Updated to match dashboard */}
+      {/* Header */}
       <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <button
-              className="text-white"
-              onClick={() => navigate(-1)}
-            >
+            <button className="text-white" onClick={() => navigate(-1)}>
               <ArrowLeftIcon className="h-6 w-6" />
             </button>
             <h1 className="text-lg font-semibold">Notifications</h1>
@@ -95,7 +131,7 @@ export default function Notifications() {
           <div className="relative">
             <BellIcon className="h-6 w-6 text-white" />
             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-              3
+              {pendingBookings.length}
             </span>
           </div>
         </div>
@@ -104,7 +140,7 @@ export default function Notifications() {
       {/* Tabs */}
       <div className="px-4 pt-2 bg-white">
         <div className="flex space-x-1 bg-gray-100 p-1 rounded-xl">
-          {tabs.map((tab) => (
+          {tabs.map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -121,7 +157,7 @@ export default function Notifications() {
       </div>
 
       {/* Notifications List */}
-      <div className="flex-1 px-4 py-6">
+      <div className="flex-1 px-4 py-6 overflow-y-auto">
         <div className="flex justify-end mb-4">
           <button className="text-sm text-blue-600 font-medium px-4 py-2 hover:bg-blue-50 rounded-lg transition-colors">
             Mark all as read
@@ -129,40 +165,67 @@ export default function Notifications() {
         </div>
 
         <div className="space-y-4">
-          {notifications.map((n) => (
-            <div
-              key={n.id}
-              className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 transform transition hover:scale-[1.02]"
-            >
+          {notifications.map(n => (
+            <div key={n.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 transform transition hover:scale-[1.02]">
               <div className="flex items-start space-x-4">
-                <div
-                  className={`p-2 rounded-full ${
-                    n.type === "message"
-                      ? "bg-blue-100"
-                      : n.type === "payment"
-                      ? "bg-green-100"
-                      : n.type === "system"
-                      ? "bg-purple-100"
-                      : n.type === "reminder"
-                      ? "bg-yellow-100"
-                      : "bg-gray-100"
-                  }`}
-                >
+                <div className={`p-2 rounded-full ${
+                  n.type === "message"
+                    ? "bg-blue-100"
+                    : n.type === "payment"
+                    ? "bg-green-100"
+                    : n.type === "system"
+                    ? "bg-purple-100"
+                    : n.type === "reminder"
+                    ? "bg-yellow-100"
+                    : "bg-gray-100"
+                }`}>
                   {getIcon(n.type)}
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-gray-900">{n.title}</h3>
                   <p className="text-sm text-gray-600 mt-1">{n.content}</p>
                   <div className="flex items-center justify-between mt-3 pt-2 border-t">
-                    <button className="text-blue-600 text-sm font-medium hover:underline">
-                      {n.action}
-                    </button>
+                    <button className="text-blue-600 text-sm font-medium hover:underline">{n.action}</button>
                     <span className="text-xs text-gray-400">{n.time}</span>
                   </div>
                 </div>
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Pending Bookings Section */}
+        <div className="mt-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Pending Booking Requests</h2>
+          <div className="space-y-4">
+            {pendingBookings.length > 0 ? pendingBookings.map(b => (
+              <div key={b.id} className="bg-white p-4 rounded-xl shadow-sm border">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-medium">{b.title}</h3>
+                    <p className="text-sm text-gray-500">New booking request</p>
+                  </div>
+                  <span className="text-yellow-600 bg-yellow-100 px-2 py-1 rounded-full text-xs">Pending</span>
+                </div>
+                <div className="mt-4 flex justify-end space-x-2">
+                  <button
+                    onClick={() => handleRejectBooking(b.id)}
+                    className="px-3 py-1 text-red-600 hover:bg-red-50 rounded"
+                  >
+                    Reject
+                  </button>
+                  <button
+                    onClick={() => handleAcceptBooking(b.id)}
+                    className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    Accept
+                  </button>
+                </div>
+              </div>
+            )) : (
+              <p className="text-gray-500 text-center">No pending bookings</p>
+            )}
+          </div>
         </div>
       </div>
     </div>

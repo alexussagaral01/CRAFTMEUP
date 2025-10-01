@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   HomeIcon,
   UserIcon,
@@ -16,10 +16,13 @@ import {
   ArrowUpTrayIcon,
 } from "@heroicons/react/24/outline";
 import { useNavigate } from 'react-router-dom';
+import { getWalletBalance, getUserTransactions } from '../../../services/api';
 
 export default function Wallet() {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [balance, setBalance] = useState(0);
+  const [transactions, setTransactions] = useState([]);
 
   const navItems = [
     { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
@@ -30,24 +33,28 @@ export default function Wallet() {
     { name: "Saved", icon: <BookmarkIcon className="h-5 w-5" />, path: "/saved" },
     { name: "Wallet", icon: <WalletIcon className="h-5 w-5" />, path: "/wallet" },
     { name: "Transactions", icon: <ReceiptRefundIcon className="h-5 w-5" />, path: "/transactions" },
-    { name: "Feedback", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/feedback" },
+    { name: "Past Feedbacks", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/view-past-feedback" },
     { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
   ];
 
-  const transactions = [
-    {
-      type: "Top-up via GCash",
-      date: "Jan 15, 2025",
-      amount: "+500",
-      ref: "GC1234458231",
-    },
-    {
-      type: "Cash-Out",
-      date: "Jan 12, 2025",
-      amount: "-200",
-      ref: "Web Development Course",
-    },
-  ];
+  useEffect(() => {
+    fetchWalletData();
+  }, []);
+
+  const fetchWalletData = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem('user'));
+      // Fetch wallet balance
+      const balanceResponse = await getWalletBalance(user.id);
+      setBalance(balanceResponse.data.balance);
+
+      // Fetch transactions
+      const transactionsResponse = await getUserTransactions(user.id);
+      setTransactions(transactionsResponse.data);
+    } catch (error) {
+      console.error('Error fetching wallet data:', error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col w-full md:max-w-sm mx-auto relative">
@@ -110,7 +117,7 @@ export default function Wallet() {
         {/* Balance Card - Inside Header */}
         <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center">
           <p className="text-white/80 text-sm">Current Balance</p>
-          <h2 className="text-3xl font-bold mt-1 text-white">2,450</h2>
+          <h2 className="text-3xl font-bold mt-1 text-white">{balance}</h2>
           <p className="text-white/80 text-sm">SkillCoins</p>
         </div>
       </div>
@@ -147,12 +154,16 @@ export default function Wallet() {
               <div key={i} className="border rounded-xl p-4 hover:bg-gray-50 transition-colors">
                 <div className="flex justify-between items-center">
                   <p className="text-sm font-medium">{t.type}</p>
-                  <span className={`text-sm font-semibold ${t.amount.startsWith("+") ? "text-green-600" : "text-red-600"}`}>
-                    {t.amount}
+                  <span className={`text-sm font-semibold ${
+                    t.type === 'credit' ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {t.type === 'credit' ? '+' : '-'}{t.amount}
                   </span>
                 </div>
-                <p className="text-xs text-gray-500">{t.date}</p>
-                <p className="text-xs text-gray-400">Ref: {t.ref}</p>
+                <p className="text-xs text-gray-500">
+                  {new Date(t.created_at).toLocaleDateString()}
+                </p>
+                <p className="text-xs text-gray-400">Ref: {t.reference_number}</p>
               </div>
             ))}
           </div>

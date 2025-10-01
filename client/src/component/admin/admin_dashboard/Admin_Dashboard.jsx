@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   HomeIcon,
@@ -10,49 +10,62 @@ import {
   ExclamationTriangleIcon,
   CalendarIcon,
   MagnifyingGlassIcon, // Changed from SearchIcon
-  ArrowRightOnRectangleIcon
+  ArrowRightOnRectangleIcon,
+  CheckCircleIcon // Import CheckCircleIcon
 } from "@heroicons/react/24/outline";
+import { getAdminDashboardData, getAdminStats, getAdminReports } from '../../../services/adminApi';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("User Reports");
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const tabs = ["User Reports", "System Reports", "Service Reports"]; // Define tabs array
 
   const sidebarItems = [
     { name: "Dashboard", icon: <HomeIcon className="w-5 h-5" />, path: "/admin-dashboard" },
-    { name: "User Reports", icon: <UsersIcon className="w-5 h-5" />, path: "/user-reports" }, // Updated path
-    { name: "Wallet Logs", icon: <WalletIcon className="w-5 h-5" />, path: "/wallet-logs" }, // Updated path
-    { name: "Post Announcement", icon: <MegaphoneIcon className="w-5 h-5" />, path: "/announcements" }, // Updated path
+    { name: "User Reports", icon: <UsersIcon className="w-5 h-5" />, path: "/user-reports" },
+    { name: "Account Verification", icon: <CheckCircleIcon className="w-5 h-5" />, path: "/account-verification" },
+    { name: "Wallet Logs", icon: <WalletIcon className="w-5 h-5" />, path: "/wallet-logs" },
+    { name: "Post Announcement", icon: <MegaphoneIcon className="w-5 h-5" />, path: "/announcements" },
     { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
   ];
 
-  const stats = [
-    { title: "New Reports Today", value: 12, icon: <BellIcon className="w-5 h-5" /> },
-    { title: "Active Users Online", value: "2,847", icon: <UsersIcon className="w-5 h-5" /> },
-    { title: "Wallet Requests Pending", value: 34, icon: <ClockIcon className="w-5 h-5" /> },
-    { title: "Flagged Messages", value: 8, icon: <ExclamationTriangleIcon className="w-5 h-5" /> },
-    { title: "Services Listed This Week", value: 156, icon: <CalendarIcon className="w-5 h-5" /> },
-  ];
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const [dashboardRes, statsRes, reportsRes] = await Promise.all([
+          getAdminDashboardData(token),
+          getAdminStats(token),
+          getAdminReports(token)
+        ]);
 
-  const tabs = ["User Reports", "Dispute Center", "Wallet Logs"];
+        setDashboardData({
+          stats: statsRes.data,
+          reports: reportsRes.data,
+          dashboard: dashboardRes.data
+        });
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to fetch dashboard data');
+        setLoading(false);
+      }
+    };
 
-  const reports = [
-    {
-      id: "#USR-001",
-      name: "John Smith",
-      type: "Inappropriate Content",
-      submittedBy: "Maria Garcia",
-      date: "Jan 15, 2025",
-      status: "Pending",
-    },
-    {
-      id: "#USR-002",
-      name: "Alex Johnson",
-      type: "Scam/Fraud",
-      submittedBy: "Sarah Wilson",
-      date: "Jan 14, 2025",
-      status: "Resolved",
-    },
-  ];
+    fetchDashboardData();
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
+
+  // Update the stats mapping to use real data
+  const stats = dashboardData?.stats || [];
+
+  // Update the reports mapping to use real data
+  const reports = dashboardData?.reports || [];
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-50 to-white">
