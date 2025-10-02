@@ -30,6 +30,7 @@ export default function MyServices() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [services, setServices] = useState([]);
   const [showServiceModal, setShowServiceModal] = useState(false);
+  const [editingService, setEditingService] = useState(null);
   const [newService, setNewService] = useState({
     title: "",
     description: "",
@@ -37,7 +38,6 @@ export default function MyServices() {
     availability: "",
     status: "Active",
   });
-  const [editingService, setEditingService] = useState(null);
 
   const navItems = [
     { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
@@ -96,11 +96,7 @@ export default function MyServices() {
       const user = JSON.parse(localStorage.getItem("user"));
       const serviceData = {
         userId: user.id,
-        title: newService.title,
-        description: newService.description,
-        price: parseFloat(newService.price),
-        availability: newService.availability,
-        status: newService.status,
+        ...newService
       };
 
       if (editingService) {
@@ -125,64 +121,101 @@ export default function MyServices() {
     }
   };
 
-  const ServiceModal = (({ visible }) => {
-    if (!visible) return null;
+  const renderServiceForm = () => (
+    <div className="fixed inset-0 bg-gradient-to-b from-blue-50 to-white z-50 w-full md:max-w-sm mx-auto">
+      <div className="min-h-screen flex flex-col">
+        {/* Header */}
+        <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">
+              {editingService ? "Edit Service" : "Add New Service"}
+            </h2>
+            <button
+              onClick={() => {
+                setShowServiceModal(false);
+                setEditingService(null);
+                setNewService({
+                  title: "",
+                  description: "",
+                  price: "",
+                  availability: "",
+                  status: "Active",
+                });
+              }}
+              className="text-white p-2 hover:bg-white/10 rounded-lg"
+            >
+              <XMarkIcon className="h-6 w-6" />
+            </button>
+          </div>
+        </div>
 
-    return (
-      <div
-        className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
-        onClick={() => setShowServiceModal(false)}
-      >
-        <div
-          className="bg-white rounded-2xl p-6 w-[90%] max-w-md"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <h2 className="text-xl font-semibold mb-4">
-            {editingService ? "Edit Service" : "Add New Service"}
-          </h2>
-          <form onSubmit={handleCreateOrUpdate} className="space-y-4">
+        {/* Form Content */}
+        <div className="flex-1 p-6 overflow-y-auto">
+          <form onSubmit={handleCreateOrUpdate} className="space-y-6">
             <div>
-              <label className="text-sm font-medium">Title</label>
+              <label className="text-sm font-medium mb-1 block">Service Title</label>
               <input
                 type="text"
+                name="title"
                 value={newService.title}
-                onChange={(e) => setNewService(prev => ({ ...prev, title: e.target.value }))}
-                className="w-full border rounded-lg px-3 py-2"
+                onChange={(e) => setNewService(prev => ({
+                  ...prev,
+                  title: e.target.value
+                }))}
+                className="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                 required
               />
             </div>
+
             <div>
-              <label className="text-sm font-medium">Description</label>
+              <label className="text-sm font-medium mb-1 block">Description</label>
               <textarea
+                name="description"
                 value={newService.description}
-                onChange={(e) => setNewService(prev => ({ ...prev, description: e.target.value }))}
-                className="w-full border rounded-lg px-3 py-2"
-                rows="3"
+                onChange={(e) => setNewService(prev => ({
+                  ...prev,
+                  description: e.target.value
+                }))}
+                className="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                rows="4"
                 required
               />
             </div>
-            <div>
-              <label className="text-sm font-medium">Price (SC)</label>
-              <input
-                type="number"
-                value={newService.price}
-                onChange={(e) => setNewService(prev => ({ ...prev, price: e.target.value }))}
-                className="w-full border rounded-lg px-3 py-2"
-                required
-              />
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-1 block">Price (SC)</label>
+                <input
+                  type="number"
+                  name="price"
+                  value={newService.price}
+                  onChange={(e) => setNewService(prev => ({
+                    ...prev,
+                    price: e.target.value
+                  }))}
+                  className="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-1 block">Availability</label>
+                <input
+                  type="text"
+                  name="availability"
+                  value={newService.availability}
+                  onChange={(e) => setNewService(prev => ({
+                    ...prev,
+                    availability: e.target.value
+                  }))}
+                  className="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  placeholder="e.g., Mon-Fri, Weekends only"
+                  required
+                />
+              </div>
             </div>
-            <div>
-              <label className="text-sm font-medium">Availability</label>
-              <input
-                type="text"
-                value={newService.availability}
-                onChange={(e) => setNewService(prev => ({ ...prev, availability: e.target.value }))}
-                className="w-full border rounded-lg px-3 py-2"
-                placeholder="e.g., Mon-Fri, Weekends only"
-                required
-              />
-            </div>
-            <div className="flex gap-3 justify-end pt-4">
+
+            <div className="pt-4 flex gap-3">
               <button
                 type="button"
                 onClick={() => {
@@ -196,13 +229,13 @@ export default function MyServices() {
                     status: "Active",
                   });
                 }}
-                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                className="flex-1 px-6 py-3 text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700"
               >
                 {editingService ? "Update Service" : "Create Service"}
               </button>
@@ -210,8 +243,8 @@ export default function MyServices() {
           </form>
         </div>
       </div>
-    );
-  });
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col w-full md:max-w-sm mx-auto relative">
@@ -320,7 +353,8 @@ export default function MyServices() {
       </div>
 
       {/* Modal */}
-      <ServiceModal visible={showServiceModal} />
+      {showServiceModal && renderServiceForm()}
     </div>
   );
 }
+

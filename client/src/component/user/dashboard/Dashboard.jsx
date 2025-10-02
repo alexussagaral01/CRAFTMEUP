@@ -28,13 +28,37 @@ export default function Dashboard() {
   const [services, setServices] = useState([]);
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    setUserData(user);
-    fetchAnnouncements();
-    if (user) {
-      fetchUserServices(user.id);
-    }
+    const fetchUserData = async () => {
+      try {
+        const storedUser = JSON.parse(localStorage.getItem('user'));
+        if (storedUser) {
+          // Fetch fresh user data from API
+          const response = await api.get(`/auth/user/${storedUser.id}`);
+          const freshUserData = response.data;
+          
+          // Update both state and localStorage
+          setUserData(freshUserData);
+          localStorage.setItem('user', JSON.stringify(freshUserData));
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        // Fallback to stored data if API fails
+        const storedUser = JSON.parse(localStorage.getItem('user'));
+        if (storedUser) {
+          setUserData(storedUser);
+        }
+      }
+    };
+
+    fetchUserData();
   }, []);
+
+  useEffect(() => {
+    if (userData?.id) {
+      fetchAnnouncements();
+      fetchUserServices(userData.id);
+    }
+  }, [userData]);
 
   const fetchAnnouncements = async () => {
     try {
@@ -73,7 +97,7 @@ export default function Dashboard() {
   { name: "Saved", icon: <BookmarkIcon className="h-5 w-5" />, path: "/saved" },
   { name: "Wallet", icon: <WalletIcon className="h-5 w-5" />, path: "/wallet" },
   { name: "Transactions", icon: <ReceiptRefundIcon className="h-5 w-5" />, path: "/transactions" },
-  { name: "Feedback", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/view-past-feedback" },
+  { name: "Past Feedbacks", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/view-past-feedback" },
   { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
 ];
 
@@ -220,7 +244,7 @@ export default function Dashboard() {
               </button>
               <div>
                 <div className="text-lg font-semibold">
-                  Welcome back, {userData?.fullName || 'User'}
+                  Welcome back, {userData?.full_name || userData?.fullName || 'User'}
                 </div>
                 <span className="bg-white/20 text-xs px-3 py-1 rounded-full mt-1 inline-block backdrop-blur-sm">
                   {userData?.role || 'User'}
@@ -238,40 +262,23 @@ export default function Dashboard() {
           {/* Stats Cards */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4">
-              <div className="text-2xl font-bold">12</div>
+              <div className="text-2xl font-bold">{services.filter(s => s.status === "active").length}</div>
               <div className="text-sm text-white/80">Active Services</div>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4">
-              <div className="text-2xl font-bold">SC 1,500</div>
-              <div className="text-sm text-white/80">This Month</div>
+              <div className="text-2xl font-bold"></div>
+                SC {services.reduce((sum, s) => sum + (s.monthlyEarnings || 0), 0)}
+                <div className="mt-2 text-sm text-white/80">This Month</div>
+              </div>
             </div>
           </div>
-        </div>
+          {renderAnnouncements()}
 
-        {/* Render Announcements */}
-        {renderAnnouncements()}
-
-        {/* My Services */}
+          {/* My Services */}
         {renderServices()}
 
         {/* Recent Activity */}
-        <div className="p-4 m-4">
-          <span className="font-semibold text-lg mb-4 block">Recent Activity</span>
-          <div className="space-y-3">
-            <div className="bg-white rounded-2xl p-4 shadow-lg border border-gray-100">
-              <div className="flex items-center">
-                <div className="bg-blue-100 p-2 rounded-full mr-3">
-                  <ChatBubbleLeftIcon className="h-5 w-5 text-blue-600" />
-                </div>
-                <div>
-                  <div className="font-medium">New booking from Sarah M.</div>
-                  <div className="text-sm text-gray-500">2 hours ago</div>
-                </div>
-              </div>
-            </div>
-            {/** Render other activity items here **/}
-          </div>
-        </div>
+        
 
        
       </div>

@@ -1,8 +1,5 @@
-// RegisterForm.jsx
 import React, { useState } from 'react';
 import { FaArrowLeft, FaUpload } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
-import { register } from '../../../services/api';
 
 const RegisterForm = () => {
   const [formData, setFormData] = useState({
@@ -18,8 +15,6 @@ const RegisterForm = () => {
   });
   const [step, setStep] = useState(1);
   const [error, setError] = useState('');
-
-  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -70,13 +65,14 @@ const RegisterForm = () => {
         formDataToSend.append('studyLoad', formData.studyLoadFile);
       }
 
-      const response = await register(formDataToSend);
+      // Simulated API call - replace with actual register function
+      console.log('Registration data:', Object.fromEntries(formDataToSend));
+      alert('Registration successful! (This is a demo)');
       
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        navigate('/');
-      }
+      // const response = await register(formDataToSend);
+      // if (response.data.token) {
+      //   navigate('/');
+      // }
     } catch (error) {
       setError(
         error.response?.data?.message || 
@@ -85,12 +81,20 @@ const RegisterForm = () => {
     }
   };
 
+  const handleBack = () => {
+    if (step > 1) {
+      setStep(step - 1);
+    } else {
+      window.location.href = '/';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-white">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-8 rounded-b-[40px] shadow-lg">
         <button
-          onClick={() => (step > 1 ? setStep(step - 1) : navigate('/'))}
+          onClick={handleBack}
           className="flex items-center space-x-2"
         >
           <FaArrowLeft />
@@ -213,14 +217,12 @@ const RegisterForm = () => {
 
             {/* File Uploads */}
             <div className="space-y-4">
-              <label htmlFor="studentIdFile" className="block">
-                <div className="bg-white p-6 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-500 transition-colors cursor-pointer text-center">
+              <div className="bg-white p-6 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-500 transition-colors cursor-pointer text-center">
+                <label htmlFor="studentIdFile" className="cursor-pointer">
                   <div className="bg-blue-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
                     <FaUpload className="text-blue-500" />
                   </div>
-                  <p className="text-sm font-medium">
-                    {formData.studentIdFile ? formData.studentIdFile.name : 'Upload Student ID'}
-                  </p>
+                  <p className="text-sm font-medium">Upload Student ID</p>
                   <p className="text-xs text-gray-500 mt-1">Max size: 5MB</p>
                   <input
                     id="studentIdFile"
@@ -230,17 +232,15 @@ const RegisterForm = () => {
                     onChange={handleFileChange}
                     className="hidden"
                   />
-                </div>
-              </label>
+                </label>
+              </div>
 
-              <label htmlFor="studyLoadFile" className="block">
-                <div className="bg-white p-6 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-500 transition-colors cursor-pointer text-center">
+              <div className="bg-white p-6 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-500 transition-colors cursor-pointer text-center">
+                <label htmlFor="studyLoadFile" className="cursor-pointer">
                   <div className="bg-blue-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
                     <FaUpload className="text-blue-500" />
                   </div>
-                  <p className="text-sm font-medium">
-                    {formData.studyLoadFile ? formData.studyLoadFile.name : 'Upload Study Load'}
-                  </p>
+                  <p className="text-sm font-medium">Upload Study Load</p>
                   <p className="text-xs text-gray-500 mt-1">Max size: 5MB</p>
                   <input
                     id="studyLoadFile"
@@ -250,8 +250,8 @@ const RegisterForm = () => {
                     onChange={handleFileChange}
                     className="hidden"
                   />
-                </div>
-              </label>
+                </label>
+              </div>
             </div>
           </div>
         )}
@@ -324,7 +324,7 @@ const RegisterForm = () => {
 
         {/* Error Message */}
         {error && (
-          <div className="mt-4 text-red-500 text-sm text-center">
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm text-center">
             {error}
           </div>
         )}

@@ -261,6 +261,39 @@ exports.createFeedback = async (req, res) => {
     }
 };
 
+exports.getUserFeedback = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        
+        // Get feedback both as a tutor and as a learner
+        const [feedbacks] = await pool.execute(`
+            SELECT 
+                f.*,
+                s.title as service_title,
+                s.description as service_description,
+                s.user_id as provider_id,
+                provider.full_name as provider_name,
+                learner.full_name as learner_name,
+                CASE 
+                    WHEN s.user_id = ? THEN 'tutor'
+                    ELSE 'learner'
+                END as role_type
+            FROM feedback f
+            JOIN services s ON f.service_id = s.id
+            JOIN users provider ON s.user_id = provider.id
+            JOIN users learner ON f.user_id = learner.id
+            WHERE f.user_id = ? OR s.user_id = ?
+            ORDER BY f.created_at DESC
+        `, [userId, userId, userId]);
+
+        console.log('Fetched feedbacks:', feedbacks); // Debug log
+        res.json(feedbacks);
+    } catch (error) {
+        console.error('Error fetching user feedback:', error);
+        res.status(500).json({ message: 'Failed to fetch feedback' });
+    }
+};
+
 exports.getWalletBalance = async (req, res) => {
     try {
         const { userId } = req.params;

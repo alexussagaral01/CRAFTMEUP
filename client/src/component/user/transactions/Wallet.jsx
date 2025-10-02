@@ -33,7 +33,7 @@ export default function Wallet() {
     { name: "Saved", icon: <BookmarkIcon className="h-5 w-5" />, path: "/saved" },
     { name: "Wallet", icon: <WalletIcon className="h-5 w-5" />, path: "/wallet" },
     { name: "Transactions", icon: <ReceiptRefundIcon className="h-5 w-5" />, path: "/transactions" },
-    { name: "Feedback", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/feedback" },
+    { name: "Past Feedbacks", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/view-past-feedback" },
     { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
   ];
 

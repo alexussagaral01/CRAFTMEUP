@@ -208,7 +208,9 @@ export const updateTransactionStatus = async (bookingId, status) => {
 
 export const getUserFeedback = async (userId) => {
   try {
+    console.log('Fetching feedback for user:', userId);
     const response = await api.get(`/services/user-feedback/${userId}`);
+    console.log('Feedback response:', response.data);
     return response;
   } catch (error) {
     console.error('Get user feedback error:', error);

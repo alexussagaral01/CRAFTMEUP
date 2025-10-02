@@ -10,7 +10,7 @@ import Saved from './component/user/transactions/Saved';
 import Wallet from './component/user/transactions/Wallet';
 import Transaction from './component/user/transactions/Transaction';
 import Feedback from './component/user/services/Feedback';
-import ViewPastFeedback from './component/user/services/Feedback';
+import ViewPastFeedback from './component/user/feedback/View_Past_Feedback';
 import Notifications from './component/user/dashboard/Notifications';
 import Admin_Dashboard from './component/admin/admin_dashboard/Admin_Dashboard';
 import Announcement from './component/admin/announcement/Announcement';

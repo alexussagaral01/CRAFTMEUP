@@ -66,6 +66,75 @@ function BookingModal({ service, onClose, onConfirm }) {
   );
 }
 
+// FilterPanel component - moved outside to prevent re-creation on every render
+const FilterPanel = ({ filters, handleFilterChange, categories }) => (
+  <div className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 mb-3 mt-3 mx-4">
+    <div className="space-y-2">
+      <div>
+        <label className="text-xs font-medium text-gray-700 mb-1 block">
+          Category
+        </label>
+        <select
+          name="category"
+          value={filters.category}
+          onChange={handleFilterChange}
+          className="w-full rounded-lg border-gray-200 text-sm"
+        >
+          {categories.map((category) => (
+            <option key={category} value={category}>{category}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <label className="text-xs font-medium text-gray-700 mb-1 block">
+            Min Price
+          </label>
+          <input
+            type="number"
+            name="minPrice"
+            value={filters.minPrice}
+            onChange={handleFilterChange}
+            className="w-full rounded-lg border-gray-200 text-sm"
+            placeholder="Min SC"
+          />
+        </div>
+        <div>
+          <label className="text-xs font-medium text-gray-700 mb-1 block">
+            Max Price
+          </label>
+          <input
+            type="number"
+            name="maxPrice"
+            value={filters.maxPrice}
+            onChange={handleFilterChange}
+            className="w-full rounded-lg border-gray-200 text-sm"
+            placeholder="Max SC"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="text-xs font-medium text-gray-700 mb-1 block">
+          Minimum Rating
+        </label>
+        <select
+          name="minRating"
+          value={filters.minRating}
+          onChange={handleFilterChange}
+          className="w-full rounded-lg border-gray-200 text-sm"
+        >
+          <option value="">Any Rating</option>
+          <option value="4">4+ Stars</option>
+          <option value="4.5">4.5+ Stars</option>
+          <option value="5">5 Stars</option>
+        </select>
+      </div>
+    </div>
+  </div>
+);
+
 const FindServices = () => {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -89,7 +158,7 @@ const FindServices = () => {
     { name: "Saved", icon: <BookmarkIcon className="h-5 w-5" />, path: "/saved" },
     { name: "Wallet", icon: <WalletIcon className="h-5 w-5" />, path: "/wallet" },
     { name: "Transactions", icon: <ReceiptRefundIcon className="h-5 w-5" />, path: "/transactions" },
-    { name: "Feedback", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/feedback" },
+    { name: "Past Feedbacks", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/view-past-feedback" },
     { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
   ];
 
@@ -107,25 +176,24 @@ const FindServices = () => {
   }, []);
 
   const fetchServices = async () => {
-  try {
-    const user = JSON.parse(localStorage.getItem('user')); // get current logged-in user
-    const response = await getAllServices(filters);
+    try {
+      const user = JSON.parse(localStorage.getItem('user')); // get current logged-in user
+      const response = await getAllServices(filters);
 
-    // Map services and include provider's full name
-    const servicesWithProvider = response.data.map(service => ({
-      ...service,
-      provider: service.user_full_name, // make sure your backend sends this
-    }));
+      // Map services and include provider's full name
+      const servicesWithProvider = response.data.map(service => ({
+        ...service,
+        provider: service.user_full_name, // make sure your backend sends this
+      }));
 
-    // Remove services created by the current user
-    const otherServices = servicesWithProvider.filter(service => service.user_id !== user.id);
+      // Remove services created by the current user
+      const otherServices = servicesWithProvider.filter(service => service.user_id !== user.id);
 
-    setServices(otherServices);
-  } catch (error) {
-    console.error('Error fetching services:', error);
-  }
-};
-
+      setServices(otherServices);
+    } catch (error) {
+      console.error('Error fetching services:', error);
+    }
+  };
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
@@ -158,74 +226,6 @@ const FindServices = () => {
 
     return matchesSearch && matchesCategory && matchesPrice && matchesRating;
   });
-
-  const FilterPanel = () => (
-    <div className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 mb-3 mt-3 mx-4">
-      <div className="space-y-2">
-        <div>
-          <label className="text-xs font-medium text-gray-700 mb-1 block">
-            Category
-          </label>
-          <select
-            name="category"
-            value={filters.category}
-            onChange={handleFilterChange}
-            className="w-full rounded-lg border-gray-200 text-sm"
-          >
-            {categories.map((category) => (
-              <option key={category} value={category}>{category}</option>
-            ))}
-          </select>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className="text-xs font-medium text-gray-700 mb-1 block">
-              Min Price
-            </label>
-            <input
-              type="number"
-              name="minPrice"
-              value={filters.minPrice}
-              onChange={handleFilterChange}
-              className="w-full rounded-lg border-gray-200 text-sm"
-              placeholder="Min SC"
-            />
-          </div>
-          <div>
-            <label className="text-xs font-medium text-gray-700 mb-1 block">
-              Max Price
-            </label>
-            <input
-              type="number"
-              name="maxPrice"
-              value={filters.maxPrice}
-              onChange={handleFilterChange}
-              className="w-full rounded-lg border-gray-200 text-sm"
-              placeholder="Max SC"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="text-xs font-medium text-gray-700 mb-1 block">
-            Minimum Rating
-          </label>
-          <select
-            name="minRating"
-            value={filters.minRating}
-            onChange={handleFilterChange}
-            className="w-full rounded-lg border-gray-200 text-sm"
-          >
-            <option value="">Any Rating</option>
-            <option value="4">4+ Stars</option>
-            <option value="4.5">4.5+ Stars</option>
-            <option value="5">5 Stars</option>
-          </select>
-        </div>
-      </div>
-    </div>
-  );
 
   const handleBookNow = (service) => {
     setSelectedService(service);
@@ -306,7 +306,7 @@ const FindServices = () => {
         </div>
       </div>
 
-      {showFilters && <FilterPanel />}
+      {showFilters && <FilterPanel filters={filters} handleFilterChange={handleFilterChange} categories={categories} />}
 
       {/* Service Cards */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">

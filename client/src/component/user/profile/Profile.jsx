@@ -66,8 +66,11 @@ export default function Profile() {
       });
 
       const updatedUser = response.data.user;
+      
+      // Update both state and localStorage
       setUserData(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
+      
       setIsEditing(false);
     } catch (error) {
       console.error('Error updating profile:', error);
