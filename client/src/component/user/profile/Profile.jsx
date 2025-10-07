@@ -126,91 +126,98 @@ export default function Profile() {
   };
 
   const renderFormInputs = () => (
-    <div className="p-4 space-y-4">
-      <div>
-        <label className="text-gray-600 text-sm">Full Name</label>
-        <input
-          type="text"
-          name="full_name"
-          value={isEditing ? editedData.full_name : (userData?.full_name || '')}
-          onChange={handleChange}
-          readOnly={!isEditing}
-          className={`w-full border rounded-lg px-3 py-2 mt-1 ${
-            isEditing ? 'bg-white' : 'bg-gray-50'
-          }`}
-        />
-      </div>
-
-      {/* School Email */}
-      <div>
-        <label className="text-gray-600 text-sm">School Email</label>
-        <div className="flex items-center border rounded-lg px-3 py-2 mt-1 justify-between bg-gray-50">
-          <span>{userData?.email || ''}</span>
+    <div className="p-4">
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Full Name */}
+        <div className="col-span-full">
+          <label className="text-gray-600 text-sm font-medium">Full Name</label>
+          <input
+            type="text"
+            name="full_name"
+            value={isEditing ? editedData.full_name : (userData?.full_name || '')}
+            onChange={handleChange}
+            readOnly={!isEditing}
+            className={`w-full border rounded-xl px-4 py-3 mt-1 text-gray-700 ${
+              isEditing ? 'bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500' : 'bg-gray-50'
+            }`}
+          />
         </div>
-        <p className="text-xs text-gray-500 mt-1">Verified</p>
-      </div>
 
-      {/* Course */}
-      <div>
-        <label className="text-gray-600 text-sm">Course</label>
-        <input
-          type="text"
-          name="course"
-          value={isEditing ? editedData.course : (userData?.course || 'Not specified')}
-          onChange={handleChange}
-          readOnly={!isEditing}
-          className={`w-full border rounded-lg px-3 py-2 mt-1 ${
-            isEditing ? 'bg-white' : 'bg-gray-50'
-          }`}
-        />
-      </div>
+        {/* School Email */}
+        <div className="col-span-full">
+          <label className="text-gray-600 text-sm font-medium">School Email</label>
+          <div className="flex items-center border rounded-xl px-4 py-3 mt-1 bg-gray-50">
+            <span className="text-gray-700">{userData?.email || ''}</span>
+            <span className="ml-2 px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">Verified</span>
+          </div>
+        </div>
 
-      {/* Year Level */}
-      <div>
-        <label className="text-gray-600 text-sm">Year Level</label>
-        <input
-          type="text"
-          name="year"
-          value={isEditing ? editedData.year : (userData?.year || 'Not specified')}
-          onChange={handleChange}
-          readOnly={!isEditing}
-          className={`w-full border rounded-lg px-3 py-2 mt-1 ${
-            isEditing ? 'bg-white' : 'bg-gray-50'
-          }`}
-        />
-      </div>
+        {/* Course */}
+        <div>
+          <label className="text-gray-600 text-sm font-medium">Course</label>
+          <input
+            type="text"
+            name="course"
+            value={isEditing ? editedData.course : (userData?.course || 'Not specified')}
+            onChange={handleChange}
+            readOnly={!isEditing}
+            className={`w-full border rounded-xl px-4 py-3 mt-1 text-gray-700 ${
+              isEditing ? 'bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500' : 'bg-gray-50'
+            }`}
+          />
+        </div>
 
-      {/* Role */}
-      <div className="flex items-center justify-between pt-2">
-        <span className="text-gray-700 font-medium">Role: {userData?.role || 'User'}</span>
-        <button className="text-blue-500 text-sm hover:text-blue-600">Request Change</button>
-      </div>
+        {/* Year Level */}
+        <div>
+          <label className="text-gray-600 text-sm font-medium">Year Level</label>
+          <input
+            type="text"
+            name="year"
+            value={isEditing ? editedData.year : (userData?.year || 'Not specified')}
+            onChange={handleChange}
+            readOnly={!isEditing}
+            className={`w-full border rounded-xl px-4 py-3 mt-1 text-gray-700 ${
+              isEditing ? 'bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500' : 'bg-gray-50'
+            }`}
+          />
+        </div>
 
-      {/* Account Verification Status */}
-      {renderVerificationStatus()}
-
-      {/* Action Buttons (only show when editing) */}
-      {isEditing && (
-        <div className="flex justify-end space-x-3">
-          <button
-            onClick={() => setIsEditing(false)}
-            className="px-4 py-2 border rounded-lg hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Save Changes
+        {/* Role Section */}
+        <div className="col-span-full flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3">
+          <span className="text-gray-700 font-medium">Role: {userData?.role || 'User'}</span>
+          <button className="text-blue-600 text-sm font-medium hover:text-blue-700 transition-colors">
+            Request Change
           </button>
         </div>
-      )}
+
+        {/* Verification Status */}
+        <div className="col-span-full">
+          {renderVerificationStatus()}
+        </div>
+
+        {/* Action Buttons */}
+        {isEditing && (
+          <div className="col-span-full flex justify-end space-x-3 mt-4">
+            <button
+              onClick={() => setIsEditing(false)}
+              className="px-6 py-2.5 border rounded-xl hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              className="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors"
+            >
+              Save Changes
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col w-full md:max-w-sm mx-auto relative">
+    <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen w-full">
       {/* Sidebar */}
       <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} bg-gradient-to-b from-gray-50 to-white w-64 transition-transform duration-300 ease-in-out z-30 md:max-w-sm shadow-xl border-r flex flex-col`}>
         <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 flex justify-between items-center">
@@ -266,38 +273,38 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Content area */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="bg-white rounded-2xl shadow-sm mx-4 mt-4">
-          {/* Profile Section */}
-          <div className="flex flex-col items-center py-6 border-b">
-            <div className="relative">
-              <img
-                src={userData?.profileImage || "https://via.placeholder.com/100"}
-                alt=""
-                className="w-24 h-24 rounded-full border-4 border-white shadow-lg"
-              />
-              <button className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full shadow-lg">
-                <CameraIcon className="h-5 w-5" />
+      {/* Profile Content */}
+      <div className="w-full px-2 py-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-white rounded-xl shadow-sm">
+            {/* Profile Photo Section */}
+            <div className="flex flex-col items-center py-8 border-b">
+              <div className="relative">
+                <img
+                  src={userData?.profileImage || "https://via.placeholder.com/100"}
+                  alt="Profile"
+                  className="w-28 h-28 rounded-full border-4 border-white shadow-lg object-cover"
+                />
+                <button className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full shadow-lg hover:bg-blue-700 transition-colors">
+                  <CameraIcon className="h-5 w-5" />
+                </button>
+              </div>
+              <button className="mt-4 text-blue-600 font-medium text-sm hover:text-blue-700 transition-colors">
+                Upload New Photo
               </button>
+              {!isEditing && (
+                <button
+                  onClick={handleEdit}
+                  className="mt-4 px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors"
+                >
+                  Edit Profile
+                </button>
+              )}
             </div>
-            <button className="mt-3 text-blue-600 font-medium text-sm hover:text-blue-700">
-              Upload New Photo
-            </button>
 
-            {/* Edit Profile button moved here */}
-            {!isEditing && (
-              <button
-                onClick={handleEdit}
-                className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                Edit Profile
-              </button>
-            )}
+            {/* Form Section */}
+            {renderFormInputs()}
           </div>
-
-          {/* Form Section */}
-          {renderFormInputs()}
         </div>
       </div>
     </div>

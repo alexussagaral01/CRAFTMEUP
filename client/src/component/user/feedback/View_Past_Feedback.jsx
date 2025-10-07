@@ -59,7 +59,7 @@ export default function ViewPastFeedback() {
   };
 
   const renderFeedbackSection = (title, feedbacks, emptyMessage) => (
-    <div className="mb-6">
+    <div className="mb-6 w-full">
       <h2 className="text-lg font-semibold mb-4">{title}</h2>
       {feedbacks && feedbacks.length > 0 ? (
         <div className="space-y-4">
@@ -87,7 +87,7 @@ export default function ViewPastFeedback() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-8 bg-gray-50 rounded-xl">
+        <div className="flex items-center justify-center w-full py-8 bg-gray-50 rounded-xl">
           <p className="text-gray-500">{emptyMessage}</p>
         </div>
       )}
@@ -151,7 +151,7 @@ export default function ViewPastFeedback() {
   const renderContent = () => {
     if (loading) {
       return (
-        <div className="text-center py-8">
+        <div className="flex items-center justify-center w-full col-span-full py-8">
           <p>Loading feedbacks...</p>
         </div>
       );
@@ -205,66 +205,117 @@ export default function ViewPastFeedback() {
     }
 
     return (
-      <div className="text-center py-8">
-        <p>No feedback available</p>
+      <div className="flex items-center justify-center w-full col-span-full py-8">
+        <p className="text-gray-500">No feedback available</p>
       </div>
     );
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col w-full md:max-w-sm mx-auto relative">
-      {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} bg-gradient-to-b from-gray-50 to-white w-64 transition-transform duration-300 ease-in-out z-30 md:max-w-sm shadow-xl border-r flex flex-col`}>
+    <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen w-full">
+      {/* Sidebar with fixed height and scrolling */}
+      <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
+        bg-gradient-to-b from-gray-50 to-white w-64 transition-transform duration-300 ease-in-out z-30
+        flex flex-col h-full`}>
+        {/* Header - Fixed at top */}
         <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 flex justify-between items-center">
           <h2 className="font-semibold text-white">Menu</h2>
-          <button onClick={() => setIsSidebarOpen(false)} className="text-white hover:bg-white/10 p-1 rounded-lg transition-colors">
+          <button 
+            onClick={() => setIsSidebarOpen(false)}
+            className="text-white hover:bg-white/10 p-1 rounded-lg transition-colors"
+          >
             <XMarkIcon className="h-6 w-6" />
           </button>
         </div>
 
-        <nav className="p-3 space-y-1 flex-1 overflow-y-auto">
-          {navItems.map((item) => (
-            <button
-              key={item.name}
-              onClick={() => navigate(item.path)}
-              className="flex items-center w-full p-3 text-gray-600 hover:text-blue-600 rounded-xl transition-all duration-200 group hover:bg-gradient-to-r from-blue-50 to-indigo-50"
-            >
-              <div className="bg-white p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
-                {item.icon}
-              </div>
-              <span className="ml-3 font-medium">{item.name}</span>
-            </button>
-          ))}
-        </nav>
+        {/* Navigation - Scrollable */}
+        <div className="flex-1 overflow-y-auto">
+          <nav className="p-3 space-y-1">
+            {navItems.map((item) => (
+              <button
+                key={item.name}
+                onClick={() => navigate(item.path)}
+                className="flex items-center w-full p-3 text-gray-600 hover:text-blue-600 rounded-xl transition-all duration-200 group hover:bg-gradient-to-r from-blue-50 to-indigo-50"
+              >
+                <div className="bg-white p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
+                  {item.icon}
+                </div>
+                <span className="ml-3 font-medium">{item.name}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
       </div>
 
       {/* Overlay */}
       {isSidebarOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-20" onClick={() => setIsSidebarOpen(false)}></div>
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-20"
+          onClick={() => setIsSidebarOpen(false)}
+        ></div>
       )}
 
-      {/* Header */}
-      <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <button onClick={() => setIsSidebarOpen(true)}>
-              <Bars3Icon className="h-6 w-6 text-white" />
-            </button>
-            <h1 className="text-lg font-semibold">Past Feedback</h1>
+      {/* Main Content */}
+      <div className="flex-1 w-full">
+        {/* Header Section */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg">
+          <div className="w-full px-2">
+            <div className="flex items-center justify-between py-4">
+              <div className="flex items-center">
+                <button 
+                  onClick={() => setIsSidebarOpen(true)} 
+                  className="hover:bg-white/10 p-2 rounded-lg transition-colors"
+                >
+                  <Bars3Icon className="h-6 w-6 text-white" />
+                </button>
+                <h1 className="text-lg font-semibold ml-3">Past Feedback</h1>
+              </div>
+              <button 
+                onClick={() => navigate('/notification')} 
+                className="relative p-2"
+              >
+                <BellIcon className="h-6 w-6 text-white" />
+                <span className="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
+              </button>
+            </div>
+
+            {/* Role Filter Tabs */}
+            <div className="px-2 pb-4">
+              {userRole === 'both' && (
+                <div className="flex space-x-1 bg-white/10 backdrop-blur-sm p-1 rounded-xl">
+                  {['all', 'learner', 'tutor'].map(role => (
+                    <button
+                      key={role}
+                      onClick={() => setSelectedRole(role)}
+                      className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
+                        selectedRole === role
+                          ? "bg-white text-blue-600"
+                          : "text-white hover:bg-white/10"
+                      }`}
+                    >
+                      {role.charAt(0).toUpperCase() + role.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-          <button onClick={() => navigate('/notification')} className="relative">
-            <BellIcon className="h-6 w-6 text-white" />
-            <span className="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
-          </button>
         </div>
-      </div>
 
-      {/* Role Filter Tabs - Only show for users with both roles */}
-      {getRoleButtons()}
-
-      {/* Content */}
-      <div className="flex-1 p-4 overflow-y-auto">
-        {renderContent()}
+        {/* Feedback Content */}
+        <div className="w-full px-2 py-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid gap-4 md:grid-cols-2">
+              {loading ? (
+                <div className="col-span-full text-center py-8">
+                  <p>Loading feedbacks...</p>
+                </div>
+              ) : (
+                renderContent()
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

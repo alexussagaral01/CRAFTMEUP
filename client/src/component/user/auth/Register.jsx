@@ -69,10 +69,10 @@ const RegisterForm = () => {
       console.log('Registration data:', Object.fromEntries(formDataToSend));
       alert('Registration successful! (This is a demo)');
       
-      // const response = await register(formDataToSend);
-      // if (response.data.token) {
-      //   navigate('/');
-      // }
+      const response = await register(formDataToSend);
+      if (response.data.token) {
+         navigate('/');
+       }
     } catch (error) {
       setError(
         error.response?.data?.message || 

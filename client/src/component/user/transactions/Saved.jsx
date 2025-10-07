@@ -15,6 +15,8 @@ import {
   BookmarkIcon,
   HeartIcon,
   ChevronDownIcon,
+  StarIcon,
+  ClockIcon,
 } from "@heroicons/react/24/outline";
 import { useNavigate } from 'react-router-dom';
 
@@ -71,10 +73,12 @@ export default function Saved() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col w-full md:max-w-sm mx-auto relative">
-      {/* Sidebar - Updated to match Dashboard */}
-      <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} bg-gradient-to-b from-gray-50 to-white w-64 transition-transform duration-300 ease-in-out z-30 md:max-w-sm shadow-xl border-r flex flex-col`}>
-        {/* Header */}
+    <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen w-full">
+      {/* Sidebar with fixed height and scrolling */}
+      <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
+        bg-gradient-to-b from-gray-50 to-white w-64 transition-transform duration-300 ease-in-out z-30
+        flex flex-col h-full`}>
+        {/* Header - Fixed at top */}
         <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 flex justify-between items-center">
           <h2 className="font-semibold text-white">Menu</h2>
           <button 
@@ -86,20 +90,98 @@ export default function Saved() {
         </div>
 
         {/* Navigation - Scrollable */}
-        <nav className="p-3 space-y-1 flex-1 overflow-y-auto">
-          {navItems.map((item) => (
-            <button
-              key={item.name}
-              onClick={() => navigate(item.path)}
-              className="flex items-center w-full p-3 text-gray-600 hover:text-blue-600 rounded-xl transition-all duration-200 group hover:bg-gradient-to-r from-blue-50 to-indigo-50"
-            >
-              <div className="bg-white p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
-                {item.icon}
+        <div className="flex-1 overflow-y-auto">
+          <nav className="p-3 space-y-1">
+            {navItems.map((item) => (
+              <button
+                key={item.name}
+                onClick={() => navigate(item.path)}
+                className="flex items-center w-full p-3 text-gray-600 hover:text-blue-600 rounded-xl transition-all duration-200 group hover:bg-gradient-to-r from-blue-50 to-indigo-50"
+              >
+                <div className="bg-white p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
+                  {item.icon}
+                </div>
+                <span className="ml-3 font-medium">{item.name}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 w-full">
+        {/* Header Section */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg">
+          <div className="w-full px-2">
+            <div className="flex items-center justify-between py-4">
+              <div className="flex items-center">
+                <button 
+                  onClick={() => setIsSidebarOpen(true)} 
+                  className="hover:bg-white/10 p-2 rounded-lg transition-colors"
+                >
+                  <Bars3Icon className="h-6 w-6 text-white" />
+                </button>
+                <h1 className="text-lg font-semibold ml-3">Saved Services</h1>
               </div>
-              <span className="ml-3 font-medium">{item.name}</span>
-            </button>
-          ))}
-        </nav>
+              <button 
+                onClick={() => navigate('/notification')} 
+                className="relative p-2"
+              >
+                <BellIcon className="h-6 w-6 text-white" />
+                <span className="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
+              </button>
+            </div>
+
+            {/* Filter Section */}
+            <div className="px-2 pb-4">
+              <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2">
+                <button className="flex items-center justify-between w-full text-sm">
+                  <span>All Categories</span>
+                  <ChevronDownIcon className="h-4 w-4 ml-2" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Saved Services Grid */}
+        <div className="w-full px-2 py-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {saved.map((service, index) => (
+                <div
+                  key={index}
+                  className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:scale-[1.02] transition-all relative"
+                >
+                  <button className="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition-colors">
+                    <HeartIcon className="h-5 w-5" />
+                  </button>
+
+                  <h2 className="font-semibold text-sm pr-8">{service.title}</h2>
+                  <p className="text-xs text-gray-500">{service.category}</p>
+                  <p className="font-semibold text-sm mt-2">{service.price}</p>
+
+                  <div className="flex items-center text-xs text-gray-500 mt-1 gap-4">
+                    <span className="flex items-center">
+                      <StarIcon className="h-4 w-4 text-yellow-400 mr-1" />
+                      {service.rating}
+                    </span>
+                    <span className="flex items-center">
+                      <ClockIcon className="h-4 w-4 text-gray-400 mr-1" />
+                      {service.duration}
+                    </span>
+                  </div>
+
+                  <div className="mt-3">
+                    <span className="px-2 py-1 text-xs rounded-lg bg-blue-50 text-blue-600">
+                      {service.tag}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Overlay */}
@@ -109,62 +191,6 @@ export default function Saved() {
           onClick={() => setIsSidebarOpen(false)}
         ></div>
       )}
-
-      {/* Header - Updated to match dashboard */}
-      <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <button onClick={() => setIsSidebarOpen(true)}>
-              <Bars3Icon className="h-6 w-6 text-white" />
-            </button>
-            <h1 className="text-lg font-semibold">Saved Services</h1>
-          </div>
-          <button 
-            onClick={() => navigate('/notification')} 
-            className="relative"
-          >
-            <BellIcon className="h-6 w-6 text-white" />
-            <span className="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
-          </button>
-        </div>
-
-        {/* Dropdown Filter */}
-        <div className="mt-4">
-          <button className="flex items-center justify-between w-full bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2 text-sm">
-            <span>All Categories</span>
-            <ChevronDownIcon className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* Saved Services List with updated styling */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {saved.map((s, i) => (
-          <div
-            key={i}
-            className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:scale-[1.02] transition-transform relative"
-          >
-            <button className="absolute top-3 right-3 text-gray-400 hover:text-red-500">
-              <HeartIcon className="h-5 w-5" />
-            </button>
-
-            <h2 className="font-semibold text-sm">{s.title}</h2>
-            <p className="text-xs text-gray-500">{s.category}</p>
-            <p className="font-semibold text-sm mt-2">{s.price}</p>
-
-            <div className="flex items-center text-xs text-gray-500 mt-1 gap-4">
-              <span>⭐ {s.rating}</span>
-              <span>⏱ {s.duration}</span>
-            </div>
-
-            <div className="mt-2">
-              <span className="px-2 py-1 text-xs rounded-lg bg-gray-200 text-gray-700">
-                {s.tag}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

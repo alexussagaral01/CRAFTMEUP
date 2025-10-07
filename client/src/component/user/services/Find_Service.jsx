@@ -68,17 +68,19 @@ function BookingModal({ service, onClose, onConfirm }) {
 
 // FilterPanel component - moved outside to prevent re-creation on every render
 const FilterPanel = ({ filters, handleFilterChange, categories }) => (
-  <div className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 mb-3 mt-3 mx-4">
-    <div className="space-y-2">
-      <div>
-        <label className="text-xs font-medium text-gray-700 mb-1 block">
+  <div className="p-6 mb-4 mx-4">
+    <h3 className="text-lg font-semibold mb-4 text-gray-800">Filter Services</h3>
+    <div className="space-y-4">
+      {/* Category Filter */}
+      <div className="filter-group"></div>
+        <label className="text-sm font-medium text-gray-700 mb-2 block">
           Category
         </label>
         <select
           name="category"
           value={filters.category}
           onChange={handleFilterChange}
-          className="w-full rounded-lg border-gray-200 text-sm"
+          className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
         >
           {categories.map((category) => (
             <option key={category} value={category}>{category}</option>
@@ -86,53 +88,68 @@ const FilterPanel = ({ filters, handleFilterChange, categories }) => (
         </select>
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <label className="text-xs font-medium text-gray-700 mb-1 block">
-            Min Price
-          </label>
-          <input
-            type="number"
-            name="minPrice"
-            value={filters.minPrice}
-            onChange={handleFilterChange}
-            className="w-full rounded-lg border-gray-200 text-sm"
-            placeholder="Min SC"
-          />
-        </div>
-        <div>
-          <label className="text-xs font-medium text-gray-700 mb-1 block">
-            Max Price
-          </label>
-          <input
-            type="number"
-            name="maxPrice"
-            value={filters.maxPrice}
-            onChange={handleFilterChange}
-            className="w-full rounded-lg border-gray-200 text-sm"
-            placeholder="Max SC"
-          />
+      {/* Price Range */}
+      <div>
+        <label className="text-sm font-medium text-gray-700 mb-2 block">
+          Price Range
+        </label>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">SC</span>
+            <input
+              type="number"
+              name="minPrice"
+              value={filters.minPrice}
+              onChange={handleFilterChange}
+              className="w-full rounded-lg border border-gray-200 pl-9 pr-4 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+              placeholder="Min"
+            />
+          </div>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">SC</span>
+            <input
+              type="number"
+              name="maxPrice"
+              value={filters.maxPrice}
+              onChange={handleFilterChange}
+              className="w-full rounded-lg border border-gray-200 pl-9 pr-4 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+              placeholder="Max"
+            />
+          </div>
         </div>
       </div>
 
+      {/* Rating Filter */}
       <div>
-        <label className="text-xs font-medium text-gray-700 mb-1 block">
+        <label className="text-sm font-medium text-gray-700 mb-2 block">
           Minimum Rating
         </label>
         <select
           name="minRating"
           value={filters.minRating}
           onChange={handleFilterChange}
-          className="w-full rounded-lg border-gray-200 text-sm"
+          className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
         >
           <option value="">Any Rating</option>
-          <option value="4">4+ Stars</option>
-          <option value="4.5">4.5+ Stars</option>
-          <option value="5">5 Stars</option>
+          <option value="4">⭐⭐⭐⭐ & up</option>
+          <option value="4.5">⭐⭐⭐⭐½ & up</option>
+          <option value="5">⭐⭐⭐⭐⭐</option>
         </select>
       </div>
+
+      {/* Reset Filters Button */}
+      <button 
+        onClick={() => handleFilterChange({ 
+          target: { 
+            name: 'reset', 
+            value: '' 
+          } 
+        })}
+        className="w-full mt-2 px-4 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg border border-gray-200 transition-colors"
+      >
+        Reset Filters
+      </button>
     </div>
-  </div>
 );
 
 const FindServices = () => {
@@ -258,83 +275,143 @@ const FindServices = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col w-full md:max-w-sm mx-auto relative">
-      {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} bg-gradient-to-b from-gray-50 to-white w-64 transition-transform duration-300 ease-in-out z-30 md:max-w-sm shadow-xl border-r flex flex-col`}>
+    <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen w-full">
+      {/* Sidebar with fixed height and scrolling */}
+      <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
+        bg-gradient-to-b from-gray-50 to-white w-64 transition-transform duration-300 ease-in-out z-30
+        flex flex-col h-full`}>
+        {/* Header - Fixed at top */}
         <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 flex justify-between items-center">
           <h2 className="font-semibold text-white">Menu</h2>
-          <button onClick={() => setIsSidebarOpen(false)} className="text-white hover:bg-white/10 p-1 rounded-lg transition-colors">
+          <button 
+            onClick={() => setIsSidebarOpen(false)}
+            className="text-white hover:bg-white/10 p-1 rounded-lg transition-colors"
+          >
             <XMarkIcon className="h-6 w-6" />
           </button>
         </div>
 
-        <nav className="p-3 space-y-1 flex-1 overflow-y-auto">
-          {navItems.map((item) => (
-            <button key={item.name} onClick={() => navigate(item.path)} className="flex items-center w-full p-3 text-gray-600 hover:text-blue-600 rounded-xl transition-all duration-200 group hover:bg-gradient-to-r from-blue-50 to-indigo-50">
-              <div className="bg-white p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform duration-200">{item.icon}</div>
-              <span className="ml-3 font-medium">{item.name}</span>
-            </button>
-          ))}
-        </nav>
+        {/* Navigation - Scrollable */}
+        <div className="flex-1 overflow-y-auto">
+          <nav className="p-3 space-y-1">
+            {navItems.map((item) => (
+              <button key={item.name} onClick={() => navigate(item.path)} className="flex items-center w-full p-3 text-gray-600 hover:text-blue-600 rounded-xl transition-all duration-200 group hover:bg-gradient-to-r from-blue-50 to-indigo-50">
+                <div className="bg-white p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform duration-200">{item.icon}</div>
+                <span className="ml-3 font-medium">{item.name}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
       </div>
 
       {isSidebarOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-20" onClick={() => setIsSidebarOpen(false)}></div>}
 
-      {/* Header */}
-      <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <button onClick={() => setIsSidebarOpen(true)}><Bars3Icon className="h-6 w-6 text-white" /></button>
-            <h1 className="text-lg font-semibold">Browse Services</h1>
-          </div>
-          <div className="flex items-center space-x-3">
-            <button onClick={() => navigate("/notification")} className="relative">
-              <BellIcon className="h-6 w-6 text-white" />
-              <span className="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
-            </button>
-            <button onClick={() => setShowFilters((prev) => !prev)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-              <AdjustmentsHorizontalIcon className="h-5 w-5 text-white" />
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-4">
-          <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2">
-            <MagnifyingGlassIcon className="h-5 w-5 text-white/80" />
-            <input type="text" value={searchTerm} onChange={handleSearch} placeholder="Search services..." className="bg-transparent outline-none ml-2 text-sm w-full text-white placeholder-white/70"/>
-          </div>
-        </div>
-      </div>
-
-      {showFilters && <FilterPanel filters={filters} handleFilterChange={handleFilterChange} categories={categories} />}
-
-      {/* Service Cards */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {filteredServices.map((service) => (
-          <div key={service.id} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:scale-[1.02] transition-transform">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="font-semibold text-sm">{service.title}</h2>
-                <p className="text-gray-600 text-xs mt-1">{service.description}</p>
-                <p className="text-xs text-gray-500 mt-1">by {service.provider}</p>
-                <p className="font-semibold text-black mt-2">SC {service.price} <span className="text-sm text-gray-500">⭐ {service.rating}</span></p>
+      {/* Main Content */}
+      <div className="flex-1 w-full">
+        {/* Header Section */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg">
+          <div className="w-full px-2">
+            <div className="flex items-center justify-between py-4">
+              <div className="flex items-center">
+                <button 
+                  onClick={() => setIsSidebarOpen(true)} 
+                  className="hover:bg-white/10 p-2 rounded-lg transition-colors"
+                >
+                  <Bars3Icon className="h-6 w-6 text-white" />
+                </button>
+                <h1 className="text-lg font-semibold ml-3">Browse Services</h1>
               </div>
-              <BookmarkIcon className="h-5 w-5 text-gray-400 hover:text-blue-600 cursor-pointer"/>
+              <div className="flex items-center space-x-2">
+                <button 
+                  onClick={() => navigate('/notification')} 
+                  className="relative p-2"
+                >
+                  <BellIcon className="h-6 w-6 text-white" />
+                  <span className="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
+                </button>
+                <button 
+                  onClick={() => setShowFilters(prev => !prev)}
+                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  <AdjustmentsHorizontalIcon className="h-5 w-5 text-white" />
+                </button>
+              </div>
             </div>
-            <div className="flex gap-2 mt-3">
-              <button
-                className="flex-1 px-3 py-2 text-xs rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-                onClick={() => handleBookNow(service)}
-              >
-                Book Now
-              </button>
-              <button className="flex-1 px-3 py-2 text-xs rounded-lg border border-gray-200 hover:bg-gray-50">Message</button>
+
+            {/* Search Bar */}
+            <div className="px-2 pb-4">
+              <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2">
+                <MagnifyingGlassIcon className="h-5 w-5 text-white/80" />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={handleSearch}
+                  placeholder="Search services..."
+                  className="bg-transparent outline-none ml-2 text-sm w-full text-white placeholder-white/70"
+                />
+              </div>
             </div>
           </div>
-        ))}
+        </div>
+
+        {/* Filters and Services Content */}
+        <div className="w-full px-2 py-4">
+          <div className="max-w-7xl mx-auto">
+            {/* Filters Panel */}
+            {showFilters && (
+              <div className="bg-white rounded-xl shadow-sm mb-4">
+                <FilterPanel 
+                  filters={filters}
+                  handleFilterChange={handleFilterChange}
+                  categories={categories}
+                />
+              </div>
+            )}
+
+            {/* Services Grid */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {filteredServices.map((service) => (
+                <div
+                  key={service.id}
+                  className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:scale-[1.02] transition-all"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="font-semibold text-sm">{service.title}</h2>
+                      <p className="text-gray-600 text-xs mt-1">{service.description}</p>
+                      <p className="text-xs text-gray-500 mt-1">by {service.provider}</p>
+                      <p className="font-semibold text-black mt-2">SC {service.price} <span className="text-sm text-gray-500">⭐ {service.rating}</span></p>
+                    </div>
+                    <BookmarkIcon className="h-5 w-5 text-gray-400 hover:text-blue-600 cursor-pointer"/>
+                  </div>
+                  <div className="flex gap-2 mt-3">
+                    <button
+                      className="flex-1 px-3 py-2 text-xs rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                      onClick={() => handleBookNow(service)}
+                    >
+                      Book Now
+                    </button>
+                    <button className="flex-1 px-3 py-2 text-xs rounded-lg border border-gray-200 hover:bg-gray-50">Message</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
-      {selectedService && <BookingModal service={selectedService} onClose={() => setSelectedService(null)} onConfirm={handleConfirmBooking} />}
+      {/* Booking Modal */}
+      {selectedService && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white w-full max-w-xl mx-4 rounded-xl shadow-xl overflow-hidden">
+            <BookingModal 
+              service={selectedService} 
+              onClose={() => setSelectedService(null)} 
+              onConfirm={handleConfirmBooking} 
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

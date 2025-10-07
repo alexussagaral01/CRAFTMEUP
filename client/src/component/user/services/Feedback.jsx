@@ -166,9 +166,12 @@ export default function Feedback() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col w-full md:max-w-sm mx-auto relative">
-      {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} bg-gradient-to-b from-gray-50 to-white w-64 transition-transform duration-300 ease-in-out z-30 md:max-w-sm shadow-xl border-r flex flex-col`}>
+    <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen w-full">
+      {/* Sidebar with fixed height and scrolling */}
+      <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
+        bg-gradient-to-b from-gray-50 to-white w-64 transition-transform duration-300 ease-in-out z-30
+        flex flex-col h-full`}>
+        {/* Header - Fixed at top */}
         <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 flex justify-between items-center">
           <h2 className="font-semibold text-white">Menu</h2>
           <button 
@@ -179,20 +182,23 @@ export default function Feedback() {
           </button>
         </div>
 
-        <nav className="p-3 space-y-1 flex-1 overflow-y-auto">
-          {navItems.map((item) => (
-            <button
-              key={item.name}
-              onClick={() => navigate(item.path)}
-              className="flex items-center w-full p-3 text-gray-600 hover:text-blue-600 rounded-xl transition-all duration-200 group hover:bg-gradient-to-r from-blue-50 to-indigo-50"
-            >
-              <div className="bg-white p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
-                {item.icon}
-              </div>
-              <span className="ml-3 font-medium">{item.name}</span>
-            </button>
-          ))}
-        </nav>
+        {/* Navigation - Scrollable */}
+        <div className="flex-1 overflow-y-auto">
+          <nav className="p-3 space-y-1">
+            {navItems.map((item) => (
+              <button
+                key={item.name}
+                onClick={() => navigate(item.path)}
+                className="flex items-center w-full p-3 text-gray-600 hover:text-blue-600 rounded-xl transition-all duration-200 group hover:bg-gradient-to-r from-blue-50 to-indigo-50"
+              >
+                <div className="bg-white p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
+                  {item.icon}
+                </div>
+                <span className="ml-3 font-medium">{item.name}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
       </div>
 
       {/* Overlay */}
@@ -203,143 +209,165 @@ export default function Feedback() {
         ></div>
       )}
 
-      {/* Header */}
-      <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <button onClick={() => setIsSidebarOpen(true)}>
-              <Bars3Icon className="h-6 w-6 text-white" />
+      {/* Header Section */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg">
+        <div className="w-full px-2">
+          <div className="flex items-center justify-between py-4">
+            <div className="flex items-center">
+              <button 
+                onClick={() => setIsSidebarOpen(true)} 
+                className="hover:bg-white/10 p-2 rounded-lg transition-colors"
+              >
+                <Bars3Icon className="h-6 w-6 text-white" />
+              </button>
+              <h1 className="text-lg font-semibold ml-3">Rate & Review</h1>
+            </div>
+            <button 
+              onClick={() => navigate('/notification')} 
+              className="relative p-2"
+            >
+              <BellIcon className="h-6 w-6 text-white" />
+              <span className="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
             </button>
-            <h1 className="text-lg font-semibold">Rate & Review</h1>
           </div>
-          <button 
-            onClick={() => navigate('/notification')} 
-            className="relative"
-          >
-            <BellIcon className="h-6 w-6 text-white" />
-            <span className="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
-          </button>
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 p-4 overflow-y-auto">
-        {/* Service Info Card */}
-        <div className="bg-white rounded-2xl shadow-sm p-4 mb-4">
-          <div className="flex items-center space-x-3 mb-2">
-            <img
-              src="https://via.placeholder.com/40"
-              alt="profile"
-              className="w-12 h-12 rounded-full object-cover"
-            />
-            <div>
-              <h2 className="font-semibold">{booking.provider_name}</h2>
-              <p className="text-sm text-gray-500">{booking.service_title}</p>
-              <p className="text-xs text-gray-400">
-                Completed on {new Date(booking.created_at).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric'
-                })}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Rating Card */}
-        <div className="bg-white rounded-2xl shadow-sm p-4 mb-4">
-          <div className="text-center">
-            <p className="text-gray-700 font-medium mb-3">How was your experience?</p>
-            <div className="flex justify-center mb-2">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  onClick={() => setRating(star)}
-                  onMouseEnter={() => setHoveredRating(star)}
-                  onMouseLeave={() => setHoveredRating(0)}
-                  className="transition-transform hover:scale-110"
-                >
-                  <StarIcon
-                    className={`h-10 w-10 ${
-                      star <= (hoveredRating || rating)
-                        ? "text-yellow-400"
-                        : "text-gray-300"
-                    }`}
+      <div className="w-full px-2 py-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* Left Column - Service Info and Rating */}
+            <div className="space-y-4">
+              {/* Service Info Card */}
+              <div className="bg-white rounded-xl shadow-sm p-4">
+                <div className="flex items-center space-x-3 mb-2">
+                  <img
+                    src="https://via.placeholder.com/40"
+                    alt="profile"
+                    className="w-12 h-12 rounded-full object-cover"
                   />
-                </button>
-              ))}
+                  <div>
+                    <h2 className="font-semibold">{booking.provider_name}</h2>
+                    <p className="text-sm text-gray-500">{booking.service_title}</p>
+                    <p className="text-xs text-gray-400">
+                      Completed on {new Date(booking.created_at).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Rating Card */}
+              <div className="bg-white rounded-xl shadow-sm p-4">
+                <div className="text-center">
+                  <p className="text-gray-700 font-medium mb-3">How was your experience?</p>
+                  <div className="flex justify-center mb-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() => setRating(star)}
+                        onMouseEnter={() => setHoveredRating(star)}
+                        onMouseLeave={() => setHoveredRating(0)}
+                        className="transition-transform hover:scale-110"
+                      >
+                        <StarIcon
+                          className={`h-10 w-10 ${
+                            star <= (hoveredRating || rating)
+                              ? "text-yellow-400"
+                              : "text-gray-300"
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  {rating > 0 && (
+                    <p className="text-gray-500 text-sm">{rating} out of 5 stars</p>
+                  )}
+                </div>
+              </div>
             </div>
-            {rating > 0 && (
-              <p className="text-gray-500 text-sm">{rating} out of 5 stars</p>
-            )}
+
+            {/* Right Column - Comment and Actions */}
+            <div className="space-y-4">
+              {/* Comment Box */}
+              <div className="bg-white rounded-xl shadow-sm p-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Share your experience
+                </label>
+                <textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="Tell us about your experience with this service..."
+                  className="w-full border border-gray-200 rounded-xl p-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  rows="6"
+                  maxLength={1500}
+                ></textarea>
+                <p className="text-right text-xs text-gray-400 mt-1">
+                  {comment.length}/1500 characters
+                </p>
+              </div>
+
+              {/* Report and Action Buttons */}
+              <div className="space-y-4">
+                {/* Report Button */}
+                <div className="bg-white rounded-xl shadow-sm p-4">
+                  <div className="flex items-center justify-between mb-4 p-3 bg-gray-50 rounded-xl">
+                    <p className="text-sm text-gray-600">Had an issue with this service?</p>
+                    <button 
+                      className="bg-red-500 text-white px-4 py-1.5 text-sm rounded-lg hover:bg-red-600 transition-colors"
+                      onClick={() => setShowReportModal(true)}
+                    >
+                      Report
+                    </button>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="bg-white rounded-xl shadow-sm p-4 space-y-3">
+                  <div className="flex flex-col space-y-3">
+                    <button 
+                      onClick={handleSubmitFeedback}
+                      disabled={isSubmitting || rating === 0}
+                      className={`w-full ${
+                        isSubmitting || rating === 0
+                          ? 'bg-gray-300'
+                          : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
+                      } text-white py-3 rounded-xl font-medium transition-all`}
+                    >
+                      {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
+                    </button>
+                    <button 
+                      onClick={() => navigate('/view-past-feedback')}
+                      disabled={isSubmitting}
+                      className="w-full border-2 border-blue-600 text-blue-600 py-3 rounded-xl font-medium hover:bg-blue-50 transition-all"
+                    >
+                      View Past Feedback
+                    </button>
+                    <button 
+                      onClick={handleSkip}
+                      disabled={isSubmitting}
+                      className="w-full border-2 border-gray-300 text-gray-600 py-3 rounded-xl font-medium hover:bg-gray-50 transition-all"
+                    >
+                      Skip for Now
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Helpful Tips */}
+              <div className="bg-white rounded-xl shadow-sm p-4 border-l-4 border-blue-500">
+                <h3 className="font-medium text-sm mb-2 text-blue-900">💡 Helpful Tips</h3>
+                <p className="text-xs text-blue-700">
+                  Your feedback helps improve our community. Be honest and constructive
+                  in your review to help others make informed decisions.
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
-
-        {/* Comment Box */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Share your experience
-          </label>
-          <textarea
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            placeholder="Tell us about your experience with this service..."
-            className="w-full border border-gray-200 rounded-xl p-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-            rows="4"
-            maxLength={1500}
-          ></textarea>
-          <p className="text-right text-xs text-gray-400 mt-1">
-            {comment.length}/1500 characters
-          </p>
-        </div>
-
-        {/* Report Button */}
-        <div className="flex items-center justify-between mb-4 p-3 bg-gray-50 rounded-xl">
-          <p className="text-sm text-gray-600">Had an issue with this service?</p>
-          <button 
-            className="bg-red-500 text-white px-4 py-1.5 text-sm rounded-lg hover:bg-red-600 transition-colors"
-            onClick={() => setShowReportModal(true)}
-          >
-            Report
-          </button>
-        </div>
-
-        {/* Submit Buttons */}
-        <div className="space-y-2 mb-6">
-          <button 
-            onClick={handleSubmitFeedback}
-            disabled={isSubmitting || rating === 0}
-            className={`w-full ${
-              isSubmitting || rating === 0
-                ? 'bg-gray-300'
-                : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
-            } text-white py-3 rounded-xl font-medium transition-all`}
-          >
-            {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
-          </button>
-          <button 
-            onClick={() => navigate('/view-past-feedback')}
-            disabled={isSubmitting}
-            className="w-full border-2 border-blue-600 text-blue-600 py-3 rounded-xl font-medium hover:bg-blue-50 transition-all"
-          >
-            View Past Feedback
-          </button>
-          <button 
-            onClick={handleSkip}
-            disabled={isSubmitting}
-            className="w-full border-2 border-gray-300 text-gray-600 py-3 rounded-xl font-medium hover:bg-gray-50 transition-all"
-          >
-            Skip for Now
-          </button>
-        </div>
-
-        {/* Helpful Tips */}
-        <div className="border border-blue-100 rounded-xl p-4 bg-blue-50">
-          <h3 className="font-medium text-sm mb-2 text-blue-900">💡 Helpful Tips</h3>
-          <p className="text-xs text-blue-700">
-            Your feedback helps improve our community. Be honest and constructive
-            in your review to help others make informed decisions.
-          </p>
         </div>
       </div>
 

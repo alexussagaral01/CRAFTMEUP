@@ -118,113 +118,122 @@ export default function Notifications() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col w-full md:max-w-sm mx-auto">
-      {/* Header */}
-      <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <button className="text-white" onClick={() => navigate(-1)}>
-              <ArrowLeftIcon className="h-6 w-6" />
-            </button>
-            <h1 className="text-lg font-semibold">Notifications</h1>
-          </div>
-          <div className="relative">
-            <BellIcon className="h-6 w-6 text-white" />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-              {pendingBookings.length}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="px-4 pt-2 bg-white">
-        <div className="flex space-x-1 bg-gray-100 p-1 rounded-xl">
-          {tabs.map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
-                activeTab === tab
-                  ? "bg-white text-blue-600 shadow-sm"
-                  : "text-gray-600 hover:bg-gray-200"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Notifications List */}
-      <div className="flex-1 px-4 py-6 overflow-y-auto">
-        <div className="flex justify-end mb-4">
-          <button className="text-sm text-blue-600 font-medium px-4 py-2 hover:bg-blue-50 rounded-lg transition-colors">
-            Mark all as read
-          </button>
-        </div>
-
-        <div className="space-y-4">
-          {notifications.map(n => (
-            <div key={n.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 transform transition hover:scale-[1.02]">
-              <div className="flex items-start space-x-4">
-                <div className={`p-2 rounded-full ${
-                  n.type === "message"
-                    ? "bg-blue-100"
-                    : n.type === "payment"
-                    ? "bg-green-100"
-                    : n.type === "system"
-                    ? "bg-purple-100"
-                    : n.type === "reminder"
-                    ? "bg-yellow-100"
-                    : "bg-gray-100"
-                }`}>
-                  {getIcon(n.type)}
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">{n.title}</h3>
-                  <p className="text-sm text-gray-600 mt-1">{n.content}</p>
-                  <div className="flex items-center justify-between mt-3 pt-2 border-t">
-                    <button className="text-blue-600 text-sm font-medium hover:underline">{n.action}</button>
-                    <span className="text-xs text-gray-400">{n.time}</span>
-                  </div>
-                </div>
-              </div>
+    <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen w-full">
+      {/* Header - Updated for full width */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg">
+        <div className="w-full px-2">
+          <div className="flex items-center justify-between py-4">
+            <div className="flex items-center">
+              <button className="hover:bg-white/10 p-2 rounded-lg" onClick={() => navigate(-1)}>
+                <ArrowLeftIcon className="h-6 w-6" />
+              </button>
+              <h1 className="text-lg font-semibold ml-3">Notifications</h1>
             </div>
-          ))}
-        </div>
+            <div className="relative p-2">
+              <BellIcon className="h-6 w-6 text-white" />
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                {pendingBookings.length}
+              </span>
+            </div>
+          </div>
 
-        {/* Pending Bookings Section */}
-        <div className="mt-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Pending Booking Requests</h2>
-          <div className="space-y-4">
-            {pendingBookings.length > 0 ? pendingBookings.map(b => (
-              <div key={b.id} className="bg-white p-4 rounded-xl shadow-sm border">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-medium">{b.title}</h3>
-                    <p className="text-sm text-gray-500">New booking request</p>
+          {/* Tabs - Updated styling */}
+          <div className="px-2 pb-4">
+            <div className="flex space-x-1 bg-white/10 backdrop-blur-sm p-1 rounded-xl">
+              {tabs.map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
+                    activeTab === tab
+                      ? "bg-white text-blue-600"
+                      : "text-white hover:bg-white/10"
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Content - Updated for responsive layout */}
+      <div className="w-full px-2 py-4">
+        <div className="max-w-7xl mx-auto">
+          {/* Mark all as read button */}
+          <div className="flex justify-end mb-4">
+            <button className="text-sm text-blue-600 font-medium px-4 py-2 hover:bg-blue-50 rounded-lg">
+              Mark all as read
+            </button>
+          </div>
+
+          {/* Notifications Grid */}
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* Regular Notifications */}
+            <div className="space-y-4">
+              {notifications.map(n => (
+                <div key={n.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 transform transition hover:scale-[1.02]">
+                  <div className="flex items-start space-x-4">
+                    <div className={`p-2 rounded-full ${
+                      n.type === "message"
+                        ? "bg-blue-100"
+                        : n.type === "payment"
+                        ? "bg-green-100"
+                        : n.type === "system"
+                        ? "bg-purple-100"
+                        : n.type === "reminder"
+                        ? "bg-yellow-100"
+                        : "bg-gray-100"
+                    }`}>
+                      {getIcon(n.type)}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900">{n.title}</h3>
+                      <p className="text-sm text-gray-600 mt-1">{n.content}</p>
+                      <div className="flex items-center justify-between mt-3 pt-2 border-t">
+                        <button className="text-blue-600 text-sm font-medium hover:underline">{n.action}</button>
+                        <span className="text-xs text-gray-400">{n.time}</span>
+                      </div>
+                    </div>
                   </div>
-                  <span className="text-yellow-600 bg-yellow-100 px-2 py-1 rounded-full text-xs">Pending</span>
                 </div>
-                <div className="mt-4 flex justify-end space-x-2">
-                  <button
-                    onClick={() => handleRejectBooking(b.id)}
-                    className="px-3 py-1 text-red-600 hover:bg-red-50 rounded"
-                  >
-                    Reject
-                  </button>
-                  <button
-                    onClick={() => handleAcceptBooking(b.id)}
-                    className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-                  >
-                    Accept
-                  </button>
-                </div>
-              </div>
-            )) : (
-              <p className="text-gray-500 text-center">No pending bookings</p>
-            )}
+              ))}
+            </div>
+
+            {/* Pending Bookings */}
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold text-gray-900">Pending Booking Requests</h2>
+              {pendingBookings.length > 0 ? (
+                pendingBookings.map(b => (
+                  <div key={b.id} className="bg-white p-4 rounded-xl shadow-sm border">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-medium">{b.title}</h3>
+                        <p className="text-sm text-gray-500">New booking request</p>
+                      </div>
+                      <span className="text-yellow-600 bg-yellow-100 px-2 py-1 rounded-full text-xs">Pending</span>
+                    </div>
+                    <div className="mt-4 flex justify-end space-x-2">
+                      <button
+                        onClick={() => handleRejectBooking(b.id)}
+                        className="px-3 py-1 text-red-600 hover:bg-red-50 rounded"
+                      >
+                        Reject
+                      </button>
+                      <button
+                        onClick={() => handleAcceptBooking(b.id)}
+                        className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                      >
+                        Accept
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-center">No pending bookings</p>
+              )}
+            </div>
           </div>
         </div>
       </div>

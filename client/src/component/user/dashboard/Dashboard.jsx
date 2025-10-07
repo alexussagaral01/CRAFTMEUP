@@ -194,9 +194,11 @@ export default function Dashboard() {
 
 
   return (
-    <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen flex flex-col w-full md:max-w-sm mx-auto relative">
-      {/* Sidebar - Updated with scrolling support */}
-      <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} bg-gradient-to-b from-gray-50 to-white w-64 transition-transform duration-300 ease-in-out z-30 md:max-w-sm shadow-xl border-r flex flex-col`}>
+    <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen w-full">
+      {/* Sidebar with fixed height and scrolling */}
+      <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
+        bg-gradient-to-b from-gray-50 to-white w-64 transition-transform duration-300 ease-in-out z-30
+        flex flex-col h-full`}>
         {/* Header - Fixed at top */}
         <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 flex justify-between items-center">
           <h2 className="font-semibold text-white">Menu</h2>
@@ -209,23 +211,28 @@ export default function Dashboard() {
         </div>
 
         {/* Navigation - Scrollable */}
-        <nav className="p-3 space-y-1 flex-1 overflow-y-auto">
-          {navItems.map((item) => (
-            <button
-              key={item.name}
-              onClick={() => navigate(item.path)}
-              className="flex items-center w-full p-3 text-gray-600 hover:text-blue-600 rounded-xl transition-all duration-200 group hover:bg-gradient-to-r from-blue-50 to-indigo-50"
-            >
-              <div className="bg-white p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
-                {item.icon}
-              </div>
-              <span className="ml-3 font-medium">{item.name}</span>
-            </button>
-          ))}
-        </nav>
+        <div className="flex-1 overflow-y-auto">
+          <nav className="p-3 space-y-1">
+            {navItems.map((item) => (
+              <button
+                key={item.name}
+                onClick={() => {
+                  navigate(item.path);
+                  setIsSidebarOpen(false);  // Close sidebar after navigation
+                }}
+                className="flex items-center w-full p-3 text-gray-600 hover:text-blue-600 rounded-xl transition-all duration-200 group hover:bg-gradient-to-r from-blue-50 to-indigo-50"
+              >
+                <div className="bg-white p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
+                  {item.icon}
+                </div>
+                <span className="ml-3 font-medium">{item.name}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
       </div>
 
-      {/* Overlay */}
+      {/* Overlay - Show for all screen sizes when sidebar is open */}
       {isSidebarOpen && (
         <div 
           className="fixed inset-0 bg-black bg-opacity-50 z-20"
@@ -233,55 +240,77 @@ export default function Dashboard() {
         ></div>
       )}
 
-      {/* Main Content */}
-      <div className="overflow-y-auto flex-1">
-        {/* Welcome Section - Updated */}
-        <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-b-3xl shadow-lg">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-3">
-              <button onClick={() => setIsSidebarOpen(true)}>
-                <Bars3Icon className="h-6 w-6 text-white" />
-              </button>
-              <div>
-                <div className="text-lg font-semibold">
-                  Welcome back, {userData?.full_name || userData?.fullName || 'User'}
+      {/* Main Content - Updated width and padding */}
+      <div className="flex-1 w-full">
+        {/* Welcome Section - Adjusted spacing */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg">
+          <div className="w-full px-2"> {/* Changed from max-w-7xl mx-auto p-6 */}
+            <div className="flex items-center justify-between py-4"> {/* Adjusted padding */}
+              <div className="flex items-center">  {/* Removed space-x-3 */}
+                <button 
+                  onClick={() => setIsSidebarOpen(true)} 
+                  className="hover:bg-white/10 p-2 rounded-lg transition-colors"
+                >
+                  <Bars3Icon className="h-6 w-6 text-white" />
+                </button>
+                <div className="ml-3">
+                  <div className="text-lg font-semibold">
+                    Welcome back, {userData?.full_name || userData?.fullName || 'User'}
+                  </div>
+                  <span className="bg-white/20 text-xs px-3 py-1 rounded-full mt-1 inline-block backdrop-blur-sm">
+                    {userData?.role || 'User'}
+                  </span>
                 </div>
-                <span className="bg-white/20 text-xs px-3 py-1 rounded-full mt-1 inline-block backdrop-blur-sm">
-                  {userData?.role || 'User'}
-                </span>
+              </div>
+              <button 
+                onClick={() => navigate('/notification')} 
+                className="relative p-2" /* Added padding */
+              >
+                <BellIcon className="h-6 w-6 text-white" />
+                <span className="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
+              </button>
+            </div>
+
+            {/* Stats Cards - Adjusted container padding */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full px-2 pb-4">
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4">
+                <div className="text-2xl font-bold">{services.filter(s => s.status === "active").length}</div>
+                <div className="text-sm text-white/80">Active Services</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4">
+                <div className="text-2xl font-bold">
+                  SC {services.reduce((sum, s) => sum + (s.monthlyEarnings || 0), 0)}
+                </div>
+                <div className="text-sm text-white/80">This Month</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4">
+                <div className="text-2xl font-bold">0</div>
+                <div className="text-sm text-white/80">Pending Reviews</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4">
+                <div className="text-2xl font-bold">0</div>
+                <div className="text-sm text-white/80">Messages</div>
               </div>
             </div>
-            <button 
-              onClick={() => navigate('/notification')} 
-              className="relative"
-            >
-              <BellIcon className="h-6 w-6 text-white" />
-              <span className="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
-            </button>
           </div>
-          {/* Stats Cards */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4">
-              <div className="text-2xl font-bold">{services.filter(s => s.status === "active").length}</div>
-              <div className="text-sm text-white/80">Active Services</div>
+        </div>
+
+        {/* Content Grid - Adjusted padding */}
+        <div className="w-full px-2 py-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            {/* Announcements Section */}
+            <div className="bg-white rounded-xl shadow-sm">
+              {renderAnnouncements()}
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4">
-              <div className="text-2xl font-bold"></div>
-                SC {services.reduce((sum, s) => sum + (s.monthlyEarnings || 0), 0)}
-                <div className="mt-2 text-sm text-white/80">This Month</div>
-              </div>
+
+            {/* Services Section */}
+            <div className="bg-white rounded-xl shadow-sm">
+              {renderServices()}
             </div>
           </div>
-          {renderAnnouncements()}
-
-          {/* My Services */}
-        {renderServices()}
-
-        {/* Recent Activity */}
-        
-
-       
+        </div>
       </div>
     </div>
   );
 }
+

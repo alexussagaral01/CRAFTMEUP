@@ -112,7 +112,7 @@ export default function Transaction() {
     { name: "Saved", icon: <BookmarkIcon className="h-5 w-5" />, path: "/saved" },
     { name: "Wallet", icon: <WalletIcon className="h-5 w-5" />, path: "/wallet" },
     { name: "Transactions", icon: <ReceiptRefundIcon className="h-5 w-5" />, path: "/transactions" },
-    { name: "Feedback", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/feedback" },
+    { name: "Past Feedbacks", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/view-past-feedback" },
     { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
   ];
 
@@ -217,7 +217,7 @@ export default function Transaction() {
       
       setShowConfirmModal(false);
       
-      navigate('/feedback', { 
+      navigate('/view-past-feedback', {  // Updated path
         state: { 
           booking: selectedBooking 
         }
@@ -359,8 +359,18 @@ export default function Transaction() {
       <div className="mb-6">
         <h2 className="text-gray-600 text-sm font-medium mb-2">Current Transactions</h2>
         {ongoingBookings.length > 0 ? ongoingBookings.map(renderBooking) : (
-          <div className="text-center py-8 bg-gray-50 rounded-xl">
-            <p className="text-gray-500">No ongoing transactions</p>
+          <div className="flex items-center justify-center min-h-[300px] w-full bg-white rounded-xl shadow-sm border border-gray-100">
+            <div className="text-center max-w-sm mx-auto px-4">
+              <div className="flex justify-center mb-4">
+                <ReceiptRefundIcon className="h-12 w-12 text-gray-300" />
+              </div>
+              <h3 className="text-gray-600 font-medium text-lg mb-2">
+                No ongoing transactions
+              </h3>
+              <p className="text-gray-400">
+                Your active transactions will appear here
+              </p>
+            </div>
           </div>
         )}
       </div>
@@ -382,48 +392,129 @@ export default function Transaction() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col w-full md:max-w-sm mx-auto relative">
-      <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} bg-gradient-to-b from-gray-50 to-white w-64 transition-transform duration-300 ease-in-out z-30 md:max-w-sm shadow-xl border-r flex flex-col`}>
+    <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen w-full">
+      {/* Sidebar with fixed height and scrolling */}
+      <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
+        bg-gradient-to-b from-gray-50 to-white w-64 transition-transform duration-300 ease-in-out z-30
+        flex flex-col h-full`}>
+        {/* Header - Fixed at top */}
         <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 flex justify-between items-center">
           <h2 className="font-semibold text-white">Menu</h2>
-          <button onClick={() => setIsSidebarOpen(false)} className="text-white hover:bg-white/10 p-1 rounded-lg transition-colors">
+          <button 
+            onClick={() => setIsSidebarOpen(false)}
+            className="text-white hover:bg-white/10 p-1 rounded-lg transition-colors"
+          >
             <XMarkIcon className="h-6 w-6" />
           </button>
         </div>
-        <nav className="p-3 space-y-1 flex-1 overflow-y-auto">
-          {navItems.map((item) => (
-            <button
-              key={item.name}
-              onClick={() => navigate(item.path)}
-              className="flex items-center w-full p-3 text-gray-600 hover:text-blue-600 rounded-xl transition-all duration-200 group hover:bg-gradient-to-r from-blue-50 to-indigo-50"
-            >
-              <div className="bg-white p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
-                {item.icon}
-              </div>
-              <span className="ml-3 font-medium">{item.name}</span>
-            </button>
-          ))}
-        </nav>
-      </div>
 
-      {isSidebarOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-20" onClick={() => setIsSidebarOpen(false)}></div>}
-
-      <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <button onClick={() => setIsSidebarOpen(true)}>
-              <Bars3Icon className="h-6 w-6 text-white" />
-            </button>
-            <h1 className="text-lg font-semibold">Transactions</h1>
-          </div>
-          <button onClick={() => navigate('/notification')} className="relative">
-            <BellIcon className="h-6 w-6 text-white" />
-            <span className="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
-          </button>
+        {/* Navigation - Scrollable */}
+        <div className="flex-1 overflow-y-auto">
+          <nav className="p-3 space-y-1">
+            {navItems.map((item) => (
+              <button
+                key={item.name}
+                onClick={() => navigate(item.path)}
+                className="flex items-center w-full p-3 text-gray-600 hover:text-blue-600 rounded-xl transition-all duration-200 group hover:bg-gradient-to-r from-blue-50 to-indigo-50"
+              >
+                <div className="bg-white p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
+                  {item.icon}
+                </div>
+                <span className="ml-3 font-medium">{item.name}</span>
+              </button>
+            ))}
+          </nav>
         </div>
       </div>
 
-      {renderBookings()}
+      {/* Main Content */}
+      <div className="flex-1 w-full">
+        {/* Header Section */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg">
+          <div className="w-full px-2">
+            <div className="flex items-center justify-between py-4">
+              <div className="flex items-center">
+                <button 
+                  onClick={() => setIsSidebarOpen(true)} 
+                  className="hover:bg-white/10 p-2 rounded-lg transition-colors"
+                >
+                  <Bars3Icon className="h-6 w-6 text-white" />
+                </button>
+                <h1 className="text-lg font-semibold ml-3">Transactions</h1>
+              </div>
+              <button 
+                onClick={() => navigate('/notification')} 
+                className="relative p-2"
+              >
+                <BellIcon className="h-6 w-6 text-white" />
+                <span className="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Transactions Content */}
+        <div className="w-full px-4 py-4">
+          <div className="max-w-5xl mx-auto"> {/* Added max-width and margin auto */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {/* Current Transactions */}
+              <div className="lg:col-span-2">
+                <h2 className="text-gray-600 text-sm font-medium mb-2">Current Transactions</h2>
+                <div className="space-y-4">
+                  {ongoingBookings.length > 0 ? (
+                    ongoingBookings.map(renderBooking)
+                  ) : (
+                    <div className="flex items-center justify-center min-h-[300px] w-full bg-white rounded-xl shadow-sm border border-gray-100">
+                      <div className="text-center max-w-sm mx-auto px-4">
+                        <div className="flex justify-center mb-4">
+                          <ReceiptRefundIcon className="h-12 w-12 text-gray-300" />
+                        </div>
+                        <h3 className="text-gray-600 font-medium text-lg mb-2">
+                          No ongoing transactions
+                        </h3>
+                        <p className="text-gray-400">
+                          Your active transactions will appear here
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Pending & Past Transactions */}
+              <div className="space-y-6">
+                {pendingBookings.length > 0 && (
+                  <div>
+                    <h2 className="text-gray-600 text-sm font-medium mb-2">Pending Transactions</h2>
+                    <div className="space-y-4">
+                      {pendingBookings.map(renderBooking)}
+                    </div>
+                  </div>
+                )}
+
+                {completedBookings.length > 0 && (
+                  <div>
+                    <h2 className="text-gray-600 text-sm font-medium mb-2">Past Transactions</h2>
+                    <div className="space-y-4">
+                      {completedBookings.map(renderBooking)}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-20"
+          onClick={() => setIsSidebarOpen(false)}
+        ></div>
+      )}
+
+      {/* Payment Confirmation Modal */}
       {showConfirmModal && selectedBooking && (
         <ConfirmPayment
           booking={selectedBooking}

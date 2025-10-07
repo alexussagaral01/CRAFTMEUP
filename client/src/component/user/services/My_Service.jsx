@@ -122,10 +122,10 @@ export default function MyServices() {
   };
 
   const renderServiceForm = () => (
-    <div className="fixed inset-0 bg-gradient-to-b from-blue-50 to-white z-50 w-full md:max-w-sm mx-auto">
-      <div className="min-h-screen flex flex-col">
-        {/* Header */}
-        <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+    <div className="w-full h-full md:h-auto md:max-w-2xl mx-auto">
+      <div className="flex flex-col h-full md:h-auto md:rounded-xl bg-white">
+        {/* Modal Header */}
+        <div className="p-4 md:p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">
               {editingService ? "Edit Service" : "Add New Service"}
@@ -142,15 +142,15 @@ export default function MyServices() {
                   status: "Active",
                 });
               }}
-              className="text-white p-2 hover:bg-white/10 rounded-lg"
+              className="text-white p-2 hover:bg-white/10 rounded-lg transition-colors"
             >
               <XMarkIcon className="h-6 w-6" />
             </button>
           </div>
         </div>
 
-        {/* Form Content */}
-        <div className="flex-1 p-6 overflow-y-auto">
+        {/* Form Content - Scrollable */}
+        <div className="flex-1 p-4 md:p-6 overflow-y-auto">
           <form onSubmit={handleCreateOrUpdate} className="space-y-6">
             <div>
               <label className="text-sm font-medium mb-1 block">Service Title</label>
@@ -247,113 +247,137 @@ export default function MyServices() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col w-full md:max-w-sm mx-auto relative">
-      {/* Sidebar */}
-      <div
-        className={`fixed inset-y-0 left-0 transform ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } bg-gradient-to-b from-gray-50 to-white w-64 transition-transform duration-300 ease-in-out z-30 md:max-w-sm shadow-xl border-r flex flex-col`}
-      >
+    <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen w-full">
+      {/* Sidebar with fixed height and scrolling */}
+      <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
+        bg-gradient-to-b from-gray-50 to-white w-64 transition-transform duration-300 ease-in-out z-30
+        flex flex-col h-full`}>
+        {/* Header - Fixed at top */}
         <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 flex justify-between items-center">
           <h2 className="font-semibold text-white">Menu</h2>
-          <button
+          <button 
             onClick={() => setIsSidebarOpen(false)}
             className="text-white hover:bg-white/10 p-1 rounded-lg transition-colors"
           >
             <XMarkIcon className="h-6 w-6" />
           </button>
         </div>
-        <nav className="p-3 space-y-1 flex-1 overflow-y-auto">
-          {navItems.map((item) => (
-            <button
-              key={item.name}
-              onClick={() => navigate(item.path)}
-              className="flex items-center w-full p-3 text-gray-600 hover:text-blue-600 rounded-xl transition-all duration-200 group hover:bg-gradient-to-r from-blue-50 to-indigo-50"
-            >
-              <div className="bg-white p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
-                {item.icon}
-              </div>
-              <span className="ml-3 font-medium">{item.name}</span>
-            </button>
-          ))}
-        </nav>
+
+        {/* Navigation - Scrollable */}
+        <div className="flex-1 overflow-y-auto">
+          <nav className="p-3 space-y-1">
+            {navItems.map((item) => (
+              <button
+                key={item.name}
+                onClick={() => navigate(item.path)}
+                className="flex items-center w-full p-3 text-gray-600 hover:text-blue-600 rounded-xl transition-all duration-200 group hover:bg-gradient-to-r from-blue-50 to-indigo-50"
+              >
+                <div className="bg-white p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
+                  {item.icon}
+                </div>
+                <span className="ml-3 font-medium">{item.name}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
       </div>
 
       {/* Overlay */}
       {isSidebarOpen && (
-        <div
+        <div 
           className="fixed inset-0 bg-black bg-opacity-50 z-20"
           onClick={() => setIsSidebarOpen(false)}
         ></div>
       )}
 
-      {/* Header */}
-      <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <button onClick={() => setIsSidebarOpen(true)}>
-              <Bars3Icon className="h-6 w-6 text-white" />
-            </button>
-            <h1 className="text-lg font-semibold">My Services</h1>
+      {/* Main Content */}
+      <div className="flex-1 w-full">
+        {/* Header Section */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg">
+          <div className="w-full px-2">
+            <div className="flex items-center justify-between py-4">
+              <div className="flex items-center">
+                <button 
+                  onClick={() => setIsSidebarOpen(true)} 
+                  className="hover:bg-white/10 p-2 rounded-lg transition-colors"
+                >
+                  <Bars3Icon className="h-6 w-6 text-white" />
+                </button>
+                <h1 className="text-lg font-semibold ml-3">My Services</h1>
+              </div>
+              <div className="flex items-center space-x-2">
+                <button 
+                  onClick={() => navigate('/notification')} 
+                  className="relative p-2"
+                >
+                  <BellIcon className="h-6 w-6 text-white" />
+                  <span className="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
+                </button>
+                <button
+                  onClick={() => setShowServiceModal(true)}
+                  className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg text-sm hover:bg-white/20 transition-all"
+                >
+                  <PlusIcon className="h-4 w-4" /> Add Service
+                </button>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center space-x-3">
-            <button onClick={() => navigate("/notification")} className="relative">
-              <BellIcon className="h-6 w-6 text-white" />
-              <span className="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
-            </button>
-            <button
-              onClick={() => setShowServiceModal(true)}
-              className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-2 rounded-lg text-sm hover:bg-white/20 transition-all"
-            >
-              <PlusIcon className="h-4 w-4" /> Add Service
-            </button>
+        </div>
+
+        {/* Services Grid */}
+        <div className="w-full px-2 py-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {services.map((service) => (
+                <div
+                  key={service.id}
+                  className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:scale-[1.02] transition-all"
+                >
+                  {/* Status Badge */}
+                  <span
+                    className={`absolute top-3 right-3 px-3 py-1 text-xs font-medium rounded-full ${
+                      service.status === "Active"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-gray-200 text-gray-600"
+                    }`}
+                  >
+                    {service.status || "Active"}
+                  </span>
+                  <h2 className="font-semibold text-base">{service.title}</h2>
+                  <p className="text-gray-600 text-sm mt-1">{service.description}</p>
+                  <p className="font-semibold text-black mt-2">SC {service.price}</p>
+                  <p className="text-gray-500 text-sm mt-1">
+                    Available: {service.availability}
+                  </p>
+                  <div className="flex gap-3 mt-3">
+                    <button
+                      onClick={() => handleEdit(service)}
+                      className="text-gray-600 hover:text-black"
+                    >
+                      <PencilIcon className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(service.id)}
+                      className="text-gray-600 hover:text-red-600"
+                    >
+                      <TrashIcon className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Service List */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {services.map((service) => (
-          <div
-            key={service.id}
-            className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:scale-[1.02] transition-transform relative"
-          >
-            {/* Status Badge */}
-            <span
-              className={`absolute top-3 right-3 px-3 py-1 text-xs font-medium rounded-full ${
-                service.status === "Active"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-gray-200 text-gray-600"
-              }`}
-            >
-              {service.status || "Active"}
-            </span>
-            <h2 className="font-semibold text-base">{service.title}</h2>
-            <p className="text-gray-600 text-sm mt-1">{service.description}</p>
-            <p className="font-semibold text-black mt-2">SC {service.price}</p>
-            <p className="text-gray-500 text-sm mt-1">
-              Available: {service.availability}
-            </p>
-            <div className="flex gap-3 mt-3">
-              <button
-                onClick={() => handleEdit(service)}
-                className="text-gray-600 hover:text-black"
-              >
-                <PencilIcon className="h-5 w-5" />
-              </button>
-              <button
-                onClick={() => handleDelete(service.id)}
-                className="text-gray-600 hover:text-red-600"
-              >
-                <TrashIcon className="h-5 w-5" />
-              </button>
-            </div>
+      {/* Modal - Updated styling */}
+      {showServiceModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-start md:items-center justify-center z-50 p-0 md:p-4">
+          <div className="w-full h-full md:h-auto md:max-w-2xl md:rounded-xl overflow-hidden">
+            {renderServiceForm()}
           </div>
-        ))}
-      </div>
-
-      {/* Modal */}
-      {showServiceModal && renderServiceForm()}
+        </div>
+      )}
     </div>
   );
 }
