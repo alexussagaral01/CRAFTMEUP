@@ -124,6 +124,20 @@ CREATE TABLE saved_services (
     FOREIGN KEY (service_id) REFERENCES services(id)
 );
 
+-- Wallet Requests table (for top-ups and cash-outs)
+CREATE TABLE wallet_requests (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    type ENUM('top-up', 'cash-out') NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    status ENUM('pending', 'approved', 'rejected', 'completed') DEFAULT 'pending',
+    reference_number VARCHAR(100) NOT NULL,
+    proof_image VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
 -- Create indexes for better performance
 CREATE INDEX idx_user_email ON users(email);
 CREATE INDEX idx_user_verification ON users(verification_status);
@@ -131,6 +145,8 @@ CREATE INDEX idx_service_status ON services(status);
 CREATE INDEX idx_transaction_status ON transactions(status);
 CREATE INDEX idx_report_status ON reports(status);
 CREATE INDEX idx_wallet_user ON wallet(user_id);
+CREATE INDEX idx_wallet_requests_status ON wallet_requests(status);
+CREATE INDEX idx_wallet_requests_user ON wallet_requests(user_id);
 
 ALTER TABLE announcements 
 ADD COLUMN expiration_date DATETIME NULL AFTER content,

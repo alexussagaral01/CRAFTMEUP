@@ -102,8 +102,40 @@ export default function Transaction() {
   const [completedBookings, setCompletedBookings] = useState([]);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [userWallet, setUserWallet] = useState(0);
+  const [userData, setUserData] = useState(null);
 
-  const navItems = [
+  // Add to all components
+const role = userData?.role?.toLowerCase() || '';
+
+const navItems = (() => {
+  if (role === 'learner') {
+    return [
+      { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
+      { name: "Profile", icon: <UserIcon className="h-5 w-5" />, path: "/profile" },
+      { name: "Messages", icon: <ChatBubbleLeftIcon className="h-5 w-5" />, path: "/messages" },
+      { name: "Find Services", icon: <MagnifyingGlassIcon className="h-5 w-5" />, path: "/find-services" },
+      { name: "Saved", icon: <BookmarkIcon className="h-5 w-5" />, path: "/saved" },
+      { name: "Wallet", icon: <WalletIcon className="h-5 w-5" />, path: "/wallet" },
+      { name: "Transactions", icon: <ReceiptRefundIcon className="h-5 w-5" />, path: "/transactions" },
+      { name: "Past Feedbacks", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/view-past-feedback" },
+      { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
+    ];
+  }
+
+  if (role === 'tutor') {
+    return [
+      { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
+      { name: "Profile", icon: <UserIcon className="h-5 w-5" />, path: "/profile" },
+      { name: "Messages", icon: <ChatBubbleLeftIcon className="h-5 w-5" />, path: "/messages" },
+      { name: "My Services", icon: <ClipboardDocumentListIcon className="h-5 w-5" />, path: "/my-services" },
+      { name: "Wallet", icon: <WalletIcon className="h-5 w-5" />, path: "/wallet" },
+      { name: "Transactions", icon: <ReceiptRefundIcon className="h-5 w-5" />, path: "/transactions" },
+      { name: "Past Feedbacks", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/view-past-feedback" },
+      { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
+    ];
+  }
+
+  return [
     { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
     { name: "Profile", icon: <UserIcon className="h-5 w-5" />, path: "/profile" },
     { name: "Messages", icon: <ChatBubbleLeftIcon className="h-5 w-5" />, path: "/messages" },
@@ -112,9 +144,16 @@ export default function Transaction() {
     { name: "Saved", icon: <BookmarkIcon className="h-5 w-5" />, path: "/saved" },
     { name: "Wallet", icon: <WalletIcon className="h-5 w-5" />, path: "/wallet" },
     { name: "Transactions", icon: <ReceiptRefundIcon className="h-5 w-5" />, path: "/transactions" },
-    { name: "Feedback", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/feedback" },
+    { name: "Past Feedbacks", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/view-past-feedback" },
     { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
   ];
+})();
+
+
+  useEffect(() => {
+  const storedUser = JSON.parse(localStorage.getItem('user'));
+  setUserData(storedUser);
+}, []);
 
   useEffect(() => {
     fetchUserBookings();

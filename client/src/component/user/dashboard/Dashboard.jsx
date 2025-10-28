@@ -4,11 +4,11 @@ import {
   UserIcon,
   ChatBubbleLeftIcon,
   ClipboardDocumentListIcon,
-  MagnifyingGlassIcon, // Changed from SearchIcon
+  MagnifyingGlassIcon, 
   WalletIcon,
   ReceiptRefundIcon,
-  ChatBubbleOvalLeftIcon, // Changed from AnnotationIcon
-  ArrowRightOnRectangleIcon, // Changed from LogoutIcon
+  ChatBubbleOvalLeftIcon, 
+  ArrowRightOnRectangleIcon, 
   BellIcon,
   StarIcon,
   PlusIcon,
@@ -88,18 +88,52 @@ export default function Dashboard() {
     return false;
   };
 
-  const navItems = [
-  { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
-  { name: "Profile", icon: <UserIcon className="h-5 w-5" />, path: "/profile" },
-  { name: "Messages", icon: <ChatBubbleLeftIcon className="h-5 w-5" />, path: "/messages" },
-  { name: "My Services", icon: <ClipboardDocumentListIcon className="h-5 w-5" />, path: "/my-services" },
-  { name: "Find Services", icon: <MagnifyingGlassIcon className="h-5 w-5" />, path: "/find-services" },
-  { name: "Saved", icon: <BookmarkIcon className="h-5 w-5" />, path: "/saved" },
-  { name: "Wallet", icon: <WalletIcon className="h-5 w-5" />, path: "/wallet" },
-  { name: "Transactions", icon: <ReceiptRefundIcon className="h-5 w-5" />, path: "/transactions" },
-  { name: "Past Feedbacks", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/view-past-feedback" },
-  { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
-];
+  const role = userData?.role?.toLowerCase() || '';
+
+  const navItems = (() => {
+    if (role === 'learner') {
+      // Learners: can see Find Services and Saved, cannot see My Services or add services
+      return [
+        { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
+        { name: "Profile", icon: <UserIcon className="h-5 w-5" />, path: "/profile" },
+        { name: "Messages", icon: <ChatBubbleLeftIcon className="h-5 w-5" />, path: "/messages" },
+        { name: "Find Services", icon: <MagnifyingGlassIcon className="h-5 w-5" />, path: "/find-services" },
+        { name: "Saved", icon: <BookmarkIcon className="h-5 w-5" />, path: "/saved" },
+        { name: "Wallet", icon: <WalletIcon className="h-5 w-5" />, path: "/wallet" },
+        { name: "Transactions", icon: <ReceiptRefundIcon className="h-5 w-5" />, path: "/transactions" },
+        { name: "Past Feedbacks", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/view-past-feedback" },
+        { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
+      ];
+    }
+
+    if (role === 'tutor') {
+      // Tutors: can see My Services and manage/add them, cannot see Find Services or Saved
+      return [
+        { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
+        { name: "Profile", icon: <UserIcon className="h-5 w-5" />, path: "/profile" },
+        { name: "Messages", icon: <ChatBubbleLeftIcon className="h-5 w-5" />, path: "/messages" },
+        { name: "My Services", icon: <ClipboardDocumentListIcon className="h-5 w-5" />, path: "/my-services" },
+        { name: "Wallet", icon: <WalletIcon className="h-5 w-5" />, path: "/wallet" },
+        { name: "Transactions", icon: <ReceiptRefundIcon className="h-5 w-5" />, path: "/transactions" },
+        { name: "Past Feedbacks", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/view-past-feedback" },
+        { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
+      ];
+    }
+
+    // role === 'both' or unknown: show all features (both learner + tutor capabilities)
+    return [
+      { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
+      { name: "Profile", icon: <UserIcon className="h-5 w-5" />, path: "/profile" },
+      { name: "Messages", icon: <ChatBubbleLeftIcon className="h-5 w-5" />, path: "/messages" },
+      { name: "My Services", icon: <ClipboardDocumentListIcon className="h-5 w-5" />, path: "/my-services" },
+      { name: "Find Services", icon: <MagnifyingGlassIcon className="h-5 w-5" />, path: "/find-services" },
+      { name: "Saved", icon: <BookmarkIcon className="h-5 w-5" />, path: "/saved" },
+      { name: "Wallet", icon: <WalletIcon className="h-5 w-5" />, path: "/wallet" },
+      { name: "Transactions", icon: <ReceiptRefundIcon className="h-5 w-5" />, path: "/transactions" },
+      { name: "Past Feedbacks", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/view-past-feedback" },
+      { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
+    ];
+  })();
 
   const renderAnnouncements = () => (
     <>
@@ -131,7 +165,11 @@ export default function Dashboard() {
     </>
   );
 
-  const renderServices = () => (
+  const renderServices = () => {
+    if (userData?.role?.toLowerCase() === 'learner') {
+    return null; // Don't render services section for learners
+    }
+  return (
     <div className="p-4 m-4">
       <div className="flex items-center justify-between mb-4">
         <span className="font-semibold text-lg">My Services</span>
@@ -191,6 +229,7 @@ export default function Dashboard() {
       </div>
     </div>
   );
+  };
 
 
   return (

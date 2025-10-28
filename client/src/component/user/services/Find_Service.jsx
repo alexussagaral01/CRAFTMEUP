@@ -140,6 +140,7 @@ const FindServices = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [services, setServices] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [userData, setUserData] = useState(null);
   const [filters, setFilters] = useState({
     category: "",
     minPrice: "",
@@ -149,7 +150,38 @@ const FindServices = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
 
-  const navItems = [
+  const role = userData?.role?.toLowerCase() || '';
+
+const navItems = (() => {
+  if (role === 'learner') {
+    return [
+      { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
+      { name: "Profile", icon: <UserIcon className="h-5 w-5" />, path: "/profile" },
+      { name: "Messages", icon: <ChatBubbleLeftIcon className="h-5 w-5" />, path: "/messages" },
+      { name: "Find Services", icon: <MagnifyingGlassIcon className="h-5 w-5" />, path: "/find-services" },
+      { name: "Saved", icon: <BookmarkIcon className="h-5 w-5" />, path: "/saved" },
+      { name: "Wallet", icon: <WalletIcon className="h-5 w-5" />, path: "/wallet" },
+      { name: "Transactions", icon: <ReceiptRefundIcon className="h-5 w-5" />, path: "/transactions" },
+      { name: "Past Feedbacks", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/view-past-feedback" },
+      { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
+    ];
+  }
+
+  if (role === 'tutor') {
+    return [
+      { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
+      { name: "Profile", icon: <UserIcon className="h-5 w-5" />, path: "/profile" },
+      { name: "Messages", icon: <ChatBubbleLeftIcon className="h-5 w-5" />, path: "/messages" },
+      { name: "My Services", icon: <ClipboardDocumentListIcon className="h-5 w-5" />, path: "/my-services" },
+      { name: "Wallet", icon: <WalletIcon className="h-5 w-5" />, path: "/wallet" },
+      { name: "Transactions", icon: <ReceiptRefundIcon className="h-5 w-5" />, path: "/transactions" },
+      { name: "Past Feedbacks", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/view-past-feedback" },
+      { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
+    ];
+  }
+
+  // For role === 'both'
+  return [
     { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
     { name: "Profile", icon: <UserIcon className="h-5 w-5" />, path: "/profile" },
     { name: "Messages", icon: <ChatBubbleLeftIcon className="h-5 w-5" />, path: "/messages" },
@@ -161,6 +193,7 @@ const FindServices = () => {
     { name: "Past Feedbacks", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/view-past-feedback" },
     { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
   ];
+})();
 
   const categories = [
     "All",
@@ -170,6 +203,15 @@ const FindServices = () => {
     "Scrapbooking",
     "Resin Art",
   ];
+  
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem('user'));
+    setUserData(storedUser);
+    if (storedUser?.role?.toLowerCase() === 'tutor') {
+      navigate('/dashboard');
+      return;
+    }
+  }, [navigate]);
 
   useEffect(() => {
     fetchServices();
