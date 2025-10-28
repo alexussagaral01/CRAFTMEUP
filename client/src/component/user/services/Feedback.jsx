@@ -17,83 +17,96 @@ import {
 } from "@heroicons/react/24/outline";
 import { StarIcon } from '@heroicons/react/24/solid';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { submitFeedback } from '../../../services/api';
+import { submitFeedback, submitReport, getUserFeedback } from '../../../services/api';
 
 function ReportUser({ booking, onClose }) {
   const [reportReason, setReportReason] = useState('');
+  const [description, setDescription] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmitReport = async () => {
-    // Add your report submission logic here
-    console.log('Reporting user:', booking.provider_name, 'Reason:', reportReason);
-    // You can add API call to submit report
-    onClose();
+  const handleSubmitReport = async (e) => {
+    e.preventDefault();
+    if (!reportReason) {
+      alert('Please select a reason for reporting');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const user = JSON.parse(localStorage.getItem('user'));
+      const reportData = {
+        reported_user_id: booking.provider_id, // The user being reported
+        reporter_id: user.id, // The user making the report
+        reason: reportReason,
+        description: description.trim()
+      };
+
+      await submitReport(reportData);
+      alert('Report submitted successfully');
+      onClose();
+    } catch (error) {
+      console.error('Error submitting report:', error);
+      alert('Failed to submit report. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-[85%] max-w-sm">
-        <div className="p-4 border-b flex justify-between items-center">
-          <h2 className="text-base font-semibold text-gray-900">Report User</h2>
-          <button 
-            onClick={onClose}
-            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <XMarkIcon className="h-5 w-5 text-gray-500" />
-          </button>
-        </div>
-
-        <div className="p-4 space-y-4">
-          <div className="flex items-center space-x-3 p-2 bg-gray-50 rounded-xl">
-            <img
-              src="https://via.placeholder.com/40"
-              alt="profile"
-              className="w-10 h-10 rounded-full border-2 border-white shadow-sm"
-            />
-            <div>
-              <h3 className="font-medium text-sm">{booking?.provider_name || 'Unknown'}</h3>
-              <p className="text-xs text-gray-500">{booking?.service_title || 'Service'}</p>
-            </div>
-          </div>
-
-          <div>
-            <label className="text-xs font-medium text-gray-700 block mb-1">
-              Reason for Report<span className="text-red-500 ml-1">*</span>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+        <h2 className="text-xl font-semibold mb-4">Report User</h2>
+        
+        <form onSubmit={handleSubmitReport}>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Reason for Report
             </label>
-            <textarea
+            <select
               value={reportReason}
               onChange={(e) => setReportReason(e.target.value)}
-              placeholder="Please describe the issue..."
-              className="w-full border border-gray-200 rounded-xl p-2 text-sm focus:ring-1 focus:ring-blue-500/20 focus:border-blue-500"
-              rows="3"
-            ></textarea>
-          </div>
-
-          <div className="border border-dashed border-gray-200 rounded-xl p-3 text-center hover:bg-gray-50 transition-colors cursor-pointer">
-            <PlusIcon className="h-5 w-5 mx-auto mb-1 text-gray-400" />
-            <p className="text-xs text-gray-600">Add screenshots (optional)</p>
-            <p className="text-[10px] text-gray-400">Max 5MB per file</p>
-          </div>
-
-          <div className="space-y-2 pt-2">
-            <button 
-              onClick={handleSubmitReport}
-              disabled={!reportReason.trim()}
-              className={`w-full ${
-                reportReason.trim() 
-                  ? 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800' 
-                  : 'bg-gray-300'
-              } text-white py-2.5 rounded-xl text-sm font-medium transition-all`}
+              className="w-full p-2 border rounded-lg"
+              required
             >
-              Submit Report
-            </button>
-            <button 
-              className="w-full py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-xl transition-all"
+              <option value="">Select a reason</option>
+              <option value="inappropriate_behavior">Inappropriate Behavior</option>
+              <option value="harassment">Harassment</option>
+              <option value="spam">Spam</option>
+              <option value="scam">Scam</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Additional Details
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full p-2 border rounded-lg"
+              rows="4"
+              placeholder="Please provide more details about the issue..."
+            />
+          </div>
+
+          <div className="flex justify-end space-x-3">
+            <button
+              type="button"
               onClick={onClose}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800"
             >
               Cancel
             </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit Report'}
+            </button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );
@@ -110,6 +123,7 @@ export default function Feedback() {
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [userData, setUserData] = useState(null);
 
   const navItems = [
     { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
@@ -125,37 +139,66 @@ export default function Feedback() {
   ];
 
   useEffect(() => {
+  const storedUser = JSON.parse(localStorage.getItem('user'));
+  setUserData(storedUser);
+  fetchFeedback(storedUser?.id);
+}, []);
+
+  useEffect(() => {
     if (!booking) {
       navigate('/transactions');
     }
   }, [booking, navigate]);
 
   const handleSubmitFeedback = async () => {
-    if (rating === 0) {
-      alert('Please select a rating');
-      return;
-    }
+  if (rating === 0) {
+    alert('Please select a rating');
+    return;
+  }
 
-    setIsSubmitting(true);
-    try {
-      const user = JSON.parse(localStorage.getItem('user'));
-      
-      await submitFeedback({
-        serviceId: booking.service_id,
-        userId: user.id,
-        rating: rating,
-        comment: comment.trim()
-      });
+  setIsSubmitting(true);
+  try {
+    const user = JSON.parse(localStorage.getItem('user'));
+    
+    const feedbackData = {
+      service_id: booking.service_id,
+      user_id: user.id,
+      rating: rating,
+      comment: comment.trim()
+    };
 
-      alert('Feedback submitted successfully!');
-      navigate('/transactions');
-    } catch (error) {
-      console.error('Error submitting feedback:', error);
-      alert('Failed to submit feedback. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+    await submitFeedback(feedbackData);
+    alert('Feedback submitted successfully!');
+    navigate('/view-past-feedback');
+  } catch (error) {
+    console.error('Error submitting feedback:', error);
+    alert('Failed to submit feedback. Please try again.');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+
+const fetchFeedback = async (userId) => {
+  if (!userId || !booking?.service_id) return;
+  
+  try {
+    const response = await getUserFeedback(userId);
+    
+    // Filter feedback for current service
+    const currentFeedback = response.data.filter(f => 
+      f.service_id === booking.service_id && 
+      f.user_id === userId
+    );
+
+    if (currentFeedback.length > 0) {
+      setRating(currentFeedback[0].rating);
+      setComment(currentFeedback[0].comment || '');
     }
-  };
+  } catch (error) {
+    console.error('Error fetching feedback:', error);
+  }
+};
 
   const handleSkip = () => {
     navigate('/transactions');

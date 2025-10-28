@@ -1,0 +1,25 @@
+const express = require('express');
+const router = express.Router();
+const reportController = require('../controllers/reportController');
+
+
+router.get('/debug', async (req, res) => {
+  try {
+    const [result] = await db.execute('SELECT COUNT(*) as count FROM reports');
+    res.json({ 
+      message: 'Database connection successful',
+      reportCount: result[0].count
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Database connection failed',
+      details: error.message 
+    });
+  }
+});
+
+router.get('/all', reportController.getAllReports);
+router.post('/submit', reportController.submitReport);
+router.put('/:id/status', reportController.updateReportStatus);
+
+module.exports = router;

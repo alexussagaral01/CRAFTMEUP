@@ -208,29 +208,29 @@ export const updateTransactionStatus = async (bookingId, status) => {
 
 export const getUserFeedback = async (userId) => {
   try {
-    console.log('Fetching feedback for user:', userId);
-    const response = await api.get(`/services/user-feedback/${userId}`);
-    console.log('Feedback response:', response.data);
-    return response;
+    const response = await api.get(`/feedback/user/${userId}`);
+    return response.data;
   } catch (error) {
-    console.error('Get user feedback error:', error);
     throw error;
   }
 };
 
 export const submitFeedback = async (feedbackData) => {
   try {
-    const response = await api.post('/services/feedback', feedbackData);
-    return response;
+    const response = await api.post('/feedback/submit', feedbackData);
+    return response.data;
   } catch (error) {
-    console.error('Submit feedback error:', error);
     throw error;
   }
 };
 
 export const getWalletBalance = async (userId) => {
   try {
-    const response = await api.get(`/services/wallet/${userId}`);
+    const response = await api.get(`/transactions/wallet/${userId}/balance`);
+    console.log('Raw wallet balance response:', response);
+    if (!response.data || typeof response.data.balance === 'undefined') {
+      throw new Error('Invalid balance data received');
+    }
     return response;
   } catch (error) {
     console.error('Get wallet balance error:', error);
@@ -259,4 +259,80 @@ export const getUserData = async (userId) => {
   }
 };
 
+export const createWalletRequest = async (formData) => {
+  try {
+    const response = await api.post('/transactions/wallet/request', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+    console.log('Create wallet request response:', response);
+    return response;
+  } catch (error) {
+    console.error('Create wallet request error:', error);
+    throw error;
+  }
+};
+
+export const getWalletRequests = async () => {
+  try {
+    const response = await api.get('/transactions/wallet/requests');
+    return response;
+  } catch (error) {
+    console.error('Get wallet requests error:', error);
+    throw error;
+  }
+};
+
+export const updateWalletRequest = async (requestId, data) => {
+  try {
+    const response = await api.put(`/transactions/wallet/requests/${requestId}/status`, data);
+    return response;
+  } catch (error) {
+    console.error('Update wallet request error:', error);
+    throw error;
+  }
+};
+
+export const getUserWalletHistory = async (userId) => {
+  try {
+    const response = await api.get(`/transactions/wallet/history/${userId}`);
+    console.log('Wallet history response:', response);
+    return response;
+  } catch (error) {
+    console.error('Get wallet history error:', error);
+    throw error;
+  }
+};
+
+export const submitReport = async (reportData) => {
+  try {
+    const response = await api.post('/reports/submit', reportData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getAllReports = async () => {
+  try {
+    const response = await api.get('/reports/all');
+    console.log('Raw API response:', response); // Debug log
+    return Array.isArray(response.data) ? response.data : [];
+  } catch (error) {
+    console.error('Get all reports error:', error);
+    throw error;
+  }
+};
+
+export const updateReportStatus = async (reportId, status) => {
+  try {
+    const response = await api.put(`/reports/${reportId}/status`, { status });
+    return response.data;
+  } catch (error) {
+    console.error('Update report status error:', error);
+    throw error;
+  }
+};
 export default api;

@@ -1,58 +1,91 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
-  FunnelIcon,
-  MagnifyingGlassIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
   HomeIcon,
   UsersIcon,
   WalletIcon,
   MegaphoneIcon,
-  ShieldExclamationIcon,
+  MagnifyingGlassIcon,
   ArrowRightOnRectangleIcon,
-  CheckCircleIcon, // Add this import
+  CheckCircleIcon,
+  FunnelIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from "@heroicons/react/24/outline";
-import { useNavigate } from "react-router-dom";
+import { getAllReports, updateReportStatus } from "../../../services/api";
 
 export default function UserReports() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
-
-  const reports = [
-    {
-      id: 1,
-      reportedUser: { name: "John Smith", role: "@johnsmith" },
-      reporter: { name: "Sarah Wilson", role: "Premium User" },
-      category: "Harassment",
-      date: "Jan 15, 2025",
-      status: "Pending",
-    },
-    {
-      id: 2,
-      reportedUser: { name: "Mike Johnson", role: "@mike" },
-      reporter: { name: "Lisa Chen", role: "Standard User" },
-      category: "Spam",
-      date: "Jan 14, 2025",
-      status: "Resolved",
-    },
-    {
-      id: 3,
-      reportedUser: { name: "Alex Turner", role: "@alexturner" },
-      reporter: { name: "Emma Davis", role: "Moderator" },
-      category: "Inappropriate Content",
-      date: "Jan 15, 2025",
-      status: "Pending",
-    },
-  ];
+  const [reports, setReports] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    resolved: 0,
+    thisWeek: 0
+  });
 
   const sidebarItems = [
     { name: "Dashboard", icon: <HomeIcon className="w-5 h-5" />, path: "/admin-dashboard" },
     { name: "User Reports", icon: <UsersIcon className="w-5 h-5" />, path: "/user-reports" },
     { name: "Account Verification", icon: <CheckCircleIcon className="w-5 h-5" />, path: "/account-verification" },
-    { name: "Wallet Logs", icon: <WalletIcon className="w-5 h-5" />, path: "/wallet-logs" },
+    { name: "Wallet Requests", icon: <WalletIcon className="w-5 h-5" />, path: "/wallet-logs" },
     { name: "Post Announcement", icon: <MegaphoneIcon className="w-5 h-5" />, path: "/announcements" },
     { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
   ];
+
+  // Fetch reports
+  useEffect(() => {
+    fetchReports();
+  }, []);
+
+  const fetchReports = async () => {
+  try {
+    setIsLoading(true);
+    const reportsData = await getAllReports();
+    console.log('Reports data:', reportsData); // Debug log
+
+    setReports(reportsData);
+    
+    // Calculate stats from the actual data
+    const pending = reportsData.filter(r => r.status === 'pending' || !r.status).length;
+    const resolved = reportsData.filter(r => r.status === 'resolved').length;
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    const thisWeek = reportsData.filter(r => new Date(r.created_at) > oneWeekAgo).length;
+
+    setStats({
+      total: reportsData.length,
+      pending,
+      resolved,
+      thisWeek
+    });
+  } catch (error) {
+    console.error('Error fetching reports:', error);
+    setReports([]);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+  // Handle status updates
+  const handleStatusUpdate = async (reportId, newStatus) => {
+    try {
+      await updateReportStatus(reportId, newStatus);
+      // Refresh reports after update
+      fetchReports();
+    } catch (error) {
+      console.error('Error updating report status:', error);
+    }
+  };
+
+  // Filter reports based on search
+  const filteredReports = reports.filter(report => 
+    report.reported_user_name?.toLowerCase().includes(search.toLowerCase()) ||
+    report.reporter_name?.toLowerCase().includes(search.toLowerCase()) ||
+    report.reason?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-50 to-white">
@@ -94,7 +127,7 @@ export default function UserReports() {
                   placeholder="Search..."
                   className="pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 w-64"
                 />
-                <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" /> {/* Changed from SearchIcon */}
+                <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
               </div>
               <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center text-white font-semibold">
                 AS
@@ -107,19 +140,19 @@ export default function UserReports() {
           {/* Stats */}
           <div className="grid grid-cols-4 gap-4 mb-6">
             <div className="bg-gray-50 p-4 rounded-xl text-center">
-              <p className="text-2xl font-bold">247</p>
+              <p className="text-2xl font-bold">{stats.total}</p>
               <p className="text-gray-500 text-sm">Total Reports</p>
             </div>
             <div className="bg-gray-50 p-4 rounded-xl text-center">
-              <p className="text-2xl font-bold">18</p>
+              <p className="text-2xl font-bold">{stats.pending}</p>
               <p className="text-gray-500 text-sm">Pending</p>
             </div>
             <div className="bg-gray-50 p-4 rounded-xl text-center">
-              <p className="text-2xl font-bold">229</p>
+              <p className="text-2xl font-bold">{stats.resolved}</p>
               <p className="text-gray-500 text-sm">Resolved</p>
             </div>
             <div className="bg-gray-50 p-4 rounded-xl text-center">
-              <p className="text-2xl font-bold">12</p>
+              <p className="text-2xl font-bold">{stats.thisWeek}</p>
               <p className="text-gray-500 text-sm">This Week</p>
             </div>
           </div>
@@ -143,68 +176,80 @@ export default function UserReports() {
 
           {/* Reports Table */}
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left border-b text-gray-500">
-                  <th className="py-2">Reported User</th>
-                  <th className="py-2">Reporter</th>
-                  <th className="py-2">Category</th>
-                  <th className="py-2">Date</th>
-                  <th className="py-2">Status</th>
-                  <th className="py-2">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reports.map((report) => (
-                  <tr key={report.id} className="border-b hover:bg-gray-50">
-                    <td className="py-3">
-                      <p className="font-medium">{report.reportedUser.name}</p>
-                      <p className="text-gray-500 text-xs">
-                        {report.reportedUser.role}
-                      </p>
-                    </td>
-                    <td>
-                      <p className="font-medium">{report.reporter.name}</p>
-                      <p className="text-gray-500 text-xs">
-                        {report.reporter.role}
-                      </p>
-                    </td>
-                    <td>{report.category}</td>
-                    <td>{report.date}</td>
-                    <td>
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          report.status === "Pending"
-                            ? "bg-yellow-100 text-yellow-600"
-                            : "bg-green-100 text-green-600"
-                        }`}
-                      >
-                        {report.status}
-                      </span>
-                    </td>
-                    <td className="space-x-2">
-                      <button className="text-blue-600 hover:underline">
-                        View Report
-                      </button>
-                      {report.status === "Pending" ? (
-                        <>
-                          <button className="text-red-600 hover:underline">
-                            Suspend User
-                          </button>
-                          <button className="text-green-600 hover:underline">
-                            Mark Resolved
-                          </button>
-                        </>
-                      ) : (
-                        <button className="text-gray-600 hover:underline">
-                          User Warned
-                        </button>
-                      )}
-                    </td>
+            {isLoading ? (
+              <div className="text-center py-8">Loading reports...</div>
+            ) : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left border-b text-gray-500">
+                    <th className="py-2">Reported User</th>
+                    <th className="py-2">Reporter</th>
+                    <th className="py-2">Reason</th>
+                    <th className="py-2">Date</th>
+                    <th className="py-2">Status</th>
+                    <th className="py-2">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {filteredReports.map((report) => (
+                    <tr key={report.id} className="border-b hover:bg-gray-50">
+                      <td className="py-3">
+                        <p className="font-medium">{report.reported_user_name}</p>
+                        <p className="text-gray-500 text-xs">ID: {report.reported_user_id}</p>
+                      </td>
+                      <td>
+                        <p className="font-medium">{report.reporter_name}</p>
+                        <p className="text-gray-500 text-xs">ID: {report.reporter_id}</p>
+                      </td>
+                      <td>
+                        <p>{report.reason}</p>
+                        {report.description && (
+                          <p className="text-gray-500 text-xs truncate max-w-xs">
+                            {report.description}
+                          </p>
+                        )}
+                      </td>
+                      <td>{new Date(report.created_at).toLocaleDateString()}</td>
+                      <td>
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            report.status === "pending"
+                              ? "bg-yellow-100 text-yellow-600"
+                              : "bg-green-100 text-green-600"
+                          }`}
+                        >
+                          {report.status}
+                        </span>
+                      </td>
+                      <td className="space-x-2">
+                        <button 
+                          className="text-blue-600 hover:underline"
+                          onClick={() => {/* Add view details modal */}}
+                        >
+                          View Details
+                        </button>
+                        {report.status === "pending" && (
+                          <>
+                            <button 
+                              className="text-red-600 hover:underline"
+                              onClick={() => handleStatusUpdate(report.id, 'suspended')}
+                            >
+                              Suspend User
+                            </button>
+                            <button 
+                              className="text-green-600 hover:underline"
+                              onClick={() => handleStatusUpdate(report.id, 'resolved')}
+                            >
+                              Mark Resolved
+                            </button>
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
 
           {/* Pagination */}
