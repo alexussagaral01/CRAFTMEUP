@@ -20,7 +20,7 @@ import {
 export default function ViewPastFeedback() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("given");
-  const [activeRole, setActiveRole] = useState("learner"); // New state for role toggle
+  const [activeRole, setActiveRole] = useState("learner");
   const [givenFeedback, setGivenFeedback] = useState([]);
   const [receivedFeedback, setReceivedFeedback] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -29,7 +29,6 @@ export default function ViewPastFeedback() {
 
   const role = userData?.role?.toLowerCase() || '';
 
-  // Navigation items based on role
   const navItems = (() => {
     if (role === 'learner') {
       return [
@@ -44,7 +43,6 @@ export default function ViewPastFeedback() {
         { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
       ];
     }
-  
     if (role === 'tutor') {
       return [
         { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
@@ -57,7 +55,6 @@ export default function ViewPastFeedback() {
         { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
       ];
     }
-  
     return [
       { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
       { name: "Profile", icon: <UserIcon className="h-5 w-5" />, path: "/profile" },
@@ -78,40 +75,46 @@ export default function ViewPastFeedback() {
   }, []);
 
   useEffect(() => {
-    fetchFeedback();
-  }, [activeRole]); // Re-fetch when activeRole changes
+  fetchFeedback();
+}, [activeRole, userData]);
 
   const fetchFeedback = async () => {
-    setIsLoading(true);
-    try {
-      const user = JSON.parse(localStorage.getItem('user'));
-      const response = await getUserFeedback(user.id);
-      
-      // Filter feedback based on active role and user role
-      let given = [];
-      let received = [];
+  setIsLoading(true);
+  try {
+    const user = JSON.parse(localStorage.getItem('user'));
+    console.log('Current user:', user);
+    
+    const response = await getUserFeedback(user.id);
+    console.log('Raw response:', response); // Debug the raw response
 
-      if (user.role.toLowerCase() === 'both') {
-        if (activeRole === 'learner') {
-          given = response.data.filter(f => f.reviewer_id === user.id && f.reviewer_role === 'learner');
-          received = response.data.filter(f => f.service_provider_id === user.id && f.reviewer_role === 'learner');
-        } else {
-          given = response.data.filter(f => f.reviewer_id === user.id && f.reviewer_role === 'tutor');
-          received = response.data.filter(f => f.service_provider_id === user.id && f.reviewer_role === 'tutor');
-        }
-      } else {
-        given = response.data.filter(f => f.reviewer_id === user.id);
-        received = response.data.filter(f => f.service_provider_id === user.id);
-      }
+    // Since getUserFeedback already returns response.data, we don't need to access .data again
+    if (Array.isArray(response)) {  // Changed from response.data to response
+      const given = response.filter(f => 
+        String(f.user_id) === String(user.id)
+      );
       
+      const received = response.filter(f => 
+        f.provider_name && f.provider_name.toLowerCase() === user.full_name.toLowerCase()
+      );
+      
+      console.log('Filtered given feedback:', given);
+      console.log('Filtered received feedback:', received);
+
       setGivenFeedback(given);
       setReceivedFeedback(received);
-    } catch (error) {
-      console.error('Error fetching feedback:', error);
-    } finally {
-      setIsLoading(false);
+    } else {
+      console.error('Invalid response format:', response);
+      setGivenFeedback([]);
+      setReceivedFeedback([]);
     }
-  };
+  } catch (error) {
+    console.error('Error fetching feedback:', error);
+    setGivenFeedback([]);
+    setReceivedFeedback([]);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const renderStars = (rating) => {
     return (
@@ -175,7 +178,15 @@ export default function ViewPastFeedback() {
             <FiArrowLeft size={20} />
           </button>
           <h1 className="text-lg font-semibold">Feedback & Ratings</h1>
+          <button 
+              onClick={() => navigate('/notification')} 
+              className="relative"
+            >
+              <BellIcon className="h-6 w-6 text-white" />
+              <span className="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
+            </button>
         </div>
+        
 
         {/* Role Toggle for 'both' users */}
         {userData?.role?.toLowerCase() === 'both' && (
@@ -230,8 +241,58 @@ export default function ViewPastFeedback() {
         </div>
       </div>
 
-      {/* Rest of your existing code... */}
-      {/* Stats Summary and Feedback List sections remain the same */}
+      {/* Content Area */}
+      <div className="flex-1 p-4 overflow-y-auto">
+        {/* Stats Summary */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="bg-white p-4 rounded-xl shadow-sm">
+            <p className="text-3xl font-bold text-center">
+              {currentFeedback.length}
+            </p>
+            <p className="text-gray-500 text-sm text-center">Reviews {activeTab}</p>
+          </div>
+          <div className="bg-white p-4 rounded-xl shadow-sm">
+            <p className="text-3xl font-bold text-center text-yellow-500">
+              {currentFeedback.length > 0
+                ? (currentFeedback.reduce((acc, f) => acc + f.rating, 0) / currentFeedback.length).toFixed(1)
+                : "0.0"}
+            </p>
+            <p className="text-gray-500 text-sm text-center">Average Rating</p>
+          </div>
+        </div>
+
+        {/* Feedback List */}
+        <div className="space-y-4">
+          {isLoading ? (
+            <div className="text-center py-8">Loading feedback...</div>
+          ) : currentFeedback.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              No {activeTab} feedback yet
+            </div>
+          ) : (
+            currentFeedback.map((feedback) => (
+              <div
+                key={feedback.id}
+                className="bg-white p-4 rounded-xl shadow-sm space-y-2"
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-medium">{feedback.service_title}</h3>
+                    <p className="text-sm text-gray-500">{feedback.provider_name}</p>
+                  </div>
+                  {renderStars(feedback.rating)}
+                </div>
+                {feedback.comment && (
+                  <p className="text-gray-600 text-sm">{feedback.comment}</p>
+                )}
+                <p className="text-xs text-gray-400">
+                  {new Date(feedback.created_at).toLocaleDateString()}
+                </p>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
     </div>
   );
 }

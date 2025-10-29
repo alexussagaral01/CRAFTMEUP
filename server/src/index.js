@@ -9,6 +9,7 @@ const transactionRoutes = require('./routes/transactionRoutes');
 const pool = require('./config/database');
 const feedbackRoutes = require('./routes/feedbackRoutes');
 const reportRoutes = require('./routes/reportRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Test database connection
 app.get('/api/test-db', async (req, res) => {

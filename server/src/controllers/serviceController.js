@@ -52,47 +52,62 @@ exports.getUserServices = async (req, res) => {
 };
 
 exports.updateService = async (req, res) => {
-    try {
-        const { serviceId } = req.params;
-        const { title, description, price, availability, status } = req.body;
+  try {
+    // accept multiple possible param names (id or serviceId)
+    const serviceId = parseInt(req.params.serviceId || req.params.id, 10);
+    const { title, description, price, availability, status } = req.body || {};
 
-        const [result] = await pool.execute(
-            `UPDATE services 
-             SET title = ?, description = ?, price = ?, 
-                 availability = ?, status = ?
-             WHERE id = ?`,
-            [title, description, price, availability, status, serviceId]
-        );
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Service not found' });
-        }
-
-        res.json({ message: 'Service updated successfully' });
-    } catch (error) {
-        console.error('Error updating service:', error);
-        res.status(500).json({ message: 'Failed to update service' });
+    if (!serviceId || isNaN(serviceId)) {
+      return res.status(400).json({ success: false, message: 'Valid service ID is required' });
     }
+
+    // convert undefined to null and ensure numeric price
+    const sanitized = [
+      (typeof title === 'string' && title.trim() !== '') ? title.trim() : null,
+      (typeof description === 'string' && description.trim() !== '') ? description.trim() : null,
+      (price !== undefined && price !== null && price !== '') ? Number(price) : null,
+      (typeof availability === 'string' && availability.trim() !== '') ? availability.trim() : null,
+      (typeof status === 'string' && status.trim() !== '') ? status.trim() : 'Active',
+      serviceId
+    ];
+
+    const [result] = await pool.execute(
+      `UPDATE services
+        SET title = ?, description = ?, price = ?, availability = ?, status = ?
+        WHERE id = ?`,
+      sanitized
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'Service not found' });
+    }
+
+    res.json({ success: true, message: 'Service updated successfully' });
+  } catch (error) {
+    console.error('Error updating service:', error);
+    res.status(500).json({ success: false, message: 'Failed to update service', error: error.message });
+  }
 };
 
 exports.deleteService = async (req, res) => {
-    try {
-        const { serviceId } = req.params;
+  try {
+    const serviceId = parseInt(req.params.serviceId || req.params.id, 10);
 
-        const [result] = await pool.execute(
-            'DELETE FROM services WHERE id = ?',
-            [serviceId]
-        );
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Service not found' });
-        }
-
-        res.json({ message: 'Service deleted successfully' });
-    } catch (error) {
-        console.error('Error deleting service:', error);
-        res.status(500).json({ message: 'Failed to delete service' });
+    if (!serviceId || isNaN(serviceId)) {
+      return res.status(400).json({ success: false, message: 'Valid service ID is required' });
     }
+
+    const [result] = await pool.execute('DELETE FROM services WHERE id = ?', [serviceId]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'Service not found' });
+    }
+
+    res.json({ success: true, message: 'Service deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting service:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete service', error: error.message });
+  }
 };
 
 exports.createBooking = async (req, res) => {

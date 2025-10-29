@@ -31,7 +31,6 @@ export default function MyServices() {
   const [services, setServices] = useState([]);
   const [showServiceModal, setShowServiceModal] = useState(false);
   const [editingService, setEditingService] = useState(null);
-  const [userData, setUserData] = useState(null);
   const [newService, setNewService] = useState({
     title: "",
     description: "",
@@ -40,38 +39,7 @@ export default function MyServices() {
     status: "Active",
   });
 
-  const role = userData?.role?.toLowerCase() || '';
-
-const navItems = (() => {
-  if (role === 'learner') {
-    return [
-      { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
-      { name: "Profile", icon: <UserIcon className="h-5 w-5" />, path: "/profile" },
-      { name: "Messages", icon: <ChatBubbleLeftIcon className="h-5 w-5" />, path: "/messages" },
-      { name: "Find Services", icon: <MagnifyingGlassIcon className="h-5 w-5" />, path: "/find-services" },
-      { name: "Saved", icon: <BookmarkIcon className="h-5 w-5" />, path: "/saved" },
-      { name: "Wallet", icon: <WalletIcon className="h-5 w-5" />, path: "/wallet" },
-      { name: "Transactions", icon: <ReceiptRefundIcon className="h-5 w-5" />, path: "/transactions" },
-      { name: "Past Feedbacks", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/view-past-feedback" },
-      { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
-    ];
-  }
-
-  if (role === 'tutor') {
-    return [
-      { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
-      { name: "Profile", icon: <UserIcon className="h-5 w-5" />, path: "/profile" },
-      { name: "Messages", icon: <ChatBubbleLeftIcon className="h-5 w-5" />, path: "/messages" },
-      { name: "My Services", icon: <ClipboardDocumentListIcon className="h-5 w-5" />, path: "/my-services" },
-      { name: "Wallet", icon: <WalletIcon className="h-5 w-5" />, path: "/wallet" },
-      { name: "Transactions", icon: <ReceiptRefundIcon className="h-5 w-5" />, path: "/transactions" },
-      { name: "Past Feedbacks", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/view-past-feedback" },
-      { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
-    ];
-  }
-
-  // For role === 'both'
-  return [
+  const navItems = [
     { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
     { name: "Profile", icon: <UserIcon className="h-5 w-5" />, path: "/profile" },
     { name: "Messages", icon: <ChatBubbleLeftIcon className="h-5 w-5" />, path: "/messages" },
@@ -80,32 +48,13 @@ const navItems = (() => {
     { name: "Saved", icon: <BookmarkIcon className="h-5 w-5" />, path: "/saved" },
     { name: "Wallet", icon: <WalletIcon className="h-5 w-5" />, path: "/wallet" },
     { name: "Transactions", icon: <ReceiptRefundIcon className="h-5 w-5" />, path: "/transactions" },
-    { name: "Past Feedbacks", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/view-past-feedback" },
+    { name: "Feedback", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/feedback" },
     { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
   ];
-})();
-
-  useEffect(() => {
-  const storedUser = JSON.parse(localStorage.getItem('user'));
-  setUserData(storedUser);
-  if (storedUser?.role?.toLowerCase() === 'learner') {
-    navigate('/dashboard');
-    return;
-  }
-  fetchUserServices();
-}, [navigate]);
 
   useEffect(() => {
     fetchUserServices();
   }, []);
-  useEffect(() => {
-  const user = JSON.parse(localStorage.getItem('user'));
-  if (user?.role?.toLowerCase() === 'learner') {
-    navigate('/dashboard');
-    return;
-  }
-  fetchUserServices();
-}, [navigate]);
 
   const fetchUserServices = async () => {
     try {

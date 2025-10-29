@@ -15,6 +15,7 @@ import {
   BookmarkIcon,
   Bars3Icon,
   XMarkIcon,
+  BellIcon
 } from "@heroicons/react/24/outline";
 
 export default function ViewPastFeedback() {
@@ -26,6 +27,7 @@ export default function ViewPastFeedback() {
   const [isLoading, setIsLoading] = useState(true);
   const [userData, setUserData] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [hasUnreadFeedback, setHasUnreadFeedback] = useState(false);
 
   const role = userData?.role?.toLowerCase() || '';
 
@@ -43,7 +45,6 @@ export default function ViewPastFeedback() {
         { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
       ];
     }
-  
     if (role === 'tutor') {
       return [
         { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
@@ -56,7 +57,6 @@ export default function ViewPastFeedback() {
         { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
       ];
     }
-  
     return [
       { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
       { name: "Profile", icon: <UserIcon className="h-5 w-5" />, path: "/profile" },
@@ -74,44 +74,65 @@ export default function ViewPastFeedback() {
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user'));
     setUserData(storedUser);
-    if (storedUser?.role?.toLowerCase() === 'tutor') {
-      setActiveRole('tutor');
-    }
   }, []);
 
   useEffect(() => {
     fetchFeedback();
-  }, [activeRole]);
+  }, [activeRole, userData]);
 
   const fetchFeedback = async () => {
     setIsLoading(true);
     try {
       const user = JSON.parse(localStorage.getItem('user'));
+      console.log('Fetching feedback for user:', user);
       const response = await getUserFeedback(user.id);
-      
-      let given = [];
-      let received = [];
+      console.log('Feedback response:', response);
 
-      if (user.role.toLowerCase() === 'both') {
-        if (activeRole === 'learner') {
-          given = response.data.filter(f => f.reviewer_id === user.id && f.reviewer_role === 'learner');
-          received = response.data.filter(f => f.service_provider_id === user.id && f.reviewer_role === 'learner');
+      if (Array.isArray(response)) {
+        // For given feedback - when user_id matches logged in user
+        const given = response.filter(f => 
+          String(f.user_id) === String(user.id)
+        );
+        
+        // For received feedback - when provider_name matches user's full name
+        const received = response.filter(f => 
+          f.provider_name && 
+          f.provider_name.toLowerCase() === user.full_name.toLowerCase()
+        );
+
+        console.log('Filtered given feedback:', given);
+        console.log('Filtered received feedback:', received);
+
+        // Check for unread feedback
+        const hasUnread = received.some(feedback => !feedback.read);
+        setHasUnreadFeedback(hasUnread);
+
+        // Update state with filtered feedback based on role and active role
+        if (user.role.toLowerCase() === 'learner') {
+          setGivenFeedback(given);
+          setReceivedFeedback([]);
+        } else if (user.role.toLowerCase() === 'tutor') {
+          setGivenFeedback([]);
+          setReceivedFeedback(received);
         } else {
-          given = response.data.filter(f => f.reviewer_id === user.id && f.reviewer_role === 'tutor');
-          received = response.data.filter(f => f.service_provider_id === user.id && f.reviewer_role === 'tutor');
+          // For users with 'both' role
+          if (activeRole === 'learner') {
+            setGivenFeedback(given);
+            setReceivedFeedback([]);
+          } else {
+            setGivenFeedback([]);
+            setReceivedFeedback(received);
+          }
         }
-      } else if (user.role.toLowerCase() === 'learner') {
-        given = response.data.filter(f => f.reviewer_id === user.id && f.reviewer_role === 'learner');
-        received = response.data.filter(f => f.service_provider_id === user.id && f.reviewer_role === 'learner');
-      } else if (user.role.toLowerCase() === 'tutor') {
-        given = response.data.filter(f => f.reviewer_id === user.id && f.reviewer_role === 'tutor');
-        received = response.data.filter(f => f.service_provider_id === user.id && f.reviewer_role === 'tutor');
+      } else {
+        console.error('Invalid response format:', response);
+        setGivenFeedback([]);
+        setReceivedFeedback([]);
       }
-      
-      setGivenFeedback(given);
-      setReceivedFeedback(received);
     } catch (error) {
       console.error('Error fetching feedback:', error);
+      setGivenFeedback([]);
+      setReceivedFeedback([]);
     } finally {
       setIsLoading(false);
     }
@@ -179,6 +200,15 @@ export default function ViewPastFeedback() {
             <FiArrowLeft size={20} />
           </button>
           <h1 className="text-lg font-semibold">Feedback & Ratings</h1>
+          <button 
+            onClick={() => navigate('/notification')} 
+            className="absolute top-6 right-5"
+          >
+            <BellIcon className="h-6 w-6 text-white" />
+            {hasUnreadFeedback && (
+              <span className="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
+            )}
+          </button>
         </div>
 
         {/* Role Toggle for 'both' users */}
@@ -234,81 +264,78 @@ export default function ViewPastFeedback() {
         </div>
       </div>
 
-      {/* Stats Summary */}
-      <div className="p-4 bg-white border-b">
-        <div className="flex justify-around text-center">
-          <div>
-            <p className="text-2xl font-bold text-blue-600">
-              {activeTab === "given" ? givenFeedback.length : receivedFeedback.length}
+      {/* Content Area */}
+      <div className="flex-1 p-4 overflow-y-auto">
+        {/* Stats Summary */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="bg-white p-4 rounded-xl shadow-sm">
+            <p className="text-3xl font-bold text-center">
+              {currentFeedback.length}
             </p>
-            <p className="text-xs text-gray-500">
-              {activeTab === "given" ? "Reviews Given" : "Reviews Received"}
-            </p>
+            <p className="text-gray-500 text-sm text-center">Reviews {activeTab}</p>
           </div>
-          <div>
-            <p className="text-2xl font-bold text-yellow-500">
+          <div className="bg-white p-4 rounded-xl shadow-sm">
+            <p className="text-3xl font-bold text-center text-yellow-500">
               {currentFeedback.length > 0
-                ? (currentFeedback.reduce((sum, f) => sum + f.rating, 0) / currentFeedback.length).toFixed(1)
+                ? (currentFeedback.reduce((acc, f) => acc + f.rating, 0) / currentFeedback.length).toFixed(1)
                 : "0.0"}
             </p>
-            <p className="text-xs text-gray-500">Average Rating</p>
+            <p className="text-gray-500 text-sm text-center">Average Rating</p>
           </div>
         </div>
-      </div>
 
-      {/* Feedback List */}
-      <div className="flex-1 p-4 space-y-4 overflow-y-auto">
-        {isLoading ? (
-          <div className="text-center py-8">
-            <p className="text-gray-500">Loading feedback...</p>
-          </div>
-        ) : currentFeedback.length === 0 ? (
-          <div className="text-center py-8 bg-white rounded-2xl shadow-sm">
-            <p className="text-gray-500">
-              {activeTab === "given" 
-                ? `No feedback given as ${activeRole}` 
-                : `No feedback received as ${activeRole}`}
-            </p>
-          </div>
-        ) : (
-          currentFeedback.map((feedback, index) => (
-            <div 
-              key={index} 
-              className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:scale-[1.02] transition-transform"
-            >
-              <div className="flex justify-between items-start mb-2">
-                <div className="flex-1">
-                  <p className="font-semibold text-gray-900">{feedback.service_title}</p>
-                  {activeTab === "given" ? (
-                    <p className="text-sm text-gray-500">To: {feedback.provider_name}</p>
-                  ) : (
-                    <p className="text-sm text-gray-500">From: {feedback.reviewer_name}</p>
-                  )}
-                </div>
-                <span className="text-xs text-gray-400">
-                  {new Date(feedback.created_at).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric'
-                  })}
-                </span>
-              </div>
-              
-              <div className="flex items-center mb-2">
-                {renderStars(feedback.rating)}
-                <span className="ml-2 text-sm text-gray-600">
-                  {feedback.rating}/5
-                </span>
-              </div>
-              
-              {feedback.comment && (
-                <p className="text-gray-700 text-sm">
-                  {feedback.comment}
-                </p>
-              )}
+        {/* Feedback List */}
+        <div className="space-y-4">
+          {isLoading ? (
+            <div className="text-center py-8">Loading feedback...</div>
+          ) : currentFeedback.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              No {activeTab} feedback yet
             </div>
-          ))
-        )}
+          ) : (
+            currentFeedback.map((feedback) => (
+              <div
+                key={feedback.id}
+                className={`bg-white p-4 rounded-xl shadow-sm space-y-2 ${
+                  !feedback.read && activeTab === 'received' ? 'border-l-4 border-blue-500' : ''
+                }`}
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-medium">{feedback.service_title}</h3>
+                    {activeTab === "given" ? (
+                      <p className="text-sm text-gray-500">To: {feedback.provider_name}</p>
+                    ) : (
+                      <p className="text-sm text-gray-500">From: {feedback.user_full_name}</p>
+                    )}
+                  </div>
+                  {renderStars(feedback.rating)}
+                </div>
+                {feedback.comment && (
+                  <p className="text-gray-600 text-sm">{feedback.comment}</p>
+                )}
+                <div className="flex justify-between items-center">
+                  <p className="text-xs text-gray-400">
+                    {new Date(feedback.created_at).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </p>
+                  <span className={`text-xs px-2 py-1 rounded-full ${
+                    feedback.rating >= 4 ? 'bg-green-100 text-green-700' :
+                    feedback.rating >= 3 ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-red-100 text-red-700'
+                  }`}>
+                    {feedback.rating} stars
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
