@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from 'axios';
 import {
   HomeIcon,
   UserIcon,
@@ -19,7 +20,26 @@ import { StarIcon } from '@heroicons/react/24/solid';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { submitFeedback, submitReport, getUserFeedback } from '../../../services/api';
 
+const violationTypes = {
+  minor: ['spam', 'rude_message', 'irrelevant_post'],
+  serious: ['harassment', 'scamming', 'fake_credentials', 'offensive_behavior'],
+  abuse: ['fake_account', 'coin_misuse', 'credit_abuse']
+};
+const sendFeedbackNotification = async (feedbackData) => {
+  try {
+    await axios.post('/api/notifications', {
+      userId: feedbackData.tutorId,
+      type: 'feedback_received',
+      title: 'New Feedback Received',
+      content: `You received feedback from ${feedbackData.learnerName}:\n${feedbackData.comment}`,
+    });
+  } catch (error) {
+    console.error('Error sending feedback notification:', error);
+  }
+};
+
 function ReportUser({ booking, onClose }) {
+  const [violationType, setViolationType] = useState('minor');
   const [reportReason, setReportReason] = useState('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,7 +47,7 @@ function ReportUser({ booking, onClose }) {
   const handleSubmitReport = async (e) => {
     e.preventDefault();
     if (!reportReason) {
-      alert('Please select a reason for reporting');
+      alert('Please select a specific violation reason');
       return;
     }
 
@@ -35,8 +55,9 @@ function ReportUser({ booking, onClose }) {
     try {
       const user = JSON.parse(localStorage.getItem('user'));
       const reportData = {
-        reported_user_id: booking.provider_id, // The user being reported
-        reporter_id: user.id, // The user making the report
+        reported_user_id: booking.provider_id,
+        reporter_id: user.id,
+        violationType: violationType,
         reason: reportReason,
         description: description.trim()
       };
@@ -60,7 +81,24 @@ function ReportUser({ booking, onClose }) {
         <form onSubmit={handleSubmitReport}>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Reason for Report
+              Violation Type
+            </label>
+            <select
+              value={violationType}
+              onChange={(e) => {
+                setViolationType(e.target.value);
+                setReportReason(''); // Reset subcategory when main category changes
+              }}
+              className="w-full p-2 border rounded-lg mb-3"
+              required
+            >
+              <option value="minor">Minor Issue</option>
+              <option value="serious">Serious Issue</option>
+              <option value="abuse">Platform Abuse</option>
+            </select>
+
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Specific Reason
             </label>
             <select
               value={reportReason}
@@ -68,12 +106,12 @@ function ReportUser({ booking, onClose }) {
               className="w-full p-2 border rounded-lg"
               required
             >
-              <option value="">Select a reason</option>
-              <option value="inappropriate_behavior">Inappropriate Behavior</option>
-              <option value="harassment">Harassment</option>
-              <option value="spam">Spam</option>
-              <option value="scam">Scam</option>
-              <option value="other">Other</option>
+              <option value="">Select a specific reason</option>
+              {violationTypes[violationType].map(reason => (
+                <option key={reason} value={reason}>
+                  {reason.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -167,7 +205,16 @@ export default function Feedback() {
       comment: comment.trim()
     };
 
+    // First submit the feedback
     await submitFeedback(feedbackData);
+
+    // Then create the notification
+    await sendFeedbackNotification({
+      tutorId: booking.provider_id,
+      learnerName: user.full_name,
+      comment: comment.trim() || `Rated ${rating} stars`  // Use rating if no comment
+    });
+
     alert('Feedback submitted successfully!');
     navigate('/view-past-feedback');
   } catch (error) {

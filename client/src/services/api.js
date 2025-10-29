@@ -4,6 +4,9 @@ const API_URL = 'http://localhost:5000/api';
 
 const api = axios.create({
   baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json'
+  }
 });
 
 export const login = (email, password) => {
@@ -161,6 +164,7 @@ export const createBooking = async (bookingData) => {
 
 export const getUserBookings = async (userId) => {
   try {
+    // Fix the URL - remove the line break
     const response = await api.get(`/services/bookings/${userId}`);
     return response;
   } catch (error) {
@@ -209,8 +213,9 @@ export const updateTransactionStatus = async (bookingId, status) => {
 export const getUserFeedback = async (userId) => {
   try {
     const response = await api.get(`/feedback/user/${userId}`);
-    return response.data;
+    return response.data; // Should return the array directly
   } catch (error) {
+    console.error('Error in getUserFeedback:', error);
     throw error;
   }
 };
@@ -311,6 +316,7 @@ export const submitReport = async (reportData) => {
     const response = await api.post('/reports/submit', reportData);
     return response.data;
   } catch (error) {
+    console.error('Submit report error:', error);
     throw error;
   }
 };
@@ -318,21 +324,90 @@ export const submitReport = async (reportData) => {
 export const getAllReports = async () => {
   try {
     const response = await api.get('/reports/all');
-    console.log('Raw API response:', response); // Debug log
-    return Array.isArray(response.data) ? response.data : [];
+    console.log('API Response:', response);
+    return response.data;
   } catch (error) {
     console.error('Get all reports error:', error);
     throw error;
   }
 };
 
-export const updateReportStatus = async (reportId, status) => {
+export const updateReportStatus = async (reportId, statusData) => {
   try {
-    const response = await api.put(`/reports/${reportId}/status`, { status });
+    const response = await api.put(`/reports/${reportId}/status`, {
+      status: statusData.status,
+      violationType: statusData.violationType || null,
+      adminNotes: statusData.adminNotes || null
+    });
     return response.data;
   } catch (error) {
     console.error('Update report status error:', error);
     throw error;
   }
 };
+
+
+export const getUserReportHistory = async (userId) => {
+  try {
+    const response = await api.get(`/reports/history/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching user report history:', error);
+    throw error;
+  }
+};
+
+export const notifyUser = async (userId, notification) => {
+  try {
+    const response = await api.post(`/notifications/${userId}`, notification);
+    return response.data;
+  } catch (error) {
+    console.error('Notify user error:', error);
+    throw error;
+  }
+};
+
+
+export const getNotifications = async (userId) => {
+  try {
+    const response = await api.get(`/notifications/user/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Get notifications error:', error);
+    throw error;
+  }
+};
+
+export const createNotification = async (notification) => {
+  try {
+    const response = await api.post('/notifications/create', notification);
+    return response.data;
+  } catch (error) {
+    console.error('Create notification error:', error);
+    throw error;
+  }
+};
+
+export const markNotificationAsRead = async (notificationId) => {
+  try {
+    const response = await api.put(`/notifications/${notificationId}/read`);
+    return response.data;
+  } catch (error) {
+    console.error('Mark as read error:', error);
+    throw error;
+  }
+};
+
+export const markAllNotificationsAsRead = async (userId) => {
+  try {
+    const response = await api.put(`/notifications/user/${userId}/read-all`);
+    return response.data;
+  } catch (error) {
+    console.error('Mark all as read error:', error);
+    throw error;
+  }
+};
+
+
+
 export default api;

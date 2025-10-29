@@ -70,3 +70,44 @@ exports.updateTransactionStatus = async (req, res) => {
         res.status(500).json({ message: 'Failed to update transaction' });
     }
 };
+
+// Add a function to get all transactions for a user
+exports.getAllUserTransactions = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const [transactions] = await pool.execute(
+            `SELECT t.*, s.title as service_title
+             FROM transactions t
+             LEFT JOIN services s ON t.service_id = s.id
+             WHERE t.user_id = ?`,
+            [userId]
+        );
+
+        res.json(transactions);
+    } catch (error) {
+        console.error('Error fetching all transactions:', error);
+        res.status(500).json({ message: 'Failed to fetch all transactions' });
+    }
+};
+
+// Add a function to delete a transaction
+exports.deleteTransaction = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const [result] = await pool.execute(
+            'DELETE FROM transactions WHERE id = ?',
+            [id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Transaction not found' });
+        }
+
+        res.json({ message: 'Transaction deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting transaction:', error);
+        res.status(500).json({ message: 'Failed to delete transaction' });
+    }
+};

@@ -274,30 +274,38 @@ const navItems = (() => {
   };
 
   const handleConfirmBooking = async (service) => {
-    try {
-      const user = JSON.parse(localStorage.getItem('user'));
-      const bookingData = {
-        userId: user.id,
-        serviceId: service.id,
-        providerId: service.user_id,
-        type: 'booking',
-        amount: service.price,
-        status: 'pending'
-      };
+  try {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const bookingData = {
+      userId: user.id,
+      serviceId: service.id,
+      providerId: service.user_id,
+      type: 'booking',
+      amount: service.price,
+      status: 'pending'
+    };
 
-      console.log('Creating booking with data:', bookingData); // Debug log
+    // Create the booking
+    const response = await createBooking(bookingData);
+    
+    if (response.data) {
+      // Send notification to tutor
+      await createNotification({
+        userId: service.user_id, // tutor's ID
+        type: 'new_booking',
+        title: 'New Booking Request',
+        content: `${user.full_name} has requested to book your service: ${service.title}`
+      });
 
-      const response = await createBooking(bookingData);
-      if (response.data) {
-        setSelectedService(null);
-        alert('Service booked successfully!');
-        navigate('/transactions');
-      }
-    } catch (error) {
-      console.error('Booking error:', error.response?.data || error);
-      alert(error.response?.data?.message || 'Failed to book service. Please try again.');
+      setSelectedService(null);
+      alert('Service booked successfully!');
+      navigate('/transactions');
     }
-  };
+  } catch (error) {
+    console.error('Booking error:', error);
+    alert(error.response?.data?.message || 'Failed to book service. Please try again.');
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col w-full md:max-w-sm mx-auto relative">

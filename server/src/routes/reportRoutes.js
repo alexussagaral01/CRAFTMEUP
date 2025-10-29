@@ -1,20 +1,19 @@
 const express = require('express');
 const router = express.Router();
 const reportController = require('../controllers/reportController');
+const db = require('../config/database');
 
-
+// Debug route
 router.get('/debug', async (req, res) => {
   try {
     const [result] = await db.execute('SELECT COUNT(*) as count FROM reports');
-    res.json({ 
+    res.json({
       message: 'Database connection successful',
-      reportCount: result[0].count
+      count: result[0].count
     });
   } catch (error) {
-    res.status(500).json({ 
-      error: 'Database connection failed',
-      details: error.message 
-    });
+    console.error('Debug route error:', error);
+    res.status(500).json({ error: 'Database connection failed' });
   }
 });
 

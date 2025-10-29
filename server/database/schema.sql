@@ -77,13 +77,15 @@ CREATE TABLE feedback (
 );
 
 -- Reports table
-CREATE TABLE reports (
+CREATE TABLE IF NOT EXISTS reports (
     id INT PRIMARY KEY AUTO_INCREMENT,
     reported_user_id INT NOT NULL,
     reporter_id INT NOT NULL,
-    reason VARCHAR(100) NOT NULL,
+    reason VARCHAR(255) NOT NULL,
     description TEXT,
-    status VARCHAR(50) DEFAULT 'pending',
+    status ENUM('pending', 'resolved', 'suspended', 'invalid') DEFAULT 'pending',
+    violation_type ENUM('minor', 'serious', 'abuse') DEFAULT NULL,
+    admin_notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (reported_user_id) REFERENCES users(id),

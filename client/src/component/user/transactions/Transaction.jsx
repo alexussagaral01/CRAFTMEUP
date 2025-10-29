@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+
 import {
   HomeIcon,
   UserIcon,
@@ -16,6 +17,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useNavigate } from 'react-router-dom';
 import { FiAlertTriangle } from "react-icons/fi";
+import { createNotification } from '../../../services/api';
 import { getUserBookings, updateTransactionStatus, getWalletBalance, transferFunds } from '../../../services/api';
 
 function ConfirmPayment({ booking, userWallet, onConfirm, onClose }) {
@@ -33,19 +35,23 @@ function ConfirmPayment({ booking, userWallet, onConfirm, onClose }) {
 
         <div className="p-4 space-y-4">
           <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Service:</span>
-            <span className="font-medium">{booking.service_title}</span>
-          </div>
+      <span className="text-gray-600">Price:</span>
+      <span className="font-medium">SC {Number(booking.price).toFixed(2)}</span>
+    </div>
 
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Provider:</span>
-            <span className="font-medium">{booking.provider_name}</span>
-          </div>
+    <hr />
 
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Price:</span>
-            <span className="font-medium">{booking.price} SkillCoins</span>
-          </div>
+    <div className="flex justify-between text-sm">
+      <span className="text-gray-600">Your Balance:</span>
+      <span className="font-medium">SC {Number(userWallet).toFixed(2)}</span>
+    </div>
+
+    <div className="flex justify-between text-sm">
+      <span className="text-gray-600">Remaining:</span>
+      <span className={`font-medium ${remainingBalance < 0 ? 'text-red-600' : 'text-green-600'}`}>
+        SC {remainingBalance.toFixed(2)}
+      </span>
+    </div>
 
           <hr />
 
@@ -160,37 +166,87 @@ const navItems = (() => {
     fetchWalletBalance();
   }, []);
 
-  const fetchUserBookings = async () => {
-    try {
-      const user = JSON.parse(localStorage.getItem('user'));
-      const response = await getUserBookings(user.id);
+  const createTutorRequestNotification = async (tutorId, learnerName) => {
+    await createNotification({
+      userId: tutorId,
+      type: 'tutor_request',
+      title: 'New Tutor Request',
+      content: `You got a Tutor request from ${learnerName}`
+    });
+};
 
-      const ongoing = [];
-      const pending = [];
-      const completed = [];
 
-      response.data.forEach(booking => {
-        switch(booking.status) {
-          case 'ongoing':
-          case 'ready':
-            ongoing.push(booking);
-            break;
-          case 'pending':
-            pending.push(booking);
-            break;
-          case 'completed':
-            completed.push(booking);
-            break;
-        }
-      });
+const createRequestAcceptedNotification = async (learnerId, tutorName) => {
+  await createNotification({
+    userId: learnerId,
+    type: 'request_accepted',
+    title: 'Tutor Request Accepted',
+    content: `Your tutor request has been accepted by ${tutorName}`,
+  });
+};
 
-      setOngoingBookings(ongoing);
-      setPendingBookings(pending);
-      setCompletedBookings(completed);
-    } catch (error) {
-      console.error('Error fetching bookings:', error);
+const createPaymentConfirmedNotification = async (tutorId, learnerName) => {
+  await createNotification({
+    userId: tutorId,
+    type: 'payment_confirmed',
+    title: 'Payment Confirmed',
+    content: `Payment has been confirmed by ${learnerName}`,
+  });
+};
+
+ const fetchUserBookings = async () => {
+  try {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user?.id) {
+      console.warn('fetchUserBookings: no user in localStorage');
+      return;
     }
-  };
+
+    const response = await getUserBookings(user.id);
+    console.log('getUserBookings response:', response);
+
+    // Normalize response -> bookings array
+    const data = response?.data ?? response;
+    const bookings = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
+
+    const ongoing = [];
+    const pending = [];
+    const completed = [];
+
+    bookings.forEach(booking => {
+      const status = (booking.status || '').toLowerCase();
+
+      // If you want to keep notification behavior, ensure correct flags
+      if (status === 'pending' && booking.is_provider) {
+        createTutorRequestNotification(booking.provider_id, booking.requester_name);
+      }
+
+      switch (status) {
+        case 'ongoing':
+        case 'ready':
+          ongoing.push(booking);
+          break;
+        case 'pending':
+          pending.push(booking);
+          break;
+        case 'completed':
+          completed.push(booking);
+          break;
+        default:
+          // optionally collect unknown statuses for debugging
+          console.debug('Unknown booking status:', booking);
+      }
+    });
+
+    setOngoingBookings(ongoing);
+    setPendingBookings(pending);
+    setCompletedBookings(completed);
+  } catch (error) {
+    console.error('Error fetching bookings:', error);
+  }
+};
+
+
 
   const fetchWalletBalance = async () => {
     try {
@@ -224,6 +280,10 @@ const navItems = (() => {
       
       // Determine the correct IDs
       let fromUserId, toUserId;
+      await createPaymentConfirmedNotification(
+      selectedBooking.provider_id, 
+      userData.full_name
+    );
       
       if (selectedBooking.is_provider) {
         alert('Error: Providers cannot confirm payment');
@@ -271,15 +331,17 @@ const navItems = (() => {
   };
 
   const handleAcceptBooking = async (bookingId) => {
-    try {
-      await updateTransactionStatus(bookingId, 'ongoing');
-      await fetchUserBookings();
-      alert('Booking accepted successfully');
-    } catch (error) {
-      console.error('Error accepting booking:', error);
-      alert('Failed to accept booking');
-    }
-  };
+  try {
+    await updateTransactionStatus(bookingId, 'ongoing');
+    const booking = pendingBookings.find(b => b.id === bookingId);
+    await createRequestAcceptedNotification(booking.user_id, booking.provider_name);
+    await fetchUserBookings();
+    alert('Booking accepted successfully');
+  } catch (error) {
+    console.error('Error accepting booking:', error);
+    alert('Failed to accept booking');
+  }
+};
 
   const handleRejectBooking = async (bookingId) => {
     try {
@@ -304,73 +366,71 @@ const navItems = (() => {
   };
 
   const renderBooking = (booking) => (
-    <div key={booking.id} className="border rounded-lg p-4 shadow-sm bg-white mb-3">
-      <div className="flex justify-between items-start mb-2">
-        <div>
-          <h3 className="font-semibold">{booking.service_title}</h3>
-          <p className="text-sm text-gray-600">
-            {booking.is_provider ? `Requested by: ${booking.requester_name}` : `Provider: ${booking.provider_name}`}
-          </p>
-        </div>
-        {booking.price && parseFloat(booking.price) > 0 && (
-          <p className="font-semibold">SC {booking.price}</p>
-        )}
+  <div key={booking.id} className="border rounded-lg p-4 shadow-sm bg-white mb-3">
+    {/* Top section */}
+    <div className="flex justify-between items-start mb-2">
+      <div>
+        <h3 className="font-semibold">{booking.service_title}</h3>
+        <p className="text-sm text-gray-600">
+          {booking.is_provider ? `Requested by: ${booking.requester_name}` : `Provider: ${booking.provider_name}`}
+        </p>
+      </div>
+      <div className="text-right">
+        <p className="font-semibold">SC {Number(booking.price).toFixed(2)}</p>
+      </div>
+    </div>
+
+    {/* Description */}
+    {booking.description && (
+      <p className="text-gray-500 text-sm mb-3">{booking.description}</p>
+    )}
+
+    {/* Bottom section */}
+    <div className="flex items-center justify-between">
+      <div className="flex items-center space-x-2">
+        <span className={`inline-flex items-center text-xs px-2 py-1 rounded-full ${getStatusColor(booking.status)}`}>
+          <span className={`w-2 h-2 mr-1 rounded-full ${
+            booking.status === 'pending' ? 'bg-yellow-500' :
+            booking.status === 'ongoing' ? 'bg-blue-500' :
+            booking.status === 'ready' ? 'bg-purple-500' :
+            booking.status === 'completed' ? 'bg-green-500' :
+            'bg-red-500'
+          }`}></span>
+          {booking.status}
+        </span>
+        <p className="text-gray-400 text-xs">
+          {new Date(booking.created_at).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+          })}
+        </p>
       </div>
 
-      <p className="text-gray-500 text-sm mb-3">{booking.description}</p>
+      {/* Action Buttons Section */}
+      <div className="flex-shrink-0">
+        {booking.is_provider && booking.status === 'ongoing' && (
+          <button
+            onClick={() => handleMarkReady(booking.id)}
+            className="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700"
+          >
+            Mark Ready
+          </button>
+        )}
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <span className={`flex items-center text-xs px-2 py-1 rounded-full ${getStatusColor(booking.status)}`}>
-            <span className={`w-2 h-2 mr-1 rounded-full ${
-              booking.status === 'pending'
-                ? 'bg-yellow-500'
-                : booking.status === 'ongoing'
-                ? 'bg-blue-500'
-                : booking.status === 'ready'
-                ? 'bg-purple-500'
-                : booking.status === 'completed'
-                ? 'bg-green-500'
-                : 'bg-red-500'
-            }`}></span>
-            {booking.status}
-          </span>
-          <p className="text-gray-400 text-xs">
-            {new Date(booking.created_at).toLocaleDateString('en-US', {
-              month: 'numeric',
-              day: 'numeric',
-              year: 'numeric',
-            })}
-          </p>
-        </div>
-
-        {( (booking.is_provider && (booking.status === 'ongoing' || booking.status === 'ready')) 
-          || (!booking.is_provider && booking.status === 'ready') ) && (
-          <div className="flex space-x-2">
-            {booking.is_provider && booking.status === 'ongoing' && (
-              <button
-                onClick={() => handleMarkReady(booking.id)}
-                className="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700"
-              >
-                Mark Ready
-              </button>
-            )}
-
-            {booking.is_provider && booking.status === 'ready' && (
-              <div className="px-3 py-1 text-gray-500 text-sm">
-                Waiting for completion
-              </div>
-            )}
-
-            {!booking.is_provider && booking.status === 'ready' && (
-              <button
-                onClick={() => handleConfirmCompletion(booking)}
-                className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
-              >
-                Confirm Completion
-              </button>
-            )}
+        {booking.is_provider && booking.status === 'ready' && (
+          <div className="px-3 py-1 text-gray-500 text-sm">
+            Waiting for completion
           </div>
+        )}
+
+        {!booking.is_provider && booking.status === 'ready' && (
+          <button
+            onClick={() => handleConfirmCompletion(booking)}
+            className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+          >
+            Confirm Completion
+          </button>
         )}
 
         {booking.is_provider && booking.status === 'pending' && (
@@ -391,34 +451,39 @@ const navItems = (() => {
         )}
       </div>
     </div>
-  );
+  </div>
+);
 
   const renderBookings = () => (
-    <div className="flex-1 p-4 overflow-y-auto">
-      <div className="mb-6">
-        <h2 className="text-gray-600 text-sm font-medium mb-2">Current Transactions</h2>
-        {ongoingBookings.length > 0 ? ongoingBookings.map(renderBooking) : (
-          <div className="text-center py-8 bg-gray-50 rounded-xl">
-            <p className="text-gray-500">No ongoing transactions</p>
-          </div>
-        )}
-      </div>
-
-      {pendingBookings.length > 0 && (
-        <div className="mb-6">
-          <h2 className="text-gray-600 text-sm font-medium mb-2">Pending Transactions</h2>
-          {pendingBookings.map(renderBooking)}
-        </div>
-      )}
-
-      {completedBookings.length > 0 && (
-        <div>
-          <h2 className="text-gray-600 text-sm font-medium mb-2">Past Transactions</h2>
-          {completedBookings.map(renderBooking)}
+  <div className="flex-1 p-4 overflow-y-auto">
+    <div className="mb-6">
+      <h2 className="text-gray-600 text-sm font-medium mb-2">Current Transactions</h2>
+      {ongoingBookings.length > 0 ? ongoingBookings.map(renderBooking) : (
+        <div className="text-center py-8 bg-gray-50 rounded-xl">
+          <p className="text-gray-500">No ongoing transactions</p>
         </div>
       )}
     </div>
-  );
+
+    <div className="mb-6">
+      <h2 className="text-gray-600 text-sm font-medium mb-2">Pending Transactions</h2>
+      {pendingBookings.length > 0 ? pendingBookings.map(renderBooking) : (
+        <div className="text-center py-4 bg-gray-50 rounded-xl">
+          <p className="text-gray-500">No pending transactions</p>
+        </div>
+      )}
+    </div>
+
+    <div>
+      <h2 className="text-gray-600 text-sm font-medium mb-2">Past Transactions</h2>
+      {completedBookings.length > 0 ? completedBookings.map(renderBooking) : (
+        <div className="text-center py-4 bg-gray-50 rounded-xl">
+          <p className="text-gray-500">No past transactions</p>
+        </div>
+      )}
+    </div>
+  </div>
+);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col w-full md:max-w-sm mx-auto relative">
