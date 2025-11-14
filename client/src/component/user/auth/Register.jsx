@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaUpload } from 'react-icons/fa';
+import { register } from '../../../services/api';
 
 const RegisterForm = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -64,15 +67,11 @@ const RegisterForm = () => {
       if (formData.studyLoadFile) {
         formDataToSend.append('studyLoad', formData.studyLoadFile);
       }
-
-      // Simulated API call - replace with actual register function
-      console.log('Registration data:', Object.fromEntries(formDataToSend));
-      alert('Registration successful! (This is a demo)');
       
-      // const response = await register(formDataToSend);
-      // if (response.data.token) {
-      //   navigate('/');
-      // }
+       const response = await register(formDataToSend);
+       if (response.data.token) {
+         navigate('/');
+       }
     } catch (error) {
       setError(
         error.response?.data?.message || 
