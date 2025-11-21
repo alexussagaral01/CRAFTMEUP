@@ -137,9 +137,6 @@ export default function Dashboard() {
 
   const renderAnnouncements = () => (
     <>
-      {/* Feature Announcement - Static */}
-     
-
       {/* Dynamic Announcements */}
       <div className="p-4 mx-4">
       <h2 className="font-semibold mb-4">Announcements</h2>
@@ -152,9 +149,9 @@ export default function Dashboard() {
               key={announcement.id}
               className="bg-white p-4 rounded-xl shadow-sm border border-gray-100"
             >
-              <h3 className="font-medium">{announcement.title}</h3>
-              <p className="text-sm text-gray-600 mt-2">{announcement.content}</p>
-              <div className="flex justify-between items-center mt-3 text-xs text-gray-500">
+              <h3 className="font-medium text-sm sm:text-base">{announcement.title}</h3>
+              <p className="text-xs sm:text-sm text-gray-600 mt-2">{announcement.content}</p>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-3 text-xs text-gray-500 gap-2">
                 <span>Target: {announcement.target_audience}</span>
                 <span>{new Date(announcement.created_at).toLocaleDateString()}</span>
               </div>
@@ -170,12 +167,12 @@ export default function Dashboard() {
     return null; // Don't render services section for learners
     }
   return (
-    <div className="p-4 m-4">
-      <div className="flex items-center justify-between mb-4">
+    <div className="p-4 mx-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
         <span className="font-semibold text-lg">My Services</span>
         <button 
           onClick={() => navigate('/my-services')} 
-          className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-full text-sm"
+          className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-full text-sm hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center"
         >
           <PlusIcon className="h-4 w-4 mr-1" /> Add New
         </button>
@@ -189,10 +186,10 @@ export default function Dashboard() {
               key={service.id}
               className="bg-white rounded-2xl p-4 shadow-lg border border-gray-100 transform transition hover:scale-[1.02]"
             >
-              <div className="flex justify-between items-center">
-                <span className="font-semibold">{service.title}</span>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2">
+                <span className="font-semibold text-sm sm:text-base">{service.title}</span>
                 <span
-                  className={`text-xs px-3 py-1 rounded-full ${
+                  className={`text-xs px-3 py-1 rounded-full whitespace-nowrap ${
                     service.status === "active"
                       ? "bg-green-100 text-green-700"
                       : "bg-gray-100 text-gray-700"
@@ -204,7 +201,7 @@ export default function Dashboard() {
               <div className="text-sm text-gray-600 mt-2">
                 {service.description}
               </div>
-              <div className="flex justify-between items-center mt-3 pt-3 border-t">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-3 pt-3 border-t gap-2">
                 <div className="flex items-center">
                   <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
                   <span className="text-sm text-gray-600">
@@ -217,10 +214,10 @@ export default function Dashboard() {
           ))
         ) : (
           <div className="text-center py-8 bg-gray-50 rounded-2xl">
-            <p className="text-gray-500">No services found</p>
+            <p className="text-gray-500 text-sm">No services found</p>
             <button
               onClick={() => navigate("/my-services")}
-              className="mt-2 text-blue-600 hover:text-blue-700"
+              className="mt-2 text-blue-600 hover:text-blue-700 text-sm"
             >
               Create your first service
             </button>
@@ -233,9 +230,33 @@ export default function Dashboard() {
 
 
   return (
-    <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen flex flex-col w-full md:max-w-sm mx-auto relative">
-      {/* Sidebar - Updated with scrolling support */}
-      <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} bg-gradient-to-b from-gray-50 to-white w-64 transition-transform duration-300 ease-in-out z-30 md:max-w-sm shadow-xl border-r flex flex-col`}>
+    <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen flex flex-col lg:flex-row w-full">
+      {/* Sidebar - Desktop (always visible) */}
+      <div className="hidden lg:flex fixed inset-y-0 left-0 bg-gradient-to-b from-gray-50 to-white w-64 flex-col shadow-xl border-r z-30">
+        {/* Header - Fixed at top */}
+        <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600">
+          <h2 className="font-semibold text-white text-lg">Menu</h2>
+        </div>
+
+        {/* Navigation - Scrollable */}
+        <nav className="p-3 space-y-1 flex-1 overflow-y-auto">
+          {navItems.map((item) => (
+            <button
+              key={item.name}
+              onClick={() => navigate(item.path)}
+              className="flex items-center w-full p-3 text-gray-600 hover:text-blue-600 rounded-xl transition-all duration-200 group hover:bg-gradient-to-r from-blue-50 to-indigo-50"
+            >
+              <div className="bg-white p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
+                {item.icon}
+              </div>
+              <span className="ml-3 font-medium text-sm">{item.name}</span>
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      {/* Sidebar - Mobile (toggle-based) */}
+      <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} bg-gradient-to-b from-gray-50 to-white w-64 transition-transform duration-300 ease-in-out z-40 lg:hidden flex flex-col shadow-xl border-r`}>
         {/* Header - Fixed at top */}
         <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 flex justify-between items-center">
           <h2 className="font-semibold text-white">Menu</h2>
@@ -252,13 +273,16 @@ export default function Dashboard() {
           {navItems.map((item) => (
             <button
               key={item.name}
-              onClick={() => navigate(item.path)}
+              onClick={() => {
+                navigate(item.path);
+                setIsSidebarOpen(false);
+              }}
               className="flex items-center w-full p-3 text-gray-600 hover:text-blue-600 rounded-xl transition-all duration-200 group hover:bg-gradient-to-r from-blue-50 to-indigo-50"
             >
               <div className="bg-white p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
                 {item.icon}
               </div>
-              <span className="ml-3 font-medium">{item.name}</span>
+              <span className="ml-3 font-medium text-sm">{item.name}</span>
             </button>
           ))}
         </nav>
@@ -267,22 +291,25 @@ export default function Dashboard() {
       {/* Overlay */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-20"
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         ></div>
       )}
 
       {/* Main Content */}
-      <div className="overflow-y-auto flex-1">
-        {/* Welcome Section - Updated */}
-        <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-b-3xl shadow-lg">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-3">
-              <button onClick={() => setIsSidebarOpen(true)}>
+      <div className="flex-1 lg:ml-64 overflow-y-auto">
+        {/* Welcome Section */}
+        <div className="p-4 sm:p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-b-3xl shadow-lg">
+          <div className="flex items-center justify-between mb-6 gap-3">
+            <div className="flex items-center space-x-3 flex-1 min-w-0">
+              <button 
+                onClick={() => setIsSidebarOpen(true)}
+                className="lg:hidden flex-shrink-0 hover:bg-white/10 p-2 rounded-lg transition-colors"
+              >
                 <Bars3Icon className="h-6 w-6 text-white" />
               </button>
-              <div>
-                <div className="text-lg font-semibold">
+              <div className="min-w-0">
+                <div className="text-base sm:text-lg font-semibold truncate">
                   Welcome back, {userData?.full_name || userData?.fullName || 'User'}
                 </div>
                 <span className="bg-white/20 text-xs px-3 py-1 rounded-full mt-1 inline-block backdrop-blur-sm">
@@ -292,34 +319,36 @@ export default function Dashboard() {
             </div>
             <button 
               onClick={() => navigate('/notification')} 
-              className="relative"
+              className="relative flex-shrink-0 hover:bg-white/10 p-2 rounded-lg transition-colors"
             >
               <BellIcon className="h-6 w-6 text-white" />
               <span className="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
             </button>
           </div>
+          
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4">
-              <div className="text-2xl font-bold">{services.filter(s => s.status === "active").length}</div>
-              <div className="text-sm text-white/80">Active Services</div>
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 sm:p-4">
+              <div className="text-xl sm:text-2xl font-bold">{services.filter(s => s.status === "active").length}</div>
+              <div className="text-xs sm:text-sm text-white/80">Active Services</div>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4">
-              <div className="text-2xl font-bold"></div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 sm:p-4">
+              <div className="text-xl sm:text-2xl font-bold">
                 SC {services.reduce((sum, s) => sum + (s.monthlyEarnings || 0), 0)}
-                <div className="mt-2 text-sm text-white/80">This Month</div>
               </div>
+              <div className="text-xs sm:text-sm text-white/80">This Month</div>
             </div>
           </div>
-          {renderAnnouncements()}
+        </div>
 
-          {/* My Services */}
+        {/* Announcements */}
+        {renderAnnouncements()}
+
+        {/* My Services */}
         {renderServices()}
 
-        {/* Recent Activity */}
-        
-
-       
+        {/* Bottom padding for mobile */}
+        <div className="h-4 sm:h-6"></div>
       </div>
     </div>
   );

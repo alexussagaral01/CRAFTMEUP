@@ -17,6 +17,7 @@ import Announcement from './component/admin/announcement/Announcement';
 import User_Report from './component/admin/reports/User_Report';
 import Wallet_Log from './component/admin/wallet_log/Wallet_Log';
 import AccountVerification from './component/admin/verification/AccountVerification';
+import Convo from './component/user/messages/Convo';
 
 
 
@@ -43,6 +44,7 @@ function App() {
         <Route path="/user-reports" element={<User_Report />} />
         <Route path="/wallet-logs" element={<Wallet_Log />} />
         <Route path="/account-verification" element={<AccountVerification />} />
+        <Route path="/messages/chat/:userId" element={<Convo />} />
       </Routes>
     </Router>
   );

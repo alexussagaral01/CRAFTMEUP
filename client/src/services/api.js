@@ -408,6 +408,56 @@ export const markAllNotificationsAsRead = async (userId) => {
   }
 };
 
+export const getConversations = async (userId) => {
+  try {
+    const response = await api.get(`/messages/conversations/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Get conversations error:', error);
+    throw error;
+  }
+};
+
+export const getMessages = async (userId, otherUserId) => {
+  try {
+    console.log('API: Fetching messages for:', userId, otherUserId);
+    const response = await api.get(`/messages/messages/${userId}/${otherUserId}`);
+    console.log('API: Got messages:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('API: Get messages error:', error);
+    throw error;
+  }
+};
+
+export const sendMessage = async (messageData) => {
+  try {
+    console.log('API: Sending message:', messageData);
+    const response = await api.post('/messages/send', messageData);
+    console.log('API: Response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('API: Error response:', error.response?.data);
+    console.error('API: Error status:', error.response?.status);
+    throw error;
+  }
+};
+
+export const markMessageAsRead = async (messageId) => {
+  try {
+    const response = await api.put(`/messages/mark-read/${messageId}`);
+    return response.data;
+  } catch (markMessageAsReadError) {
+    console.error('Mark as read error:', error);
+    throw error;
+  }
+};
+
+export const getUserById = async (userId) => {
+   const response = await api.get(`/auth/user/${userId}`);
+   return response.data;
+};
+
 
 
 export default api;

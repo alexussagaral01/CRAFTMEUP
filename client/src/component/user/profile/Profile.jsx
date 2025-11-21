@@ -163,7 +163,7 @@ const navItems = (() => {
   };
 
   const renderFormInputs = () => (
-    <div className="p-4 space-y-4">
+    <div className="p-4 sm:p-6 space-y-4">
       <div>
         <label className="text-gray-600 text-sm">Full Name</label>
         <input
@@ -172,7 +172,7 @@ const navItems = (() => {
           value={isEditing ? editedData.full_name : (userData?.full_name || '')}
           onChange={handleChange}
           readOnly={!isEditing}
-          className={`w-full border rounded-lg px-3 py-2 mt-1 ${
+          className={`w-full border rounded-lg px-3 py-2 mt-1 text-sm ${
             isEditing ? 'bg-white' : 'bg-gray-50'
           }`}
         />
@@ -182,7 +182,7 @@ const navItems = (() => {
       <div>
         <label className="text-gray-600 text-sm">School Email</label>
         <div className="flex items-center border rounded-lg px-3 py-2 mt-1 justify-between bg-gray-50">
-          <span>{userData?.email || ''}</span>
+          <span className="text-sm">{userData?.email || ''}</span>
         </div>
         <p className="text-xs text-gray-500 mt-1">Verified</p>
       </div>
@@ -196,7 +196,7 @@ const navItems = (() => {
           value={isEditing ? editedData.course : (userData?.course || 'Not specified')}
           onChange={handleChange}
           readOnly={!isEditing}
-          className={`w-full border rounded-lg px-3 py-2 mt-1 ${
+          className={`w-full border rounded-lg px-3 py-2 mt-1 text-sm ${
             isEditing ? 'bg-white' : 'bg-gray-50'
           }`}
         />
@@ -211,33 +211,33 @@ const navItems = (() => {
           value={isEditing ? editedData.year : (userData?.year || 'Not specified')}
           onChange={handleChange}
           readOnly={!isEditing}
-          className={`w-full border rounded-lg px-3 py-2 mt-1 ${
+          className={`w-full border rounded-lg px-3 py-2 mt-1 text-sm ${
             isEditing ? 'bg-white' : 'bg-gray-50'
           }`}
         />
       </div>
 
       {/* Role */}
-      <div className="flex items-center justify-between pt-2">
-        <span className="text-gray-700 font-medium">Role: {userData?.role || 'User'}</span>
-        <button className="text-blue-500 text-sm hover:text-blue-600">Request Change</button>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-2 gap-2">
+        <span className="text-gray-700 font-medium text-sm">Role: {userData?.role || 'User'}</span>
+        <button className="text-blue-500 text-xs sm:text-sm hover:text-blue-600 transition-colors">Request Change</button>
       </div>
 
       {/* Account Verification Status */}
       {renderVerificationStatus()}
 
-      {/* Action Buttons (only show when editing) */}
+      {/* Action Buttons */}
       {isEditing && (
-        <div className="flex justify-end space-x-3">
+        <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
           <button
             onClick={() => setIsEditing(false)}
-            className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+            className="px-4 py-2 border rounded-lg hover:bg-gray-50 text-sm transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition-colors"
           >
             Save Changes
           </button>
@@ -247,19 +247,15 @@ const navItems = (() => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col w-full md:max-w-sm mx-auto relative">
-      {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} bg-gradient-to-b from-gray-50 to-white w-64 transition-transform duration-300 ease-in-out z-30 md:max-w-sm shadow-xl border-r flex flex-col`}>
-        <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 flex justify-between items-center">
-          <h2 className="font-semibold text-white">Menu</h2>
-          <button 
-            onClick={() => setIsSidebarOpen(false)}
-            className="text-white hover:bg-white/10 p-1 rounded-lg transition-colors"
-          >
-            <XMarkIcon className="h-6 w-6" />
-          </button>
+    <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen flex flex-col lg:flex-row w-full">
+      {/* Sidebar - Desktop (always visible) */}
+      <div className="hidden lg:flex fixed inset-y-0 left-0 bg-gradient-to-b from-gray-50 to-white w-64 flex-col shadow-xl border-r z-30">
+        {/* Header - Fixed at top */}
+        <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600">
+          <h2 className="font-semibold text-white text-lg">Menu</h2>
         </div>
 
+        {/* Navigation - Scrollable */}
         <nav className="p-3 space-y-1 flex-1 overflow-y-auto">
           {navItems.map((item) => (
             <button
@@ -270,7 +266,40 @@ const navItems = (() => {
               <div className="bg-white p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
                 {item.icon}
               </div>
-              <span className="ml-3 font-medium">{item.name}</span>
+              <span className="ml-3 font-medium text-sm">{item.name}</span>
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      {/* Sidebar - Mobile (toggle-based) */}
+      <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} bg-gradient-to-b from-gray-50 to-white w-64 transition-transform duration-300 ease-in-out z-40 lg:hidden flex flex-col shadow-xl border-r`}>
+        {/* Header - Fixed at top */}
+        <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 flex justify-between items-center">
+          <h2 className="font-semibold text-white">Menu</h2>
+          <button 
+            onClick={() => setIsSidebarOpen(false)}
+            className="text-white hover:bg-white/10 p-1 rounded-lg transition-colors"
+          >
+            <XMarkIcon className="h-6 w-6" />
+          </button>
+        </div>
+
+        {/* Navigation - Scrollable */}
+        <nav className="p-3 space-y-1 flex-1 overflow-y-auto">
+          {navItems.map((item) => (
+            <button
+              key={item.name}
+              onClick={() => {
+                navigate(item.path);
+                setIsSidebarOpen(false);
+              }}
+              className="flex items-center w-full p-3 text-gray-600 hover:text-blue-600 rounded-xl transition-all duration-200 group hover:bg-gradient-to-r from-blue-50 to-indigo-50"
+            >
+              <div className="bg-white p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
+                {item.icon}
+              </div>
+              <span className="ml-3 font-medium text-sm">{item.name}</span>
             </button>
           ))}
         </nav>
@@ -279,62 +308,73 @@ const navItems = (() => {
       {/* Overlay */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-20"
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         ></div>
       )}
 
-      {/* Header */}
-      <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <button onClick={() => setIsSidebarOpen(true)}>
-              <Bars3Icon className="h-6 w-6 text-white" />
-            </button>
-            <h1 className="text-lg font-semibold">Profile</h1>
-          </div>
-          <button 
-            onClick={() => navigate('/notification')} 
-            className="relative"
-          >
-            <BellIcon className="h-6 w-6 text-white" />
-            <span className="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
-          </button>
-        </div>
-      </div>
-
-      {/* Content area */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="bg-white rounded-2xl shadow-sm mx-4 mt-4">
-          {/* Profile Section */}
-          <div className="flex flex-col items-center py-6 border-b">
-            <div className="relative">
-              <img
-                src={userData?.profileImage || "https://via.placeholder.com/100"}
-                alt=""
-                className="w-24 h-24 rounded-full border-4 border-white shadow-lg"
-              />
-              <button className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full shadow-lg">
-                <CameraIcon className="h-5 w-5" />
-              </button>
-            </div>
-            <button className="mt-3 text-blue-600 font-medium text-sm hover:text-blue-700">
-              Upload New Photo
-            </button>
-
-            {/* Edit Profile button moved here */}
-            {!isEditing && (
-              <button
-                onClick={handleEdit}
-                className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+      {/* Main Content */}
+      <div className="flex-1 lg:ml-64 overflow-y-auto">
+        {/* Header */}
+        <div className="p-4 sm:p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white sticky top-0 z-20 shadow-lg">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <button 
+                onClick={() => setIsSidebarOpen(true)}
+                className="lg:hidden flex-shrink-0 hover:bg-white/10 p-2 rounded-lg transition-colors"
               >
-                Edit Profile
+                <Bars3Icon className="h-6 w-6" />
               </button>
-            )}
+              <h1 className="text-lg sm:text-xl font-semibold truncate">Profile</h1>
+            </div>
+            <button 
+              onClick={() => navigate('/notification')} 
+              className="flex-shrink-0 hover:bg-white/10 p-2 rounded-lg transition-colors relative"
+            >
+              <BellIcon className="h-6 w-6" />
+              <span className="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
+            </button>
           </div>
+        </div>
 
-          {/* Form Section */}
-          {renderFormInputs()}
+        {/* Content area */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="max-w-2xl mx-auto w-full px-4 py-4 sm:py-6">
+            <div className="bg-white rounded-2xl shadow-sm">
+              {/* Profile Section */}
+              <div className="flex flex-col items-center py-6 sm:py-8 px-4 border-b">
+                <div className="relative">
+                  <img
+                    src={userData?.profileImage || "https://via.placeholder.com/100"}
+                    alt="Profile"
+                    className="w-20 sm:w-24 h-20 sm:h-24 rounded-full border-4 border-white shadow-lg object-cover"
+                  />
+                  <button className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full shadow-lg hover:bg-blue-700 transition-colors">
+                    <CameraIcon className="h-4 sm:h-5 w-4 sm:w-5" />
+                  </button>
+                </div>
+                <button className="mt-3 text-blue-600 font-medium text-xs sm:text-sm hover:text-blue-700 transition-colors">
+                  Upload New Photo
+                </button>
+
+                {/* Edit Profile button */}
+                {!isEditing && (
+                  <button
+                    onClick={handleEdit}
+                    className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition-colors"
+                  >
+                    Edit Profile
+                  </button>
+                )}
+              </div>
+
+              {/* Form Section */}
+              {renderFormInputs()}
+            </div>
+
+            {/* Bottom spacing */}
+            <div className="h-4 sm:h-6"></div>
+          </div>
         </div>
       </div>
     </div>
