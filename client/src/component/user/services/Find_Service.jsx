@@ -23,39 +23,39 @@ function BookingModal({ service, onClose, onConfirm }) {
   if (!service) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl p-6 w-[90%] max-w-md" onClick={(e) => e.stopPropagation()}>
-        <h2 className="text-xl font-semibold mb-4">Confirm Booking</h2>
-        <div className="space-y-4">
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+        <h2 className="text-lg sm:text-xl font-semibold mb-4">Confirm Booking</h2>
+        <div className="space-y-4 max-h-[70vh] overflow-y-auto">
           <div className="bg-gray-50 p-4 rounded-xl">
-            <h3 className="font-semibold text-lg">{service.title}</h3>
-            <p className="text-gray-600 text-sm mt-1">{service.description}</p>
+            <h3 className="font-semibold text-base sm:text-lg">{service.title}</h3>
+            <p className="text-gray-600 text-xs sm:text-sm mt-1">{service.description}</p>
             <div className="mt-4 space-y-2">
-              <div className="flex justify-between">
+              <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Price:</span>
                 <span className="font-bold text-blue-600">SC {service.price}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Provider:</span>
-                <span className="font-medium">{service.provider || 'Unknown Provider'}</span>
+                <span className="font-medium truncate">{service.provider || 'Unknown Provider'}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Availability:</span>
                 <span className="font-medium">{service.availability}</span>
               </div>
             </div>
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4 border-t">
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+              className="flex-1 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg text-sm border"
             >
               Cancel
             </button>
             <button
               onClick={() => onConfirm(service)}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
             >
               Confirm Booking
             </button>
@@ -66,19 +66,19 @@ function BookingModal({ service, onClose, onConfirm }) {
   );
 }
 
-// FilterPanel component - moved outside to prevent re-creation on every render
+// FilterPanel component
 const FilterPanel = ({ filters, handleFilterChange, categories }) => (
-  <div className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 mb-3 mt-3 mx-4">
-    <div className="space-y-2">
+  <div className="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-gray-100 mb-4 mx-4">
+    <div className="space-y-3">
       <div>
-        <label className="text-xs font-medium text-gray-700 mb-1 block">
+        <label className="text-xs sm:text-sm font-medium text-gray-700 mb-1 block">
           Category
         </label>
         <select
           name="category"
           value={filters.category}
           onChange={handleFilterChange}
-          className="w-full rounded-lg border-gray-200 text-sm"
+          className="w-full rounded-lg border border-gray-200 text-sm p-2"
         >
           {categories.map((category) => (
             <option key={category} value={category}>{category}</option>
@@ -88,7 +88,7 @@ const FilterPanel = ({ filters, handleFilterChange, categories }) => (
 
       <div className="grid grid-cols-2 gap-2">
         <div>
-          <label className="text-xs font-medium text-gray-700 mb-1 block">
+          <label className="text-xs sm:text-sm font-medium text-gray-700 mb-1 block">
             Min Price
           </label>
           <input
@@ -96,12 +96,12 @@ const FilterPanel = ({ filters, handleFilterChange, categories }) => (
             name="minPrice"
             value={filters.minPrice}
             onChange={handleFilterChange}
-            className="w-full rounded-lg border-gray-200 text-sm"
+            className="w-full rounded-lg border border-gray-200 text-sm p-2"
             placeholder="Min SC"
           />
         </div>
         <div>
-          <label className="text-xs font-medium text-gray-700 mb-1 block">
+          <label className="text-xs sm:text-sm font-medium text-gray-700 mb-1 block">
             Max Price
           </label>
           <input
@@ -109,21 +109,21 @@ const FilterPanel = ({ filters, handleFilterChange, categories }) => (
             name="maxPrice"
             value={filters.maxPrice}
             onChange={handleFilterChange}
-            className="w-full rounded-lg border-gray-200 text-sm"
+            className="w-full rounded-lg border border-gray-200 text-sm p-2"
             placeholder="Max SC"
           />
         </div>
       </div>
 
       <div>
-        <label className="text-xs font-medium text-gray-700 mb-1 block">
+        <label className="text-xs sm:text-sm font-medium text-gray-700 mb-1 block">
           Minimum Rating
         </label>
         <select
           name="minRating"
           value={filters.minRating}
           onChange={handleFilterChange}
-          className="w-full rounded-lg border-gray-200 text-sm"
+          className="w-full rounded-lg border border-gray-200 text-sm p-2"
         >
           <option value="">Any Rating</option>
           <option value="4">4+ Stars</option>
@@ -134,6 +134,7 @@ const FilterPanel = ({ filters, handleFilterChange, categories }) => (
     </div>
   </div>
 );
+
 
 const FindServices = () => {
   const navigate = useNavigate();
@@ -150,14 +151,65 @@ const FindServices = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
 
+  const handleMessage = (service) => {
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('user'));
+      
+      console.log('Service object:', service);
+      console.log('Current user:', currentUser);
+      
+      if (!service.user_id) {
+        alert('Service provider information not available');
+        return;
+      }
+
+      if (currentUser?.role?.toLowerCase() === service.provider_role?.toLowerCase()) {
+        alert('You can only message users with different roles');
+        return;
+      }
+
+      navigate(`/messages/chat/${service.user_id}`);
+    } catch (error) {
+      console.error('Error initiating message:', error);
+      alert('Failed to open chat. Please try again.');
+    }
+  };
+
   const role = userData?.role?.toLowerCase() || '';
 
-const navItems = (() => {
-  if (role === 'learner') {
+  const navItems = (() => {
+    if (role === 'learner') {
+      return [
+        { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
+        { name: "Profile", icon: <UserIcon className="h-5 w-5" />, path: "/profile" },
+        { name: "Messages", icon: <ChatBubbleLeftIcon className="h-5 w-5" />, path: "/messages" },
+        { name: "Find Services", icon: <MagnifyingGlassIcon className="h-5 w-5" />, path: "/find-services" },
+        { name: "Saved", icon: <BookmarkIcon className="h-5 w-5" />, path: "/saved" },
+        { name: "Wallet", icon: <WalletIcon className="h-5 w-5" />, path: "/wallet" },
+        { name: "Transactions", icon: <ReceiptRefundIcon className="h-5 w-5" />, path: "/transactions" },
+        { name: "Past Feedbacks", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/view-past-feedback" },
+        { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
+      ];
+    }
+
+    if (role === 'tutor') {
+      return [
+        { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
+        { name: "Profile", icon: <UserIcon className="h-5 w-5" />, path: "/profile" },
+        { name: "Messages", icon: <ChatBubbleLeftIcon className="h-5 w-5" />, path: "/messages" },
+        { name: "My Services", icon: <ClipboardDocumentListIcon className="h-5 w-5" />, path: "/my-services" },
+        { name: "Wallet", icon: <WalletIcon className="h-5 w-5" />, path: "/wallet" },
+        { name: "Transactions", icon: <ReceiptRefundIcon className="h-5 w-5" />, path: "/transactions" },
+        { name: "Past Feedbacks", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/view-past-feedback" },
+        { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
+      ];
+    }
+
     return [
       { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
       { name: "Profile", icon: <UserIcon className="h-5 w-5" />, path: "/profile" },
       { name: "Messages", icon: <ChatBubbleLeftIcon className="h-5 w-5" />, path: "/messages" },
+      { name: "My Services", icon: <ClipboardDocumentListIcon className="h-5 w-5" />, path: "/my-services" },
       { name: "Find Services", icon: <MagnifyingGlassIcon className="h-5 w-5" />, path: "/find-services" },
       { name: "Saved", icon: <BookmarkIcon className="h-5 w-5" />, path: "/saved" },
       { name: "Wallet", icon: <WalletIcon className="h-5 w-5" />, path: "/wallet" },
@@ -165,35 +217,7 @@ const navItems = (() => {
       { name: "Past Feedbacks", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/view-past-feedback" },
       { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
     ];
-  }
-
-  if (role === 'tutor') {
-    return [
-      { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
-      { name: "Profile", icon: <UserIcon className="h-5 w-5" />, path: "/profile" },
-      { name: "Messages", icon: <ChatBubbleLeftIcon className="h-5 w-5" />, path: "/messages" },
-      { name: "My Services", icon: <ClipboardDocumentListIcon className="h-5 w-5" />, path: "/my-services" },
-      { name: "Wallet", icon: <WalletIcon className="h-5 w-5" />, path: "/wallet" },
-      { name: "Transactions", icon: <ReceiptRefundIcon className="h-5 w-5" />, path: "/transactions" },
-      { name: "Past Feedbacks", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/view-past-feedback" },
-      { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
-    ];
-  }
-
-  // For role === 'both'
-  return [
-    { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
-    { name: "Profile", icon: <UserIcon className="h-5 w-5" />, path: "/profile" },
-    { name: "Messages", icon: <ChatBubbleLeftIcon className="h-5 w-5" />, path: "/messages" },
-    { name: "My Services", icon: <ClipboardDocumentListIcon className="h-5 w-5" />, path: "/my-services" },
-    { name: "Find Services", icon: <MagnifyingGlassIcon className="h-5 w-5" />, path: "/find-services" },
-    { name: "Saved", icon: <BookmarkIcon className="h-5 w-5" />, path: "/saved" },
-    { name: "Wallet", icon: <WalletIcon className="h-5 w-5" />, path: "/wallet" },
-    { name: "Transactions", icon: <ReceiptRefundIcon className="h-5 w-5" />, path: "/transactions" },
-    { name: "Past Feedbacks", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/view-past-feedback" },
-    { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
-  ];
-})();
+  })();
 
   const categories = [
     "All",
@@ -218,24 +242,24 @@ const navItems = (() => {
   }, []);
 
   const fetchServices = async () => {
-    try {
-      const user = JSON.parse(localStorage.getItem('user')); // get current logged-in user
-      const response = await getAllServices(filters);
+  try {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const response = await getAllServices(filters);
 
-      // Map services and include provider's full name
-      const servicesWithProvider = response.data.map(service => ({
-        ...service,
-        provider: service.user_full_name, // make sure your backend sends this
-      }));
+    const servicesWithProvider = response.data.map(service => ({
+      ...service,
+      provider: service.user_full_name,
+      provider_role: service.user_role,
+      user_id: service.user_id // Add this from backend
+    }));
 
-      // Remove services created by the current user
-      const otherServices = servicesWithProvider.filter(service => service.user_id !== user.id);
+    const otherServices = servicesWithProvider.filter(service => service.user_id !== user.id);
 
-      setServices(otherServices);
-    } catch (error) {
-      console.error('Error fetching services:', error);
-    }
-  };
+    setServices(otherServices);
+  } catch (error) {
+    console.error('Error fetching services:', error);
+  }
+};
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
@@ -274,117 +298,209 @@ const navItems = (() => {
   };
 
   const handleConfirmBooking = async (service) => {
-  try {
-    const user = JSON.parse(localStorage.getItem('user'));
-    const bookingData = {
-      userId: user.id,
-      serviceId: service.id,
-      providerId: service.user_id,
-      type: 'booking',
-      amount: service.price,
-      status: 'pending'
-    };
+    try {
+      const user = JSON.parse(localStorage.getItem('user'));
+      const bookingData = {
+        userId: user.id,
+        serviceId: service.id,
+        providerId: service.user_id,
+        type: 'booking',
+        amount: service.price,
+        status: 'pending'
+      };
 
-    // Create the booking
-    const response = await createBooking(bookingData);
-    
-    if (response.data) {
-      // Send notification to tutor
-      await createNotification({
-        userId: service.user_id, // tutor's ID
-        type: 'new_booking',
-        title: 'New Booking Request',
-        content: `${user.full_name} has requested to book your service: ${service.title}`
-      });
-
-      setSelectedService(null);
-      alert('Service booked successfully!');
-      navigate('/transactions');
+      const response = await createBooking(bookingData);
+      
+      if (response.data) {
+        setSelectedService(null);
+        alert('Service booked successfully!');
+        navigate('/transactions');
+      }
+    } catch (error) {
+      console.error('Booking error:', error);
+      alert(error.response?.data?.message || 'Failed to book service. Please try again.');
     }
-  } catch (error) {
-    console.error('Booking error:', error);
-    alert(error.response?.data?.message || 'Failed to book service. Please try again.');
-  }
-};
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col w-full md:max-w-sm mx-auto relative">
-      {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} bg-gradient-to-b from-gray-50 to-white w-64 transition-transform duration-300 ease-in-out z-30 md:max-w-sm shadow-xl border-r flex flex-col`}>
-        <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 flex justify-between items-center">
-          <h2 className="font-semibold text-white">Menu</h2>
-          <button onClick={() => setIsSidebarOpen(false)} className="text-white hover:bg-white/10 p-1 rounded-lg transition-colors">
-            <XMarkIcon className="h-6 w-6" />
-          </button>
+    <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen flex flex-col lg:flex-row w-full">
+      {/* Sidebar - Desktop (always visible) */}
+      <div className="hidden lg:flex fixed inset-y-0 left-0 bg-gradient-to-b from-gray-50 to-white w-64 flex-col shadow-xl border-r z-30">
+        {/* Header - Fixed at top */}
+        <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600">
+          <h2 className="font-semibold text-white text-lg">Menu</h2>
         </div>
 
+        {/* Navigation - Scrollable */}
         <nav className="p-3 space-y-1 flex-1 overflow-y-auto">
           {navItems.map((item) => (
-            <button key={item.name} onClick={() => navigate(item.path)} className="flex items-center w-full p-3 text-gray-600 hover:text-blue-600 rounded-xl transition-all duration-200 group hover:bg-gradient-to-r from-blue-50 to-indigo-50">
-              <div className="bg-white p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform duration-200">{item.icon}</div>
-              <span className="ml-3 font-medium">{item.name}</span>
+            <button
+              key={item.name}
+              onClick={() => navigate(item.path)}
+              className="flex items-center w-full p-3 text-gray-600 hover:text-blue-600 rounded-xl transition-all duration-200 group hover:bg-gradient-to-r from-blue-50 to-indigo-50"
+            >
+              <div className="bg-white p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
+                {item.icon}
+              </div>
+              <span className="ml-3 font-medium text-sm">{item.name}</span>
             </button>
           ))}
         </nav>
       </div>
 
-      {isSidebarOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-20" onClick={() => setIsSidebarOpen(false)}></div>}
-
-      {/* Header */}
-      <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <button onClick={() => setIsSidebarOpen(true)}><Bars3Icon className="h-6 w-6 text-white" /></button>
-            <h1 className="text-lg font-semibold">Browse Services</h1>
-          </div>
-          <div className="flex items-center space-x-3">
-            <button onClick={() => navigate("/notification")} className="relative">
-              <BellIcon className="h-6 w-6 text-white" />
-              <span className="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
-            </button>
-            <button onClick={() => setShowFilters((prev) => !prev)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-              <AdjustmentsHorizontalIcon className="h-5 w-5 text-white" />
-            </button>
-          </div>
+      {/* Sidebar - Mobile (toggle-based) */}
+      <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} bg-gradient-to-b from-gray-50 to-white w-64 transition-transform duration-300 ease-in-out z-40 lg:hidden flex flex-col shadow-xl border-r`}>
+        {/* Header - Fixed at top */}
+        <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 flex justify-between items-center">
+          <h2 className="font-semibold text-white">Menu</h2>
+          <button 
+            onClick={() => setIsSidebarOpen(false)}
+            className="text-white hover:bg-white/10 p-1 rounded-lg transition-colors"
+          >
+            <XMarkIcon className="h-6 w-6" />
+          </button>
         </div>
 
-        <div className="mt-4">
-          <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2">
-            <MagnifyingGlassIcon className="h-5 w-5 text-white/80" />
-            <input type="text" value={searchTerm} onChange={handleSearch} placeholder="Search services..." className="bg-transparent outline-none ml-2 text-sm w-full text-white placeholder-white/70"/>
-          </div>
-        </div>
-      </div>
-
-      {showFilters && <FilterPanel filters={filters} handleFilterChange={handleFilterChange} categories={categories} />}
-
-      {/* Service Cards */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {filteredServices.map((service) => (
-          <div key={service.id} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:scale-[1.02] transition-transform">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="font-semibold text-sm">{service.title}</h2>
-                <p className="text-gray-600 text-xs mt-1">{service.description}</p>
-                <p className="text-xs text-gray-500 mt-1">by {service.provider}</p>
-                <p className="font-semibold text-black mt-2">SC {service.price} <span className="text-sm text-gray-500">⭐ {service.rating}</span></p>
+        {/* Navigation - Scrollable */}
+        <nav className="p-3 space-y-1 flex-1 overflow-y-auto">
+          {navItems.map((item) => (
+            <button
+              key={item.name}
+              onClick={() => {
+                navigate(item.path);
+                setIsSidebarOpen(false);
+              }}
+              className="flex items-center w-full p-3 text-gray-600 hover:text-blue-600 rounded-xl transition-all duration-200 group hover:bg-gradient-to-r from-blue-50 to-indigo-50"
+            >
+              <div className="bg-white p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
+                {item.icon}
               </div>
-              <BookmarkIcon className="h-5 w-5 text-gray-400 hover:text-blue-600 cursor-pointer"/>
-            </div>
-            <div className="flex gap-2 mt-3">
-              <button
-                className="flex-1 px-3 py-2 text-xs rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-                onClick={() => handleBookNow(service)}
-              >
-                Book Now
-              </button>
-              <button className="flex-1 px-3 py-2 text-xs rounded-lg border border-gray-200 hover:bg-gray-50">Message</button>
-            </div>
-          </div>
-        ))}
+              <span className="ml-3 font-medium text-sm">{item.name}</span>
+            </button>
+          ))}
+        </nav>
       </div>
 
-      {selectedService && <BookingModal service={selectedService} onClose={() => setSelectedService(null)} onConfirm={handleConfirmBooking} />}
+      {/* Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        ></div>
+      )}
+
+      {/* Main Content */}
+      <div className="flex-1 lg:ml-64 overflow-y-auto">
+        {/* Header */}
+        <div className="p-4 sm:p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white sticky top-0 z-20 shadow-lg">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <button 
+                onClick={() => setIsSidebarOpen(true)}
+                className="lg:hidden flex-shrink-0 hover:bg-white/10 p-2 rounded-lg transition-colors"
+              >
+                <Bars3Icon className="h-6 w-6" />
+              </button>
+              <h1 className="text-lg sm:text-xl font-semibold truncate">Browse Services</h1>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button 
+                onClick={() => navigate("/notification")} 
+                className="hover:bg-white/10 p-2 rounded-lg transition-colors relative"
+              >
+                <BellIcon className="h-6 w-6" />
+                <span className="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
+              </button>
+              <button 
+                onClick={() => setShowFilters((prev) => !prev)} 
+                className="hover:bg-white/10 p-2 rounded-lg transition-colors"
+              >
+                <AdjustmentsHorizontalIcon className="h-6 w-6" />
+              </button>
+            </div>
+          </div>
+
+          {/* Search Bar */}
+          <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2">
+            <MagnifyingGlassIcon className="h-5 w-5 text-white/80 flex-shrink-0" />
+            <input 
+              type="text" 
+              value={searchTerm} 
+              onChange={handleSearch} 
+              placeholder="Search services..." 
+              className="bg-transparent outline-none ml-2 text-sm w-full text-white placeholder-white/70"
+            />
+          </div>
+        </div>
+
+        {/* Filters */}
+        {showFilters && <FilterPanel filters={filters} handleFilterChange={handleFilterChange} categories={categories} />}
+
+        {/* Service Cards */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="max-w-2xl mx-auto w-full px-4 py-4 sm:py-6">
+            <div className="space-y-3 sm:space-y-4">
+              {filteredServices.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                  <p className="text-sm sm:text-base">No services found</p>
+                </div>
+              ) : (
+                filteredServices.map((service) => (
+                  <div 
+                    key={service.id} 
+                    className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all"
+                  >
+                    <div className="flex justify-between items-start gap-3">
+                      <div className="flex-1 min-w-0">
+                        <h2 className="font-semibold text-sm sm:text-base text-gray-900 truncate">{service.title}</h2>
+                        <p className="text-gray-600 text-xs sm:text-sm mt-1 line-clamp-2">{service.description}</p>
+                        <p className="text-xs text-gray-500 mt-1">by {service.provider}</p>
+                      </div>
+                      <button className="flex-shrink-0 hover:text-blue-600 transition-colors">
+                        <BookmarkIcon className="h-5 w-5 text-gray-400" />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-sm sm:text-base text-blue-600">SC {service.price}</span>
+                        <span className="text-xs sm:text-sm text-gray-500">⭐ {service.rating}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 mt-3">
+                      <button
+                        className="flex-1 px-3 py-2 text-xs sm:text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors font-medium"
+                        onClick={() => handleBookNow(service)}
+                      >
+                        Book Now
+                      </button>
+                      <button 
+                        onClick={() => handleMessage(service)}
+                        className="flex-1 px-3 py-2 text-xs sm:text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors font-medium"
+                      >
+                        Message
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Bottom spacing */}
+            <div className="h-4 sm:h-6"></div>
+          </div>
+        </div>
+      </div>
+
+      {/* Booking Modal */}
+      {selectedService && (
+        <BookingModal 
+          service={selectedService} 
+          onClose={() => setSelectedService(null)} 
+          onConfirm={handleConfirmBooking} 
+        />
+      )}
     </div>
   );
 }

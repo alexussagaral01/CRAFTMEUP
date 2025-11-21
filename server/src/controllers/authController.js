@@ -342,3 +342,25 @@ exports.updateProfilePhoto = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// In server/src/controllers/authController.js
+
+exports.getUserById = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const [user] = await pool.execute(
+      'SELECT id, full_name, role, email FROM users WHERE id = ?',
+      [userId]
+    );
+
+    if (user.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json(user[0]);
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    res.status(500).json({ message: 'Failed to fetch user' });
+  }
+};

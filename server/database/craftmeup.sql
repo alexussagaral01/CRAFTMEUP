@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 29, 2025 at 10:38 AM
+-- Generation Time: Nov 21, 2025 at 04:05 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -142,10 +142,29 @@ CREATE TABLE `messages` (
   `id` int(11) NOT NULL,
   `sender_id` int(11) NOT NULL,
   `receiver_id` int(11) NOT NULL,
-  `content` text NOT NULL,
-  `read_status` tinyint(1) DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `message` text NOT NULL,
+  `sender_name` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `read_status` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `messages`
+--
+
+INSERT INTO `messages` (`id`, `sender_id`, `receiver_id`, `message`, `sender_name`, `created_at`, `read_status`) VALUES
+(1, 6, 7, 'hello', 'User', '2025-11-21 01:42:06', 0),
+(2, 7, 6, 'HI sad', 'Mark Dave Catubigs', '2025-11-21 01:42:26', 0),
+(3, 6, 7, 'can we have a convesation', 'User', '2025-11-21 01:43:56', 0),
+(4, 6, 7, 'hahaha', 'User', '2025-11-21 01:45:31', 0),
+(5, 7, 6, 'yeah boy', 'Mark Dave Catubigs', '2025-11-21 01:54:35', 0),
+(6, 6, 7, 'hahahahaasdasd', 'User', '2025-11-21 01:58:34', 0),
+(7, 6, 7, 'tarung ba', 'User', '2025-11-21 02:00:30', 0),
+(8, 7, 6, 'real', 'Mark Dave Catubigs', '2025-11-21 02:08:38', 0),
+(9, 6, 7, 'real??', 'User', '2025-11-21 02:32:45', 0),
+(10, 6, 7, 'hello', 'User', '2025-11-21 02:52:48', 0),
+(11, 6, 7, 'typing', 'User', '2025-11-21 02:57:54', 0),
+(12, 7, 6, 'typing', 'User', '2025-11-21 02:58:31', 0);
 
 -- --------------------------------------------------------
 
@@ -487,7 +506,8 @@ CREATE TABLE `users` (
 INSERT INTO `users` (`id`, `full_name`, `email`, `password`, `course`, `year`, `role`, `student_id_file`, `study_load_file`, `profile_image`, `verified`, `verification_status`, `reset_token`, `reset_token_expires`, `created_at`, `updated_at`) VALUES
 (5, 'Alexus Sagaral', 'alex@gmail.com', '$2a$10$HtxI0.J0PQQ.tjgnzI1EyeC8zKvu5Q1Tuu2pBNE3H0oDIbuElwVhy', 'BSIT', '2', 'Tutor', '/uploads/1759246422853-664456215.jpg', '/uploads/1759246422855-549247028.jpg', NULL, 1, 'approved', NULL, NULL, '2025-09-30 15:33:42', '2025-09-30 15:39:38'),
 (6, 'Jeff Monreal', 'jeff@email.com', '$2a$10$g/f5yo.4rXfWxF6.Lpe8J.wmQ29Wj8XJyU5veJV7QzVtN7P/kek2a', 'BSIT', '2', 'Learner', '/uploads/1759246471164-210728058.jpg', '/uploads/1759246471165-940254723.jpg', NULL, 1, 'approved', NULL, NULL, '2025-09-30 15:34:31', '2025-09-30 15:38:03'),
-(7, 'Mark Dave Catubigs', 'mark@email.com', '$2a$10$l01O4W36mDCuHvnI2gCcNO32RAoZo3EneviVmtVKNn755j3fj.Z8y', 'BSIT', '4', 'Both', '/uploads/1759246942236-842248708.jpg', '/uploads/1759246942236-760000021.jpg', NULL, 1, 'approved', NULL, NULL, '2025-09-30 15:42:22', '2025-10-01 03:23:19');
+(7, 'Mark Dave Catubigs', 'mark@email.com', '$2a$10$l01O4W36mDCuHvnI2gCcNO32RAoZo3EneviVmtVKNn755j3fj.Z8y', 'BSIT', '4', 'Both', '/uploads/1759246942236-842248708.jpg', '/uploads/1759246942236-760000021.jpg', NULL, 1, 'approved', NULL, NULL, '2025-09-30 15:42:22', '2025-10-01 03:23:19'),
+(8, 'john palacio', 'real@gmail.com', '$2a$10$No8ptRMpLbMYJgRA3cUQA.UA/A38XhBXoq.KNOFiiELYe.bcb3a2q', 'BSIT', '4', 'Both', '/uploads/1763147786067-877529146.jpg', '/uploads/1763147786088-824334118.jpg', NULL, 1, 'approved', NULL, NULL, '2025-11-14 19:16:26', '2025-11-14 19:18:17');
 
 -- --------------------------------------------------------
 
@@ -579,7 +599,8 @@ ALTER TABLE `feedback`
 ALTER TABLE `messages`
   ADD PRIMARY KEY (`id`),
   ADD KEY `sender_id` (`sender_id`),
-  ADD KEY `receiver_id` (`receiver_id`);
+  ADD KEY `receiver_id` (`receiver_id`),
+  ADD KEY `created_at` (`created_at`);
 
 --
 -- Indexes for table `notifications`
@@ -672,7 +693,7 @@ ALTER TABLE `feedback`
 -- AUTO_INCREMENT for table `messages`
 --
 ALTER TABLE `messages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `notifications`
@@ -708,7 +729,7 @@ ALTER TABLE `transactions`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `wallet`
@@ -737,8 +758,8 @@ ALTER TABLE `feedback`
 -- Constraints for table `messages`
 --
 ALTER TABLE `messages`
-  ADD CONSTRAINT `messages_ibfk_1` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `messages_ibfk_2` FOREIGN KEY (`receiver_id`) REFERENCES `users` (`id`);
+  ADD CONSTRAINT `messages_ibfk_1` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `messages_ibfk_2` FOREIGN KEY (`receiver_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `notifications`

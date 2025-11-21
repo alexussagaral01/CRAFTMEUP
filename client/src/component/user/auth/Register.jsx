@@ -5,6 +5,7 @@ import { register } from '../../../services/api';
 
 const RegisterForm = () => {
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -16,6 +17,7 @@ const RegisterForm = () => {
     studentIdFile: null,
     studyLoadFile: null,
   });
+
   const [step, setStep] = useState(1);
   const [error, setError] = useState('');
 
@@ -52,53 +54,43 @@ const RegisterForm = () => {
     }
 
     try {
-      // Create FormData for file upload
       const formDataToSend = new FormData();
+
       formDataToSend.append('fullName', formData.fullName);
       formDataToSend.append('email', formData.email);
       formDataToSend.append('password', formData.password);
       formDataToSend.append('course', formData.course);
       formDataToSend.append('year', formData.year);
       formDataToSend.append('role', formData.role);
-      
-      if (formData.studentIdFile) {
-        formDataToSend.append('studentId', formData.studentIdFile);
-      }
-      if (formData.studyLoadFile) {
-        formDataToSend.append('studyLoad', formData.studyLoadFile);
-      }
-      
-       const response = await register(formDataToSend);
-       if (response.data.token) {
-         navigate('/');
-       }
+
+      if (formData.studentIdFile) formDataToSend.append('studentId', formData.studentIdFile);
+      if (formData.studyLoadFile) formDataToSend.append('studyLoad', formData.studyLoadFile);
+
+      const response = await register(formDataToSend);
+
+      if (response.data.token) navigate('/');
     } catch (error) {
       setError(
-        error.response?.data?.message || 
-        'Registration failed. Please try again.'
+        error.response?.data?.message ||
+          'Registration failed. Please try again.'
       );
     }
   };
 
   const handleBack = () => {
-    if (step > 1) {
-      setStep(step - 1);
-    } else {
-      window.location.href = '/';
-    }
+    if (step > 1) setStep(step - 1);
+    else window.location.href = '/';
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-white">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-8 rounded-b-[40px] shadow-lg">
-        <button
-          onClick={handleBack}
-          className="flex items-center space-x-2"
-        >
+        <button onClick={handleBack} className="flex items-center space-x-2">
           <FaArrowLeft />
           <span>{step > 1 ? 'Back' : 'Sign In'}</span>
         </button>
+
         <h1 className="text-2xl font-bold mt-4">Create Account</h1>
         <p className="text-white/80 mt-1">Step {step} of 3</p>
 
@@ -112,10 +104,11 @@ const RegisterForm = () => {
       </div>
 
       <div className="px-6 py-8">
+        {/* STEP 1 */}
         {step === 1 && (
           <div className="space-y-4 animate-fadeIn">
-            {/* Basic Info */}
             <div className="space-y-4">
+              {/* Full Name */}
               <div className="relative">
                 <input
                   type="text"
@@ -126,52 +119,66 @@ const RegisterForm = () => {
                   value={formData.fullName}
                   onChange={handleChange}
                 />
-                <label className="absolute left-4 -top-2.5 text-sm text-gray-600 bg-white px-2 transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2.5 peer-focus:text-sm">
+                <label className="absolute left-4 -top-2.5 text-sm text-gray-600 bg-white px-2 
+                  transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base 
+                  peer-focus:-top-2.5 peer-focus:text-sm">
                   Full Name
                 </label>
               </div>
 
+              {/* Email */}
               <div className="relative">
                 <input
                   type="email"
                   name="email"
                   required
-                  className="w-full bg-white border border-gray-200 px-4 py-3 rounded-xl outline-none transition-all duration-200 focus:border-blue-500 peer placeholder-transparent"
-                  placeholder="Email Address"
+                  className="w-full bg-white border border-gray-200 px-4 py-3 rounded-xl outline-none 
+                    transition-all duration-200 focus:border-blue-500 peer placeholder-transparent"
+                  placeholder="Email"
                   value={formData.email}
                   onChange={handleChange}
                 />
-                <label className="absolute left-4 -top-2.5 text-sm text-gray-600 bg-white px-2 transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2.5 peer-focus:text-sm">
+                <label className="absolute left-4 -top-2.5 text-sm text-gray-600 bg-white px-2 
+                  transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base 
+                  peer-focus:-top-2.5 peer-focus:text-sm">
                   Email Address
                 </label>
               </div>
 
+              {/* Password */}
               <div className="relative">
                 <input
                   type="password"
                   name="password"
                   required
-                  className="w-full bg-white border border-gray-200 px-4 py-3 rounded-xl outline-none transition-all duration-200 focus:border-blue-500 peer placeholder-transparent"
+                  className="w-full bg-white border border-gray-200 px-4 py-3 rounded-xl outline-none 
+                    transition-all duration-200 focus:border-blue-500 peer placeholder-transparent"
                   placeholder="Password"
                   value={formData.password}
                   onChange={handleChange}
                 />
-                <label className="absolute left-4 -top-2.5 text-sm text-gray-600 bg-white px-2 transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2.5 peer-focus:text-sm">
+                <label className="absolute left-4 -top-2.5 text-sm text-gray-600 bg-white px-2 
+                  transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base 
+                  peer-focus:-top-2.5 peer-focus:text-sm">
                   Password
                 </label>
               </div>
 
+              {/* Confirm Password */}
               <div className="relative">
                 <input
                   type="password"
                   name="confirmPassword"
                   required
-                  className="w-full bg-white border border-gray-200 px-4 py-3 rounded-xl outline-none transition-all duration-200 focus:border-blue-500 peer placeholder-transparent"
+                  className="w-full bg-white border border-gray-200 px-4 py-3 rounded-xl outline-none 
+                    transition-all duration-200 focus:border-blue-500 peer placeholder-transparent"
                   placeholder="Confirm Password"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                 />
-                <label className="absolute left-4 -top-2.5 text-sm text-gray-600 bg-white px-2 transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2.5 peer-focus:text-sm">
+                <label className="absolute left-4 -top-2.5 text-sm text-gray-600 bg-white px-2 
+                  transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base 
+                  peer-focus:-top-2.5 peer-focus:text-sm">
                   Confirm Password
                 </label>
               </div>
@@ -179,36 +186,44 @@ const RegisterForm = () => {
           </div>
         )}
 
+        {/* STEP 2 */}
         {step === 2 && (
           <div className="space-y-4 animate-fadeIn">
-            {/* Course and Year */}
             <div className="grid grid-cols-2 gap-4">
+              {/* Course */}
               <div className="relative">
                 <input
                   type="text"
                   name="course"
                   required
-                  className="w-full bg-white border border-gray-200 px-4 py-3 rounded-xl outline-none transition-all duration-200 focus:border-blue-500 peer placeholder-transparent"
+                  className="w-full bg-white border border-gray-200 px-4 py-3 rounded-xl outline-none 
+                    transition-all duration-200 focus:border-blue-500 peer placeholder-transparent"
                   placeholder="Course"
                   value={formData.course}
                   onChange={handleChange}
                 />
-                <label className="absolute left-4 -top-2.5 text-sm text-gray-600 bg-white px-2 transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2.5 peer-focus:text-sm">
+                <label className="absolute left-4 -top-2.5 text-sm text-gray-600 bg-white px-2 
+                  transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base 
+                  peer-focus:-top-2.5 peer-focus:text-sm">
                   Course
                 </label>
               </div>
 
+              {/* Year */}
               <div className="relative">
                 <input
                   type="text"
                   name="year"
                   required
-                  className="w-full bg-white border border-gray-200 px-4 py-3 rounded-xl outline-none transition-all duration-200 focus:border-blue-500 peer placeholder-transparent"
+                  className="w-full bg-white border border-gray-200 px-4 py-3 rounded-xl outline-none 
+                    transition-all duration-200 focus:border-blue-500 peer placeholder-transparent"
                   placeholder="Year Level"
                   value={formData.year}
                   onChange={handleChange}
                 />
-                <label className="absolute left-4 -top-2.5 text-sm text-gray-600 bg-white px-2 transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2.5 peer-focus:text-sm">
+                <label className="absolute left-4 -top-2.5 text-sm text-gray-600 bg-white px-2 
+                  transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base 
+                  peer-focus:-top-2.5 peer-focus:text-sm">
                   Year Level
                 </label>
               </div>
@@ -216,13 +231,16 @@ const RegisterForm = () => {
 
             {/* File Uploads */}
             <div className="space-y-4">
-              <div className="bg-white p-6 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-500 transition-colors cursor-pointer text-center">
+              {/* Student ID */}
+              <div className="bg-white p-6 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-500 
+                transition-colors cursor-pointer text-center">
                 <label htmlFor="studentIdFile" className="cursor-pointer">
                   <div className="bg-blue-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
                     <FaUpload className="text-blue-500" />
                   </div>
                   <p className="text-sm font-medium">Upload Student ID</p>
                   <p className="text-xs text-gray-500 mt-1">Max size: 5MB</p>
+
                   <input
                     id="studentIdFile"
                     type="file"
@@ -234,13 +252,16 @@ const RegisterForm = () => {
                 </label>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-500 transition-colors cursor-pointer text-center">
+              {/* Study Load */}
+              <div className="bg-white p-6 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-500 
+                transition-colors cursor-pointer text-center">
                 <label htmlFor="studyLoadFile" className="cursor-pointer">
                   <div className="bg-blue-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
                     <FaUpload className="text-blue-500" />
                   </div>
                   <p className="text-sm font-medium">Upload Study Load</p>
                   <p className="text-xs text-gray-500 mt-1">Max size: 5MB</p>
+
                   <input
                     id="studyLoadFile"
                     type="file"
@@ -255,11 +276,11 @@ const RegisterForm = () => {
           </div>
         )}
 
+        {/* STEP 3 */}
         {step === 3 && (
           <div className="space-y-4 animate-fadeIn">
-            {/* Role Selection */}
             <div className="space-y-3">
-              { [
+              {[
                 {
                   value: 'Learner',
                   icon: '🎓',
@@ -306,7 +327,8 @@ const RegisterForm = () => {
           {step < 3 ? (
             <button
               onClick={() => setStep(step + 1)}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-xl font-medium text-lg hover:from-blue-700 hover:to-indigo-700 transform transition-all duration-200"
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-xl 
+                font-medium text-lg hover:from-blue-700 hover:to-indigo-700 transition-all"
             >
               Continue
             </button>
@@ -314,7 +336,8 @@ const RegisterForm = () => {
             <button
               type="submit"
               onClick={handleSubmit}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-xl font-medium text-lg hover:from-blue-700 hover:to-indigo-700 transform transition-all duration-200"
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-xl 
+                font-medium text-lg hover:from-blue-700 hover:to-indigo-700 transition-all"
             >
               Create Account
             </button>
