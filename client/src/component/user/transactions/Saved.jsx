@@ -210,10 +210,10 @@ export default function Saved() {
 
         {/* Saved Services List */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-2xl mx-auto w-full px-4 py-4 sm:py-6">
-            <div className="space-y-3 sm:space-y-4">
+          <div className="w-full px-2 sm:px-3 lg:px-4 py-2 sm:py-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
               {saved.length === 0 ? (
-                <div className="text-center py-12 sm:py-16">
+                <div className="col-span-full text-center py-12 sm:py-16">
                   <BookmarkIcon className="h-12 sm:h-16 w-12 sm:w-16 text-gray-300 mx-auto mb-4" />
                   <p className="text-gray-500 text-sm sm:text-base">No saved services yet</p>
                 </div>
@@ -221,23 +221,23 @@ export default function Saved() {
                 saved.map((s, i) => (
                   <div
                     key={i}
-                    className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all relative"
+                    className="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all flex flex-col"
                   >
-                    <button className="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition-colors p-1">
+                    <button className="absolute top-2 right-2 text-gray-400 hover:text-red-500 transition-colors p-1 flex-shrink-0">
                       <HeartIcon className="h-5 w-5" />
                     </button>
 
-                    <h2 className="font-semibold text-sm sm:text-base text-gray-900 pr-10">{s.title}</h2>
-                    <p className="text-xs sm:text-sm text-gray-500 mt-1">{s.category}</p>
-                    <p className="font-semibold text-sm sm:text-base text-blue-600 mt-2">{s.price}</p>
+                    <h2 className="font-semibold text-xs sm:text-base text-gray-900 pr-8 line-clamp-2">{s.title}</h2>
+                    <p className="text-xs text-gray-500 mt-1 truncate">{s.category}</p>
+                    <p className="font-semibold text-xs sm:text-sm text-blue-600 mt-2">{s.price}</p>
 
-                    <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-500 mt-3">
-                      <span className="flex items-center">⭐ {s.rating}</span>
-                      <span className="flex items-center">⏱ {s.duration}</span>
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-gray-500 mt-2">
+                      <span>⭐ {s.rating}</span>
+                      <span>⏱ {s.duration}</span>
                     </div>
 
-                    <div className="mt-3 pt-3 border-t border-gray-100">
-                      <span className="inline-block px-3 py-1 text-xs rounded-lg bg-gray-100 text-gray-700 font-medium">
+                    <div className="mt-2 pt-2 border-t border-gray-100">
+                      <span className="inline-block px-2.5 py-1 text-xs rounded-lg bg-gray-100 text-gray-700 font-medium">
                         {s.tag}
                       </span>
                     </div>
@@ -247,7 +247,7 @@ export default function Saved() {
             </div>
 
             {/* Bottom spacing */}
-            <div className="h-4 sm:h-6"></div>
+            <div className="h-2 sm:h-3"></div>
           </div>
         </div>
       </div>

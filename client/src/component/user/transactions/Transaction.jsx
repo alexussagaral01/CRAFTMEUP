@@ -331,23 +331,23 @@ export default function Transaction() {
   };
 
   const renderBooking = (booking) => (
-    <div key={booking.id} className="border border-gray-100 rounded-2xl p-3 sm:p-4 shadow-sm bg-white mb-3 hover:shadow-md transition-all">
+    <div key={booking.id} className="border border-gray-100 rounded-2xl p-3 sm:p-4 shadow-sm bg-white hover:shadow-md transition-all flex flex-col">
       {/* Top section */}
       <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-2">
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-sm sm:text-base text-gray-900 truncate">{booking.service_title}</h3>
-          <p className="text-xs sm:text-sm text-gray-600 mt-1">
+          <h3 className="font-semibold text-xs sm:text-base text-gray-900 truncate">{booking.service_title}</h3>
+          <p className="text-xs text-gray-600 mt-1">
             {booking.is_provider ? `Requested by: ${booking.requester_name}` : `Provider: ${booking.provider_name}`}
           </p>
         </div>
         <div className="text-right flex-shrink-0">
-          <p className="font-semibold text-sm sm:text-base">SC {Number(booking.price).toFixed(2)}</p>
+          <p className="font-semibold text-xs sm:text-base">SC {Number(booking.price).toFixed(2)}</p>
         </div>
       </div>
 
       {/* Description */}
       {booking.description && (
-        <p className="text-gray-500 text-xs sm:text-sm mb-3 line-clamp-2">{booking.description}</p>
+        <p className="text-gray-500 text-xs line-clamp-2 mb-2">{booking.description}</p>
       )}
 
       {/* Status and date */}
@@ -374,18 +374,18 @@ export default function Transaction() {
       </div>
 
       {/* Action Buttons Section */}
-      <div className="flex flex-col sm:flex-row gap-2">
+      <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2">
         {booking.is_provider && booking.status === 'ongoing' && (
           <button
             onClick={() => handleMarkReady(booking.id)}
-            className="flex-1 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm font-medium transition-colors"
+            className="flex-1 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-xs sm:text-sm font-medium transition-colors"
           >
             Mark Ready
           </button>
         )}
 
         {booking.is_provider && booking.status === 'ready' && (
-          <div className="flex-1 px-3 py-2 text-gray-500 text-sm text-center bg-gray-50 rounded-lg">
+          <div className="flex-1 px-3 py-2 text-gray-500 text-xs text-center bg-gray-50 rounded-lg">
             Waiting for completion
           </div>
         )}
@@ -393,23 +393,23 @@ export default function Transaction() {
         {!booking.is_provider && booking.status === 'ready' && (
           <button
             onClick={() => handleConfirmCompletion(booking)}
-            className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium transition-colors"
+            className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-xs sm:text-sm font-medium transition-colors"
           >
             Confirm Completion
           </button>
         )}
 
         {booking.is_provider && booking.status === 'pending' && (
-          <div className="flex gap-2 w-full">
+          <div className="flex gap-1.5 sm:gap-2 w-full">
             <button
               onClick={() => handleAcceptBooking(booking.id)}
-              className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium transition-colors"
+              className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-xs sm:text-sm font-medium transition-colors"
             >
               Accept
             </button>
             <button
               onClick={() => handleRejectBooking(booking.id)}
-              className="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium transition-colors"
+              className="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-xs sm:text-sm font-medium transition-colors"
             >
               Reject
             </button>
@@ -421,11 +421,13 @@ export default function Transaction() {
 
   const renderBookings = () => (
     <div className="flex-1 overflow-y-auto">
-      <div className="max-w-2xl mx-auto w-full px-4 py-4 sm:py-6">
+      <div className="w-full px-2 sm:px-3 lg:px-4 py-2 sm:py-3">
         <div className="mb-6">
-          <h2 className="text-gray-700 text-sm sm:text-base font-semibold mb-3">Current Transactions</h2>
+          <h2 className="text-gray-700 text-sm sm:text-base font-semibold mb-3 px-2">Current Transactions</h2>
           {ongoingBookings.length > 0 ? (
-            ongoingBookings.map(renderBooking)
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
+              {ongoingBookings.map(renderBooking)}
+            </div>
           ) : (
             <div className="text-center py-8 bg-gray-50 rounded-xl">
               <p className="text-gray-500 text-sm">No ongoing transactions</p>
@@ -434,9 +436,11 @@ export default function Transaction() {
         </div>
 
         <div className="mb-6">
-          <h2 className="text-gray-700 text-sm sm:text-base font-semibold mb-3">Pending Transactions</h2>
+          <h2 className="text-gray-700 text-sm sm:text-base font-semibold mb-3 px-2">Pending Transactions</h2>
           {pendingBookings.length > 0 ? (
-            pendingBookings.map(renderBooking)
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
+              {pendingBookings.map(renderBooking)}
+            </div>
           ) : (
             <div className="text-center py-8 bg-gray-50 rounded-xl">
               <p className="text-gray-500 text-sm">No pending transactions</p>
@@ -445,9 +449,11 @@ export default function Transaction() {
         </div>
 
         <div>
-          <h2 className="text-gray-700 text-sm sm:text-base font-semibold mb-3">Past Transactions</h2>
+          <h2 className="text-gray-700 text-sm sm:text-base font-semibold mb-3 px-2">Past Transactions</h2>
           {completedBookings.length > 0 ? (
-            completedBookings.map(renderBooking)
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
+              {completedBookings.map(renderBooking)}
+            </div>
           ) : (
             <div className="text-center py-8 bg-gray-50 rounded-xl">
               <p className="text-gray-500 text-sm">No past transactions</p>
@@ -456,7 +462,7 @@ export default function Transaction() {
         </div>
 
         {/* Bottom spacing */}
-        <div className="h-4 sm:h-6"></div>
+        <div className="h-2 sm:h-3"></div>
       </div>
     </div>
   );

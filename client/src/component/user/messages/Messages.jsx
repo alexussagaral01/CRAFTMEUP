@@ -191,9 +191,9 @@ export default function Messages() {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 lg:ml-64 overflow-y-auto">
+      <div className="flex-1 lg:ml-64 overflow-y-auto flex flex-col">
         {/* Header */}
-        <div className="p-4 sm:p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white sticky top-0 z-20 shadow-lg">
+        <div className="p-3 sm:p-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white sticky top-0 z-20 shadow-lg">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <button 
@@ -215,25 +215,23 @@ export default function Messages() {
         </div>
 
         {/* Search */}
-        <div className="px-4 sm:px-6 py-3 sm:py-4 sticky top-16 sm:top-20 bg-white/80 backdrop-blur-md border-b z-10">
-          <div className="max-w-2xl mx-auto">
-            <div className="flex items-center gap-2 bg-white rounded-2xl px-3 sm:px-4 py-2 sm:py-3 shadow-sm border border-gray-100">
-              <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 flex-shrink-0" />
-              <input
-                type="text"
-                placeholder="Search conversations..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="flex-1 bg-transparent outline-none text-xs sm:text-sm"
-              />
-            </div>
+        <div className="px-3 sm:px-4 py-2 sm:py-3 sticky top-14 sm:top-16 bg-white/80 backdrop-blur-md border-b z-10">
+          <div className="flex items-center gap-2 bg-white rounded-2xl px-3 py-2 shadow-sm border border-gray-100">
+            <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 flex-shrink-0" />
+            <input
+              type="text"
+              placeholder="Search conversations..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-1 bg-transparent outline-none text-xs sm:text-sm"
+            />
           </div>
         </div>
 
         {/* Chat List */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-4 sm:py-6">
-            <div className="space-y-2 sm:space-y-3">
+          <div className="w-full px-2 sm:px-3 lg:px-4 py-2 sm:py-3">
+            <div className="space-y-1.5 sm:space-y-2">
               {filteredConversations.length === 0 ? (
                 <div className="text-center py-12 sm:py-16">
                   <ChatBubbleLeftIcon className="h-12 sm:h-16 w-12 sm:w-16 text-gray-300 mx-auto mb-4" />
@@ -244,7 +242,7 @@ export default function Messages() {
                   <div 
                     key={index}
                     onClick={() => navigate(`/messages/chat/${chat.user_id}`)}
-                    className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 hover:bg-blue-50/50 rounded-2xl transition-all cursor-pointer border border-gray-100 hover:border-blue-200"
+                    className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 hover:bg-blue-50/50 rounded-xl transition-all cursor-pointer border border-gray-100 hover:border-blue-200"
                   >
                     {/* Avatar */}
                     <div className="relative flex-shrink-0">
@@ -260,11 +258,11 @@ export default function Messages() {
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start gap-2 mb-1">
+                      <div className="flex justify-between items-start gap-2 mb-0.5">
                         <h2 className="font-semibold text-sm sm:text-base text-gray-900 truncate">{chat.name}</h2>
                       </div>
-                      <p className="text-xs text-gray-600 mb-2">{chat.role}</p>
-                      <span className="text-xs px-2 py-1 bg-blue-100 text-blue-600 rounded-full inline-block font-medium">
+                      <p className="text-xs text-gray-600 mb-1">{chat.role}</p>
+                      <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-600 rounded-full inline-block font-medium">
                         Last: {new Date(chat.last_message_time).toLocaleDateString()}
                       </span>
                     </div>
@@ -273,7 +271,7 @@ export default function Messages() {
               )}
             </div>
 
-            <div className="h-4 sm:h-6"></div>
+            <div className="h-2 sm:h-3"></div>
           </div>
         </div>
       </div>

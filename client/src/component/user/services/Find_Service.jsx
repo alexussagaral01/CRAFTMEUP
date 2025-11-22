@@ -438,46 +438,46 @@ const FindServices = () => {
 
         {/* Service Cards */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-2xl mx-auto w-full px-4 py-4 sm:py-6">
-            <div className="space-y-3 sm:space-y-4">
+          <div className="w-full px-2 sm:px-3 lg:px-4 py-2 sm:py-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
               {filteredServices.length === 0 ? (
-                <div className="text-center py-12 text-gray-500">
+                <div className="col-span-full text-center py-12 text-gray-500">
                   <p className="text-sm sm:text-base">No services found</p>
                 </div>
               ) : (
                 filteredServices.map((service) => (
                   <div 
                     key={service.id} 
-                    className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all"
+                    className="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all flex flex-col"
                   >
-                    <div className="flex justify-between items-start gap-3">
+                    <div className="flex justify-between items-start gap-2 mb-2">
                       <div className="flex-1 min-w-0">
                         <h2 className="font-semibold text-sm sm:text-base text-gray-900 truncate">{service.title}</h2>
                         <p className="text-gray-600 text-xs sm:text-sm mt-1 line-clamp-2">{service.description}</p>
-                        <p className="text-xs text-gray-500 mt-1">by {service.provider}</p>
+                        <p className="text-xs text-gray-500 mt-1 truncate">by {service.provider}</p>
                       </div>
                       <button className="flex-shrink-0 hover:text-blue-600 transition-colors">
                         <BookmarkIcon className="h-5 w-5 text-gray-400" />
                       </button>
                     </div>
 
-                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm sm:text-base text-blue-600">SC {service.price}</span>
-                        <span className="text-xs sm:text-sm text-gray-500">⭐ {service.rating}</span>
+                        <span className="font-semibold text-xs sm:text-sm text-blue-600">SC {service.price}</span>
+                        <span className="text-xs text-gray-500">⭐ {service.rating}</span>
                       </div>
                     </div>
 
-                    <div className="flex gap-2 mt-3">
+                    <div className="flex gap-2 mt-2">
                       <button
-                        className="flex-1 px-3 py-2 text-xs sm:text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors font-medium"
+                        className="flex-1 px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors font-medium"
                         onClick={() => handleBookNow(service)}
                       >
                         Book Now
                       </button>
                       <button 
                         onClick={() => handleMessage(service)}
-                        className="flex-1 px-3 py-2 text-xs sm:text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors font-medium"
+                        className="flex-1 px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors font-medium"
                       >
                         Message
                       </button>
@@ -488,7 +488,7 @@ const FindServices = () => {
             </div>
 
             {/* Bottom spacing */}
-            <div className="h-4 sm:h-6"></div>
+            <div className="h-2 sm:h-3"></div>
           </div>
         </div>
       </div>

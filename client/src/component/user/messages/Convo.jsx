@@ -274,9 +274,9 @@ export default function Convo() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col w-full md:max-w-sm mx-auto">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col w-full">
       {/* Header */}
-      <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white sticky top-0 z-50">
+      <div className="p-3 sm:p-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white sticky top-0 z-50 shadow-lg">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <button 
@@ -285,24 +285,24 @@ export default function Convo() {
             >
               <ArrowLeftIcon className="w-5 h-5" />
             </button>
-            <div className="flex flex-col">
-              <h1 className="font-semibold">{otherUser?.full_name || otherUser?.name || 'User'}</h1>
-              <p className="text-xs text-white/80 h-5">
+            <div className="flex flex-col min-w-0">
+              <h1 className="font-semibold text-sm sm:text-base truncate">{otherUser?.full_name || otherUser?.name || 'User'}</h1>
+              <p className="text-xs text-white/80 h-4 sm:h-5">
                 {otherUserTyping ? '✏️ typing...' : 'Active now'}
               </p>
             </div>
           </div>
-          <button className="text-white hover:bg-white/10 p-2 rounded-lg transition-colors">
+          <button className="text-white hover:bg-white/10 p-2 rounded-lg transition-colors flex-shrink-0">
             <EllipsisVerticalIcon className="w-5 h-5" />
           </button>
         </div>
       </div>
 
       {/* Chat Messages */}
-      <div className="flex-1 px-4 py-3 space-y-4 overflow-y-auto">
+      <div className="flex-1 px-2 sm:px-4 lg:px-6 py-2 sm:py-3 space-y-3 overflow-y-auto">
         {messages.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            <p>No messages yet. Start the conversation!</p>
+            <p className="text-sm">No messages yet. Start the conversation!</p>
           </div>
         ) : (
           messages.map((msg, index) => {
@@ -311,27 +311,27 @@ export default function Convo() {
             return (
               <div 
                 key={msg.id || index}
-                className={`flex ${isSentByCurrentUser ? 'justify-end' : 'gap-3'}`}
+                className={`flex ${isSentByCurrentUser ? 'justify-end' : 'gap-2 sm:gap-3'}`}
               >
                 {!isSentByCurrentUser && (
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center flex-shrink-0">
+                  <div className="w-7 sm:w-8 h-7 sm:h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center flex-shrink-0">
                     <span className="text-white text-xs font-bold">
                       {msg.sender_name?.[0]?.toUpperCase() || 'U'}
                     </span>
                   </div>
                 )}
-                <div className={`max-w-xs ${isSentByCurrentUser ? 'mr-2' : ''}`}>
-                  <p className={`px-4 py-2 rounded-2xl shadow-sm text-sm ${
+                <div className={`max-w-xs sm:max-w-sm lg:max-w-md ${isSentByCurrentUser ? 'mr-1 sm:mr-2' : ''}`}>
+                  <p className={`px-3 sm:px-4 py-2 rounded-2xl shadow-sm text-xs sm:text-sm ${
                     isSentByCurrentUser 
                       ? 'bg-blue-600 text-white' 
                       : 'bg-white border border-gray-100'
                   }`}>
                     {msg.message}
                   </p>
-                  <p className={`text-xs mt-1 ${
-                    isSentByCurrentUser ? 'text-right mr-2' : 'text-left ml-2'
+                  <p className={`text-xs mt-0.5 sm:mt-1 ${
+                    isSentByCurrentUser ? 'text-right mr-1 sm:mr-2' : 'text-left ml-1 sm:ml-2'
                   } text-gray-400`}>
-                    {msg.created_at ? new Date(msg.created_at).toLocaleTimeString() : 'now'}
+                    {msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'now'}
                   </p>
                 </div>
               </div>
@@ -341,13 +341,13 @@ export default function Convo() {
 
         {/* Typing Indicator */}
         {otherUserTyping && (
-          <div className="flex gap-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center flex-shrink-0">
+          <div className="flex gap-2 sm:gap-3">
+            <div className="w-7 sm:w-8 h-7 sm:h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center flex-shrink-0">
               <span className="text-white text-xs font-bold">
                 {otherUser?.full_name?.[0]?.toUpperCase() || 'U'}
               </span>
             </div>
-            <div className="bg-white border border-gray-100 rounded-2xl px-4 py-2">
+            <div className="bg-white border border-gray-100 rounded-2xl px-3 sm:px-4 py-2">
               <div className="flex space-x-1">
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -361,21 +361,21 @@ export default function Convo() {
       </div>
 
       {/* Message Input */}
-      <div className="border-t px-4 py-3 bg-white/80 backdrop-blur-md">
-        <form onSubmit={handleSendMessage} className="flex items-center gap-2 bg-gray-50 rounded-2xl p-2 border border-gray-100">
+      <div className="border-t px-2 sm:px-4 lg:px-6 py-2 sm:py-3 bg-white/80 backdrop-blur-md">
+        <form onSubmit={handleSendMessage} className="flex items-center gap-1.5 sm:gap-2 bg-gray-50 rounded-2xl p-1.5 sm:p-2 border border-gray-100">
           <input
             type="text"
             placeholder="Type a message..."
             value={newMessage}
             onChange={handleMessageChange}
-            className="flex-1 bg-transparent outline-none text-sm px-2"
+            className="flex-1 bg-transparent outline-none text-xs sm:text-sm px-2 py-1"
           />
           <button 
             type="submit"
-            className="bg-blue-600 text-white p-3 rounded-xl hover:bg-blue-700 transition-all disabled:opacity-50"
+            className="bg-blue-600 text-white p-2 sm:p-3 rounded-xl hover:bg-blue-700 transition-all disabled:opacity-50 flex-shrink-0"
             disabled={!newMessage.trim()}
           >
-            <PaperAirplaneIcon className="w-5 h-5" />
+            <PaperAirplaneIcon className="w-4 sm:w-5 h-4 sm:h-5" />
           </button>
         </form>
       </div>
