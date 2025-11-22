@@ -297,104 +297,109 @@ const navItems = (() => {
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-2xl mx-auto w-full px-4 py-4 sm:py-6">
-            {/* Balance Card */}
-            <div className="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl p-6 sm:p-8 text-white shadow-lg mb-6">
-              <p className="text-white/80 text-xs sm:text-sm">Current Balance</p>
-              <h2 className="text-3xl sm:text-4xl font-bold mt-2">{balance}</h2>
-              <p className="text-white/80 text-xs sm:text-sm mt-1">SkillCoins</p>
-            </div>
-
-            {/* Request Type Toggle */}
-            <div className="flex gap-2 mb-6">
-              <button 
-                onClick={() => setRequestType('top-up')}
-                className={`flex-1 py-3 rounded-xl font-medium text-sm sm:text-base transition-colors ${
-                  requestType === 'top-up' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Top Up
-              </button>
-              <button 
-                onClick={() => setRequestType('cash-out')}
-                className={`flex-1 py-3 rounded-xl font-medium text-sm sm:text-base transition-colors ${
-                  requestType === 'cash-out' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Cash Out
-              </button>
-            </div>
-
-            {/* Form */}
-            <div className="space-y-4 sm:space-y-5 mb-6">
-              {/* Amount Input */}
-              <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100">
-                <label className="text-xs sm:text-sm font-medium text-gray-700 mb-2 block">
-                  Amount (SkillCoins)
-                </label>
-                <input
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="Enter amount"
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                />
+          <div className="w-full px-2 sm:px-3 lg:px-4 py-2 sm:py-3">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 mb-6">
+              {/* Balance Card - Full Width on Left */}
+              <div className="lg:col-span-1 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl p-6 sm:p-8 text-white shadow-lg">
+                <p className="text-white/80 text-xs sm:text-sm">Current Balance</p>
+                <h2 className="text-3xl sm:text-4xl font-bold mt-2">{balance}</h2>
+                <p className="text-white/80 text-xs sm:text-sm mt-1">SkillCoins</p>
               </div>
 
-              {/* Reference Number Input */}
-              <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100">
-                <label className="text-xs sm:text-sm font-medium text-gray-700 mb-2 block">
-                  {requestType === 'top-up' ? 'GCash Reference Number' : 'GCash Number'}
-                </label>
-                <input
-                  type="text"
-                  value={referenceNumber}
-                  onChange={(e) => setReferenceNumber(e.target.value)}
-                  placeholder={requestType === 'top-up' ? 'Enter reference number' : 'Enter GCash number'}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                />
-              </div>
-
-              {/* File Upload - Only for Top-Up */}
-              {requestType === 'top-up' && (
-                <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100">
-                  <label className="text-xs sm:text-sm font-medium text-gray-700 mb-3 block">
-                    Upload Proof of Payment
-                  </label>
-                  <label className="border-2 border-dashed border-gray-300 rounded-xl p-6 sm:p-8 text-center hover:bg-gray-50 transition-colors cursor-pointer block">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      className="hidden"
-                    />
-                    <ArrowUpTrayIcon className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                    <p className="text-xs sm:text-sm text-gray-700 font-medium">
-                      {proofFile ? proofFile.name : 'Tap to upload image'}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">(PNG, JPG up to 5MB)</p>
-                  </label>
+              {/* Form Section - Takes 2 Columns on Desktop */}
+              <div className="lg:col-span-2 space-y-4 sm:space-y-5">
+                {/* Request Type Toggle */}
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => setRequestType('top-up')}
+                    className={`flex-1 py-3 rounded-xl font-medium text-sm sm:text-base transition-colors ${
+                      requestType === 'top-up' 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    Top Up
+                  </button>
+                  <button 
+                    onClick={() => setRequestType('cash-out')}
+                    className={`flex-1 py-3 rounded-xl font-medium text-sm sm:text-base transition-colors ${
+                      requestType === 'cash-out' 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    Cash Out
+                  </button>
                 </div>
-              )}
 
-              {/* Submit Button */}
-              <button 
-                onClick={handleSubmitRequest}
-                disabled={isLoading || !amount || !referenceNumber || (requestType === 'top-up' && !proofFile)}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 sm:py-4 rounded-xl font-medium text-sm sm:text-base hover:from-blue-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? 'Processing...' : `Submit ${requestType === 'top-up' ? 'Top-Up' : 'Cash-Out'} Request`}
-              </button>
+                {/* Form Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  {/* Amount Input */}
+                  <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100">
+                    <label className="text-xs sm:text-sm font-medium text-gray-700 mb-2 block">
+                      Amount (SkillCoins)
+                    </label>
+                    <input
+                      type="number"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      placeholder="Enter amount"
+                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    />
+                  </div>
+
+                  {/* Reference Number Input */}
+                  <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100">
+                    <label className="text-xs sm:text-sm font-medium text-gray-700 mb-2 block">
+                      {requestType === 'top-up' ? 'GCash Reference Number' : 'GCash Number'}
+                    </label>
+                    <input
+                      type="text"
+                      value={referenceNumber}
+                      onChange={(e) => setReferenceNumber(e.target.value)}
+                      placeholder={requestType === 'top-up' ? 'Enter reference number' : 'Enter GCash number'}
+                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+
+                {/* File Upload - Only for Top-Up */}
+                {requestType === 'top-up' && (
+                  <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100">
+                    <label className="text-xs sm:text-sm font-medium text-gray-700 mb-3 block">
+                      Upload Proof of Payment
+                    </label>
+                    <label className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-gray-50 transition-colors cursor-pointer block">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                      <ArrowUpTrayIcon className="h-6 w-6 mx-auto mb-2 text-gray-400" />
+                      <p className="text-xs sm:text-sm text-gray-700 font-medium">
+                        {proofFile ? proofFile.name : 'Tap to upload image'}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">(PNG, JPG up to 5MB)</p>
+                    </label>
+                  </div>
+                )}
+
+                {/* Submit Button */}
+                <button 
+                  onClick={handleSubmitRequest}
+                  disabled={isLoading || !amount || !referenceNumber || (requestType === 'top-up' && !proofFile)}
+                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 sm:py-4 rounded-xl font-medium text-sm sm:text-base hover:from-blue-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? 'Processing...' : `Submit ${requestType === 'top-up' ? 'Top-Up' : 'Cash-Out'} Request`}
+                </button>
+              </div>
             </div>
 
             {/* Transaction History */}
             <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100">
               <h3 className="font-semibold text-base sm:text-lg mb-4">Transaction History</h3>
-              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+              <div className="space-y-2 sm:space-y-3 max-h-[500px] overflow-y-auto pr-2">
                 {transactions.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
                     <p className="text-sm">No transactions yet</p>
@@ -429,7 +434,7 @@ const navItems = (() => {
             </div>
 
             {/* Bottom spacing */}
-            <div className="h-4 sm:h-6"></div>
+            <div className="h-2 sm:h-3"></div>
           </div>
         </div>
       </div>

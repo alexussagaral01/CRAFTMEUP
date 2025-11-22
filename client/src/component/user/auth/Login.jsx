@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { FaEnvelope, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../../../services/api';
-import { getAdminDashboardData } from '../../../services/adminApi'; // Add this import
+import { getAdminDashboardData } from '../../../services/adminApi';
+import Toast from '../../common/Toast';
 
 const LoginForm = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +14,7 @@ const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [toast, setToast] = useState(null);
   const navigate = useNavigate();
 
   const validateEmail = (email) => {
@@ -42,7 +44,6 @@ const LoginForm = () => {
         fullName: 'Admin User'
       };
 
-      // Add mock admin dashboard data
       const mockDashboardData = {
         stats: [
           { title: 'Total Users', value: '1,234', icon: 'UsersIcon' },
@@ -65,43 +66,88 @@ const LoginForm = () => {
       localStorage.setItem('user', JSON.stringify(adminUser));
       localStorage.setItem('adminDashboardData', JSON.stringify(mockDashboardData));
       
+      setToast({
+        message: 'Login successful!',
+        type: 'success',
+        isLoading: false,
+        showProgress: true,
+        duration: 2000,
+      });
+
+      const redirectTimer = setTimeout(() => {
+        navigate('/admin-dashboard');
+      }, 2000);
+
       setIsLoading(false);
-      navigate('/admin-dashboard');
-      return;
+      return () => clearTimeout(redirectTimer);
     }
 
     // Continue with regular user login flow
     try {
       const response = await login(formData.email, formData.password);
-      console.log('Login response:', response.data); // Debug log
 
       if (response.data && response.data.token) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
         
-        // Check if user has admin role (modify this according to your user object structure)
+        // Check if user has admin role
         if (response.data.user && (response.data.user.role === 'admin' || response.data.user.type === 'admin')) {
           try {
-            console.log('User is admin, fetching admin data...'); // Debug log
             const adminDataRes = await getAdminDashboardData(response.data.token);
             localStorage.setItem('adminDashboardData', JSON.stringify(adminDataRes.data));
-            navigate('/admin-dashboard');
+            
+            setToast({
+              message: 'Login successful!',
+              type: 'success',
+              isLoading: false,
+              showProgress: true,
+              duration: 2000,
+            });
+
+            const redirectTimer = setTimeout(() => {
+              navigate('/admin-dashboard');
+            }, 2000);
+
+            setIsLoading(false);
+            return () => clearTimeout(redirectTimer);
           } catch (adminErr) {
-            console.error('Admin dashboard error:', adminErr);
-            setError('Failed to retrieve admin dashboard data.');
+            setToast({
+              message: 'Failed to retrieve admin dashboard data.',
+              type: 'error',
+              isLoading: false,
+              showProgress: false,
+              duration: 2000,
+            });
             localStorage.clear();
+            setIsLoading(false);
           }
         } else {
-          navigate('/dashboard');
+          setToast({
+            message: 'Login successful!',
+            type: 'success',
+            isLoading: false,
+            showProgress: true,
+            duration: 2000,
+          });
+
+          const redirectTimer = setTimeout(() => {
+            navigate('/dashboard');
+          }, 2000);
+
+          setIsLoading(false);
+          return () => clearTimeout(redirectTimer);
         }
       } else {
-        setError('Invalid response format from server');
-        console.error('Invalid response format:', response);
+        setToast({
+          message: 'Invalid response format from server',
+          type: 'error',
+          isLoading: false,
+          showProgress: false,
+          duration: 2000,
+        });
+        setIsLoading(false);
       }
     } catch (error) {
-      console.error('Login error:', error);
-      console.error('Error response:', error.response); // Debug log
-      
       let errorMessage = 'An error occurred during login';
       
       if (error.response) {
@@ -117,8 +163,13 @@ const LoginForm = () => {
         }
       }
       
-      setError(errorMessage);
-    } finally {
+      setToast({
+        message: errorMessage,
+        type: 'error',
+        isLoading: false,
+        showProgress: false,
+        duration: 3000,
+      });
       setIsLoading(false);
     }
   };
@@ -212,6 +263,18 @@ const LoginForm = () => {
           </p>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+          isLoading={toast.isLoading}
+          showProgress={toast.showProgress}
+          duration={toast.duration}
+        />
+      )}
     </div>
   );
 };

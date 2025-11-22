@@ -24,6 +24,7 @@ import {
   updateService,
   deleteService,
 } from "../../../services/api";
+import Toast from "../../common/Toast";
 
 export default function MyServices() {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ export default function MyServices() {
   const [services, setServices] = useState([]);
   const [showServiceModal, setShowServiceModal] = useState(false);
   const [editingService, setEditingService] = useState(null);
+  const [toast, setToast] = useState(null);
   const [newService, setNewService] = useState({
     title: "",
     description: "",
@@ -83,9 +85,22 @@ export default function MyServices() {
       try {
         await deleteService(serviceId);
         fetchUserServices();
-        alert("Service deleted successfully");
+        
+        setToast({
+          message: "Service deleted successfully!",
+          type: "success",
+          isLoading: false,
+          showProgress: true,
+          duration: 2000,
+        });
       } catch (error) {
-        alert("Failed to delete service");
+        setToast({
+          message: "Failed to delete service",
+          type: "error",
+          isLoading: false,
+          showProgress: false,
+          duration: 2000,
+        });
       }
     }
   };
@@ -101,8 +116,24 @@ export default function MyServices() {
 
       if (editingService) {
         await updateService(editingService.id, serviceData);
+        
+        setToast({
+          message: "Service updated successfully!",
+          type: "success",
+          isLoading: false,
+          showProgress: true,
+          duration: 2000,
+        });
       } else {
         await createService(serviceData);
+        
+        setToast({
+          message: "Service created successfully!",
+          type: "success",
+          isLoading: false,
+          showProgress: true,
+          duration: 2000,
+        });
       }
 
       setShowServiceModal(false);
@@ -115,9 +146,14 @@ export default function MyServices() {
       });
       setEditingService(null);
       fetchUserServices();
-      alert(editingService ? "Service updated successfully!" : "Service created successfully!");
     } catch (error) {
-      alert(editingService ? "Failed to update service" : "Failed to create service");
+      setToast({
+        message: editingService ? "Failed to update service" : "Failed to create service",
+        type: "error",
+        isLoading: false,
+        showProgress: false,
+        duration: 2000,
+      });
     }
   };
 
@@ -359,10 +395,10 @@ export default function MyServices() {
 
         {/* Service List */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-2xl mx-auto w-full px-4 py-4 sm:py-6">
-            <div className="space-y-3 sm:space-y-4">
+          <div className="w-full px-2 sm:px-3 lg:px-4 py-2 sm:py-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
               {services.length === 0 ? (
-                <div className="text-center py-12 sm:py-16">
+                <div className="col-span-full text-center py-12 sm:py-16">
                   <ClipboardDocumentListIcon className="h-12 sm:h-16 w-12 sm:w-16 text-gray-300 mx-auto mb-4" />
                   <p className="text-gray-500 text-sm sm:text-base mb-4">No services created yet</p>
                   <button
@@ -376,11 +412,11 @@ export default function MyServices() {
                 services.map((service) => (
                   <div
                     key={service.id}
-                    className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all relative"
+                    className="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all flex flex-col"
                   >
                     {/* Status Badge */}
                     <span
-                      className={`absolute top-3 right-3 px-3 py-1 text-xs font-medium rounded-full ${
+                      className={`absolute top-3 right-3 px-2 sm:px-3 py-1 text-xs font-medium rounded-full ${
                         service.status === "Active"
                           ? "bg-green-100 text-green-700"
                           : "bg-gray-200 text-gray-600"
@@ -389,29 +425,29 @@ export default function MyServices() {
                       {service.status || "Active"}
                     </span>
 
-                    <h2 className="font-semibold text-sm sm:text-base text-gray-900 pr-20">{service.title}</h2>
-                    <p className="text-gray-600 text-xs sm:text-sm mt-2 line-clamp-2">{service.description}</p>
+                    <h2 className="font-semibold text-sm sm:text-base text-gray-900 pr-16 line-clamp-1">{service.title}</h2>
+                    <p className="text-gray-600 text-xs sm:text-sm mt-1 line-clamp-2">{service.description}</p>
                     
-                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
                       <div>
-                        <p className="font-semibold text-blue-600 text-sm sm:text-base">SC {service.price}</p>
-                        <p className="text-gray-500 text-xs mt-1">
-                          Available: {service.availability}
+                        <p className="font-semibold text-blue-600 text-xs sm:text-sm">SC {service.price}</p>
+                        <p className="text-gray-500 text-xs mt-0.5 truncate">
+                          {service.availability}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex gap-3 mt-3">
+                    <div className="flex gap-2 mt-2">
                       <button
                         onClick={() => handleEdit(service)}
-                        className="flex-1 flex items-center justify-center gap-2 p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-sm"
+                        className="flex-1 flex items-center justify-center gap-1 p-1.5 sm:p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-xs sm:text-sm"
                       >
                         <PencilIcon className="h-4 w-4" />
                         <span className="hidden sm:inline">Edit</span>
                       </button>
                       <button
                         onClick={() => handleDelete(service.id)}
-                        className="flex-1 flex items-center justify-center gap-2 p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm"
+                        className="flex-1 flex items-center justify-center gap-1 p-1.5 sm:p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-xs sm:text-sm"
                       >
                         <TrashIcon className="h-4 w-4" />
                         <span className="hidden sm:inline">Delete</span>
@@ -423,13 +459,25 @@ export default function MyServices() {
             </div>
 
             {/* Bottom spacing */}
-            <div className="h-4 sm:h-6"></div>
+            <div className="h-2 sm:h-3"></div>
           </div>
         </div>
       </div>
 
       {/* Modal */}
       {showServiceModal && renderServiceForm()}
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+          isLoading={toast.isLoading}
+          showProgress={toast.showProgress}
+          duration={toast.duration}
+        />
+      )}
     </div>
   );
 }

@@ -177,10 +177,10 @@ export default function Feedback() {
   ];
 
   useEffect(() => {
-  const storedUser = JSON.parse(localStorage.getItem('user'));
-  setUserData(storedUser);
-  fetchFeedback(storedUser?.id);
-}, []);
+    const storedUser = JSON.parse(localStorage.getItem('user'));
+    setUserData(storedUser);
+    fetchFeedback(storedUser?.id);
+  }, []);
 
   useEffect(() => {
     if (!booking) {
@@ -189,63 +189,59 @@ export default function Feedback() {
   }, [booking, navigate]);
 
   const handleSubmitFeedback = async () => {
-  if (rating === 0) {
-    alert('Please select a rating');
-    return;
-  }
-
-  setIsSubmitting(true);
-  try {
-    const user = JSON.parse(localStorage.getItem('user'));
-    
-    const feedbackData = {
-      service_id: booking.service_id,
-      user_id: user.id,
-      rating: rating,
-      comment: comment.trim()
-    };
-
-    // First submit the feedback
-    await submitFeedback(feedbackData);
-
-    // Then create the notification
-    await sendFeedbackNotification({
-      tutorId: booking.provider_id,
-      learnerName: user.full_name,
-      comment: comment.trim() || `Rated ${rating} stars`  // Use rating if no comment
-    });
-
-    alert('Feedback submitted successfully!');
-    navigate('/view-past-feedback');
-  } catch (error) {
-    console.error('Error submitting feedback:', error);
-    alert('Failed to submit feedback. Please try again.');
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
-
-const fetchFeedback = async (userId) => {
-  if (!userId || !booking?.service_id) return;
-  
-  try {
-    const response = await getUserFeedback(userId);
-    
-    // Filter feedback for current service
-    const currentFeedback = response.data.filter(f => 
-      f.service_id === booking.service_id && 
-      f.user_id === userId
-    );
-
-    if (currentFeedback.length > 0) {
-      setRating(currentFeedback[0].rating);
-      setComment(currentFeedback[0].comment || '');
+    if (rating === 0) {
+      alert('Please select a rating');
+      return;
     }
-  } catch (error) {
-    console.error('Error fetching feedback:', error);
-  }
-};
+
+    setIsSubmitting(true);
+    try {
+      const user = JSON.parse(localStorage.getItem('user'));
+      
+      const feedbackData = {
+        service_id: booking.service_id,
+        user_id: user.id,
+        rating: rating,
+        comment: comment.trim()
+      };
+
+      await submitFeedback(feedbackData);
+
+      await sendFeedbackNotification({
+        tutorId: booking.provider_id,
+        learnerName: user.full_name,
+        comment: comment.trim() || `Rated ${rating} stars`
+      });
+
+      alert('Feedback submitted successfully!');
+      navigate('/view-past-feedback');
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      alert('Failed to submit feedback. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const fetchFeedback = async (userId) => {
+    if (!userId || !booking?.service_id) return;
+    
+    try {
+      const response = await getUserFeedback(userId);
+      
+      const currentFeedback = response.data.filter(f => 
+        f.service_id === booking.service_id && 
+        f.user_id === userId
+      );
+
+      if (currentFeedback.length > 0) {
+        setRating(currentFeedback[0].rating);
+        setComment(currentFeedback[0].comment || '');
+      }
+    } catch (error) {
+      console.error('Error fetching feedback:', error);
+    }
+  };
 
   const handleSkip = () => {
     navigate('/transactions');
@@ -256,15 +252,13 @@ const fetchFeedback = async (userId) => {
   }
 
   return (
-    <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen flex flex-col lg:flex-row w-full">
-      {/* Sidebar - Desktop (always visible) */}
+    <div className="bg-gradient-to-b from-blue-50 to-white h-screen flex flex-col lg:flex-row w-full overflow-hidden">
+      {/* Sidebar - Desktop */}
       <div className="hidden lg:flex fixed inset-y-0 left-0 bg-gradient-to-b from-gray-50 to-white w-64 flex-col shadow-xl border-r z-30">
-        {/* Header - Fixed at top */}
         <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600">
           <h2 className="font-semibold text-white text-lg">Menu</h2>
         </div>
 
-        {/* Navigation - Scrollable */}
         <nav className="p-3 space-y-1 flex-1 overflow-y-auto">
           {navItems.map((item) => (
             <button
@@ -281,9 +275,8 @@ const fetchFeedback = async (userId) => {
         </nav>
       </div>
 
-      {/* Sidebar - Mobile (toggle-based) */}
+      {/* Sidebar - Mobile */}
       <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} bg-gradient-to-b from-gray-50 to-white w-64 transition-transform duration-300 ease-in-out z-40 lg:hidden flex flex-col shadow-xl border-r`}>
-        {/* Header - Fixed at top */}
         <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 flex justify-between items-center">
           <h2 className="font-semibold text-white">Menu</h2>
           <button 
@@ -294,7 +287,6 @@ const fetchFeedback = async (userId) => {
           </button>
         </div>
 
-        {/* Navigation - Scrollable */}
         <nav className="p-3 space-y-1 flex-1 overflow-y-auto">
           {navItems.map((item) => (
             <button
@@ -322,10 +314,10 @@ const fetchFeedback = async (userId) => {
         ></div>
       )}
 
-      {/* Main Content */}
-      <div className="flex-1 lg:ml-64 overflow-y-auto">
-        {/* Header */}
-        <div className="p-4 sm:p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white sticky top-0 z-20 shadow-lg">
+      {/* Main Content - Maximized */}
+      <div className="flex-1 lg:ml-64 flex flex-col h-screen overflow-hidden">
+        {/* Header - Fixed */}
+        <div className="p-4 sm:p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg flex-shrink-0">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <button 
@@ -346,129 +338,136 @@ const fetchFeedback = async (userId) => {
           </div>
         </div>
 
-        {/* Content */}
+        {/* Content - Scrollable and Maximized */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-2xl mx-auto w-full px-4 py-4 sm:py-6">
-            {/* Service Info Card */}
-            <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-5 mb-4">
-              <div className="flex items-center gap-3">
-                <img
-                  src="https://via.placeholder.com/40"
-                  alt="profile"
-                  className="w-12 sm:w-14 h-12 sm:h-14 rounded-full object-cover flex-shrink-0"
-                />
-                <div className="flex-1 min-w-0">
-                  <h2 className="font-semibold text-sm sm:text-base truncate">{booking.provider_name}</h2>
-                  <p className="text-xs sm:text-sm text-gray-500 truncate">{booking.service_title}</p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Completed on {new Date(booking.created_at).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric'
-                    })}
+          <div className="max-w-5xl mx-auto w-full px-4 lg:px-8 py-6 lg:py-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+              {/* Left Column */}
+              <div className="space-y-6">
+                {/* Service Info Card */}
+                <div className="bg-white rounded-2xl shadow-sm p-6">
+                  <div className="flex items-center gap-4">
+                    <img
+                      src="https://via.placeholder.com/60"
+                      alt="profile"
+                      className="w-16 h-16 rounded-full object-cover flex-shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h2 className="font-semibold text-lg truncate">{booking.provider_name}</h2>
+                      <p className="text-sm text-gray-500 truncate">{booking.service_title}</p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        Completed on {new Date(booking.created_at).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Rating Card */}
+                <div className="bg-white rounded-2xl shadow-sm p-8">
+                  <div className="text-center">
+                    <p className="text-gray-700 font-medium text-lg mb-6">How was your experience?</p>
+                    <div className="flex justify-center gap-4 mb-4">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          onClick={() => setRating(star)}
+                          onMouseEnter={() => setHoveredRating(star)}
+                          onMouseLeave={() => setHoveredRating(0)}
+                          className="transition-transform hover:scale-110"
+                        >
+                          <StarIcon
+                            className={`h-12 w-12 ${
+                              star <= (hoveredRating || rating)
+                                ? "text-yellow-400"
+                                : "text-gray-300"
+                            }`}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                    {rating > 0 && (
+                      <p className="text-gray-500 text-base font-medium">{rating} out of 5 stars</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Helpful Tips */}
+                <div className="border border-blue-100 rounded-xl p-6 bg-blue-50">
+                  <h3 className="font-medium text-base mb-3 text-blue-900">💡 Helpful Tips</h3>
+                  <p className="text-sm text-blue-700 leading-relaxed">
+                    Your feedback helps improve our community. Be honest and constructive
+                    in your review to help others make informed decisions.
                   </p>
                 </div>
               </div>
-            </div>
 
-            {/* Rating Card */}
-            <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-5 mb-4">
-              <div className="text-center">
-                <p className="text-gray-700 font-medium text-sm sm:text-base mb-4">How was your experience?</p>
-                <div className="flex justify-center gap-2 sm:gap-3 mb-3">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      onClick={() => setRating(star)}
-                      onMouseEnter={() => setHoveredRating(star)}
-                      onMouseLeave={() => setHoveredRating(0)}
-                      className="transition-transform hover:scale-110"
-                    >
-                      <StarIcon
-                        className={`h-8 sm:h-10 w-8 sm:w-10 ${
-                          star <= (hoveredRating || rating)
-                            ? "text-yellow-400"
-                            : "text-gray-300"
-                        }`}
-                      />
-                    </button>
-                  ))}
+              {/* Right Column */}
+              <div className="space-y-6">
+                {/* Comment Box */}
+                <div className="bg-white rounded-2xl shadow-sm p-6">
+                  <label className="block text-base font-medium text-gray-700 mb-3">
+                    Share your experience
+                  </label>
+                  <textarea
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    placeholder="Tell us about your experience with this service..."
+                    className="w-full border border-gray-200 rounded-xl p-4 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    rows="8"
+                    maxLength={1500}
+                  ></textarea>
+                  <p className="text-right text-xs text-gray-400 mt-2">
+                    {comment.length}/1500 characters
+                  </p>
                 </div>
-                {rating > 0 && (
-                  <p className="text-gray-500 text-xs sm:text-sm">{rating} out of 5 stars</p>
-                )}
+
+                {/* Report Button */}
+                <div className="bg-white rounded-2xl shadow-sm p-6">
+                  <div className="flex items-center justify-between gap-4">
+                    <p className="text-sm text-gray-600">Had an issue with this service?</p>
+                    <button 
+                      className="bg-red-500 text-white px-6 py-2.5 text-sm rounded-lg hover:bg-red-600 transition-colors whitespace-nowrap"
+                      onClick={() => setShowReportModal(true)}
+                    >
+                      Report User
+                    </button>
+                  </div>
+                </div>
+
+                {/* Submit Buttons */}
+                <div className="space-y-3">
+                  <button 
+                    onClick={handleSubmitFeedback}
+                    disabled={isSubmitting || rating === 0}
+                    className={`w-full ${
+                      isSubmitting || rating === 0
+                        ? 'bg-gray-300'
+                        : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
+                    } text-white py-4 rounded-xl font-medium text-base transition-all shadow-md`}
+                  >
+                    {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
+                  </button>
+                  <button 
+                    onClick={() => navigate('/view-past-feedback')}
+                    disabled={isSubmitting}
+                    className="w-full border-2 border-blue-600 text-blue-600 py-4 rounded-xl font-medium text-base hover:bg-blue-50 transition-all disabled:opacity-50"
+                  >
+                    View Past Feedback
+                  </button>
+                  <button 
+                    onClick={() => navigate('/transactions')}
+                    disabled={isSubmitting}
+                    className="w-full border-2 border-gray-300 text-gray-600 py-4 rounded-xl font-medium text-base hover:bg-gray-50 transition-all disabled:opacity-50"
+                  >
+                    Skip for Now
+                  </button>
+                </div>
               </div>
             </div>
-
-            {/* Comment Box */}
-            <div className="mb-4">
-              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
-                Share your experience
-              </label>
-              <textarea
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                placeholder="Tell us about your experience with this service..."
-                className="w-full border border-gray-200 rounded-xl p-3 text-xs sm:text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                rows="4"
-                maxLength={1500}
-              ></textarea>
-              <p className="text-right text-xs text-gray-400 mt-1">
-                {comment.length}/1500 characters
-              </p>
-            </div>
-
-            {/* Report Button */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 p-3 bg-gray-50 rounded-xl">
-              <p className="text-xs sm:text-sm text-gray-600">Had an issue with this service?</p>
-              <button 
-                className="bg-red-500 text-white px-4 py-2 text-xs sm:text-sm rounded-lg hover:bg-red-600 transition-colors whitespace-nowrap"
-                onClick={() => setShowReportModal(true)}
-              >
-                Report
-              </button>
-            </div>
-
-            {/* Submit Buttons */}
-            <div className="space-y-2 sm:space-y-3 mb-6">
-              <button 
-                onClick={handleSubmitFeedback}
-                disabled={isSubmitting || rating === 0}
-                className={`w-full ${
-                  isSubmitting || rating === 0
-                    ? 'bg-gray-300'
-                    : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
-                } text-white py-3 rounded-xl font-medium text-sm transition-all`}
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
-              </button>
-              <button 
-                onClick={() => navigate('/view-past-feedback')}
-                disabled={isSubmitting}
-                className="w-full border-2 border-blue-600 text-blue-600 py-3 rounded-xl font-medium text-sm hover:bg-blue-50 transition-all disabled:opacity-50"
-              >
-                View Past Feedback
-              </button>
-              <button 
-                onClick={() => navigate('/transactions')}
-                disabled={isSubmitting}
-                className="w-full border-2 border-gray-300 text-gray-600 py-3 rounded-xl font-medium text-sm hover:bg-gray-50 transition-all disabled:opacity-50"
-              >
-                Skip for Now
-              </button>
-            </div>
-
-            {/* Helpful Tips */}
-            <div className="border border-blue-100 rounded-xl p-3 sm:p-4 bg-blue-50 mb-6">
-              <h3 className="font-medium text-xs sm:text-sm mb-2 text-blue-900">💡 Helpful Tips</h3>
-              <p className="text-xs text-blue-700 leading-relaxed">
-                Your feedback helps improve our community. Be honest and constructive
-                in your review to help others make informed decisions.
-              </p>
-            </div>
-
-            {/* Bottom spacing */}
-            <div className="h-4 sm:h-6"></div>
           </div>
         </div>
       </div>

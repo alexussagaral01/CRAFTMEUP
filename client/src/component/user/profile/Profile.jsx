@@ -339,7 +339,7 @@ const navItems = (() => {
 
         {/* Content area */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-2xl mx-auto w-full px-4 py-4 sm:py-6">
+          <div className="w-full px-4 py-4 sm:py-6">
             <div className="bg-white rounded-2xl shadow-sm">
               {/* Profile Section */}
               <div className="flex flex-col items-center py-6 sm:py-8 px-4 border-b">
