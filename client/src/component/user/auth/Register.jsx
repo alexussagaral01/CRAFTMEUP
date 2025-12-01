@@ -47,54 +47,57 @@ const RegisterForm = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
+  e.preventDefault();
+  setError('');
 
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      return;
+  if (formData.password !== formData.confirmPassword) {
+    setError('Passwords do not match');
+    return;
+  }
+
+  try {
+    const formDataToSend = new FormData();
+
+    formDataToSend.append('fullName', formData.fullName);
+    formDataToSend.append('email', formData.email);
+    formDataToSend.append('password', formData.password);
+    formDataToSend.append('course', formData.course);
+    formDataToSend.append('year', formData.year);
+    formDataToSend.append('role', formData.role);
+
+    if (formData.studentIdFile) {
+      formDataToSend.append('studentId', formData.studentIdFile);
+    }
+    if (formData.studyLoadFile) {
+      formDataToSend.append('studyLoad', formData.studyLoadFile);
     }
 
-    try {
-      const formDataToSend = new FormData();
+    const response = await register(formDataToSend);
 
-      formDataToSend.append('fullName', formData.fullName);
-      formDataToSend.append('email', formData.email);
-      formDataToSend.append('password', formData.password);
-      formDataToSend.append('course', formData.course);
-      formDataToSend.append('year', formData.year);
-      formDataToSend.append('role', formData.role);
+    if (response.data.token) {
+      setToast({
+        message: 'Account created successfully!',
+        type: 'success',
+        isLoading: false,
+        showProgress: true,
+        duration: 2000,
+      });
 
-      if (formData.studentIdFile) formDataToSend.append('studentId', formData.studentIdFile);
-      if (formData.studyLoadFile) formDataToSend.append('studyLoad', formData.studyLoadFile);
+      const redirectTimer = setTimeout(() => {
+        navigate('/');
+      }, 2000);
 
-      const response = await register(formDataToSend);
-
-      if (response.data.token) {
-        // Show success with progress bar
-        setToast({
-          message: 'Account created successfully!',
-          type: 'success',
-          isLoading: false,
-          showProgress: true,
-          duration: 2000,
-        });
-        
-        // Redirect after 2 seconds
-        const redirectTimer = setTimeout(() => {
-          navigate('/');
-        }, 2000);
-
-        return () => clearTimeout(redirectTimer);
-      }
-    } catch (error) {
-      setError(
-        error.response?.data?.message ||
-          'Registration failed. Please try again.'
-      );
-      setToast(null);
+      return () => clearTimeout(redirectTimer);
     }
-  };
+  } catch (error) {
+    setError(
+      error.response?.data?.message ||
+      'Registration failed. Please try again.'
+    );
+    setToast(null);
+  }
+};
+
 
   const handleBack = () => {
     if (step > 1) setStep(step - 1);

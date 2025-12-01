@@ -71,12 +71,12 @@ const LoginForm = () => {
         type: 'success',
         isLoading: false,
         showProgress: true,
-        duration: 2000,
+        duration: 1000,
       });
 
       const redirectTimer = setTimeout(() => {
         navigate('/admin-dashboard');
-      }, 2000);
+      }, 1000);
 
       setIsLoading(false);
       return () => clearTimeout(redirectTimer);
@@ -101,12 +101,12 @@ const LoginForm = () => {
               type: 'success',
               isLoading: false,
               showProgress: true,
-              duration: 2000,
+              duration: 1000,
             });
 
             const redirectTimer = setTimeout(() => {
               navigate('/admin-dashboard');
-            }, 2000);
+            }, 1000);
 
             setIsLoading(false);
             return () => clearTimeout(redirectTimer);
@@ -127,12 +127,12 @@ const LoginForm = () => {
             type: 'success',
             isLoading: false,
             showProgress: true,
-            duration: 2000,
+            duration: 1000,
           });
 
           const redirectTimer = setTimeout(() => {
             navigate('/dashboard');
-          }, 2000);
+          }, 1000);
 
           setIsLoading(false);
           return () => clearTimeout(redirectTimer);
@@ -235,7 +235,11 @@ const LoginForm = () => {
 
             {/* Forgot Password */}
             <div className="flex justify-end">
-              <button type="button" className="text-sm text-blue-600 hover:text-blue-700">
+              <button 
+                type="button" 
+                onClick={() => navigate('/forgot-password')}
+                className="text-sm text-blue-600 hover:text-blue-700"
+              >
                 Forgot password?
               </button>
             </div>

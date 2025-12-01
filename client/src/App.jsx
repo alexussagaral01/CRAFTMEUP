@@ -18,6 +18,8 @@ import User_Report from './component/admin/reports/User_Report';
 import Wallet_Log from './component/admin/wallet_log/Wallet_Log';
 import AccountVerification from './component/admin/verification/AccountVerification';
 import Convo from './component/user/messages/Convo';
+import ForgotPassword from './component/user/auth/ForgotPassword';
+import AdminMessages from "./component/admin/admin_messages/AdminMessages";
 
 
 
@@ -45,6 +47,8 @@ function App() {
         <Route path="/wallet-logs" element={<Wallet_Log />} />
         <Route path="/account-verification" element={<AccountVerification />} />
         <Route path="/messages/chat/:userId" element={<Convo />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/admin-messages" element={<AdminMessages />} />
       </Routes>
     </Router>
   );

@@ -53,7 +53,6 @@ exports.getUserServices = async (req, res) => {
 
 exports.updateService = async (req, res) => {
   try {
-    // accept multiple possible param names (id or serviceId)
     const serviceId = parseInt(req.params.serviceId || req.params.id, 10);
     const { title, description, price, availability, status } = req.body || {};
 
@@ -61,12 +60,11 @@ exports.updateService = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Valid service ID is required' });
     }
 
-    // convert undefined to null and ensure numeric price
     const sanitized = [
       (typeof title === 'string' && title.trim() !== '') ? title.trim() : null,
       (typeof description === 'string' && description.trim() !== '') ? description.trim() : null,
       (price !== undefined && price !== null && price !== '') ? Number(price) : null,
-      (typeof availability === 'string' && availability.trim() !== '') ? availability.trim() : null,
+      availability !== undefined ? availability : null,
       (typeof status === 'string' && status.trim() !== '') ? status.trim() : 'Active',
       serviceId
     ];
