@@ -16,6 +16,7 @@ import {
   TrashIcon,
   PlusIcon,
   BookmarkIcon,
+  XCircleIcon,
 } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 import {
@@ -37,9 +38,25 @@ export default function MyServices() {
     title: "",
     description: "",
     price: "",
-    availability: "",
+    availability: [],
     status: "Active",
   });
+
+  const [tempAvailability, setTempAvailability] = useState({
+    day: "",
+    startTime: "",
+    endTime: "",
+  });
+
+  const days = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
 
   const navItems = [
     { name: "Home", icon: <HomeIcon className="h-5 w-5" />, path: "/dashboard" },
@@ -53,6 +70,31 @@ export default function MyServices() {
     { name: "Feedback", icon: <ChatBubbleOvalLeftIcon className="h-5 w-5" />, path: "/feedback" },
     { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
   ];
+
+  // Helper function to safely parse availability
+  const parseAvailability = (availability) => {
+    if (!availability) return [];
+    
+    // If it's already an array, return it
+    if (Array.isArray(availability)) return availability;
+    
+    // If it's a string, try to parse it
+    if (typeof availability === 'string') {
+      try {
+        const parsed = JSON.parse(availability);
+        // If parsed result is an array, return it
+        if (Array.isArray(parsed)) return parsed;
+        // If it's not an array, return empty array
+        return [];
+      } catch (e) {
+        // If JSON parsing fails (old format like "Weekends"), return empty array
+        console.warn('Could not parse availability:', availability);
+        return [];
+      }
+    }
+    
+    return [];
+  };
 
   useEffect(() => {
     fetchUserServices();
@@ -70,12 +112,19 @@ export default function MyServices() {
 
   const handleEdit = (service) => {
     setEditingService(service);
+    const availabilityArray = parseAvailability(service.availability);
+    
     setNewService({
       title: service.title,
       description: service.description,
       price: service.price.toString(),
-      availability: service.availability,
+      availability: availabilityArray,
       status: service.status || "Active",
+    });
+    setTempAvailability({
+      day: "",
+      startTime: "",
+      endTime: "",
     });
     setShowServiceModal(true);
   };
@@ -105,13 +154,80 @@ export default function MyServices() {
     }
   };
 
+  const addAvailability = () => {
+    if (!tempAvailability.day || !tempAvailability.startTime || !tempAvailability.endTime) {
+      setToast({
+        message: "Please fill in all availability fields",
+        type: "error",
+        isLoading: false,
+        showProgress: false,
+        duration: 2000,
+      });
+      return;
+    }
+
+    setNewService(prev => ({
+      ...prev,
+      availability: [
+        ...prev.availability,
+        {
+          day: tempAvailability.day,
+          startTime: tempAvailability.startTime,
+          endTime: tempAvailability.endTime,
+        }
+      ]
+    }));
+
+    setTempAvailability({
+      day: "",
+      startTime: "",
+      endTime: "",
+    });
+  };
+
+  const removeAvailability = (index) => {
+    setNewService(prev => ({
+      ...prev,
+      availability: prev.availability.filter((_, i) => i !== index)
+    }));
+  };
+
   const handleCreateOrUpdate = async (e) => {
     e.preventDefault();
+    
+    if (newService.availability.length === 0) {
+      setToast({
+        message: "Please add at least one availability slot",
+        type: "error",
+        isLoading: false,
+        showProgress: false,
+        duration: 2000,
+      });
+      return;
+    }
+
+    // Validate price
+    const price = parseFloat(newService.price);
+    if (isNaN(price) || price <= 0) {
+      setToast({
+        message: "Please enter a valid price",
+        type: "error",
+        isLoading: false,
+        showProgress: false,
+        duration: 2000,
+      });
+      return;
+    }
+
     try {
       const user = JSON.parse(localStorage.getItem("user"));
       const serviceData = {
         userId: user.id,
-        ...newService
+        title: newService.title,
+        description: newService.description,
+        price: price.toString(),
+        availability: JSON.stringify(newService.availability),
+        status: newService.status,
       };
 
       if (editingService) {
@@ -141,12 +257,18 @@ export default function MyServices() {
         title: "",
         description: "",
         price: "",
-        availability: "",
+        availability: [],
         status: "Active",
+      });
+      setTempAvailability({
+        day: "",
+        startTime: "",
+        endTime: "",
       });
       setEditingService(null);
       fetchUserServices();
     } catch (error) {
+      console.error('Error creating/updating service:', error);
       setToast({
         message: editingService ? "Failed to update service" : "Failed to create service",
         type: "error",
@@ -174,8 +296,13 @@ export default function MyServices() {
                   title: "",
                   description: "",
                   price: "",
-                  availability: "",
+                  availability: [],
                   status: "Active",
+                });
+                setTempAvailability({
+                  day: "",
+                  startTime: "",
+                  endTime: "",
                 });
               }}
               className="text-white hover:bg-white/10 p-2 rounded-lg transition-colors"
@@ -193,7 +320,6 @@ export default function MyServices() {
                 <label className="text-sm font-medium text-gray-700 mb-2 block">Service Title</label>
                 <input
                   type="text"
-                  name="title"
                   value={newService.title}
                   onChange={(e) => setNewService(prev => ({
                     ...prev,
@@ -207,7 +333,6 @@ export default function MyServices() {
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-2 block">Description</label>
                 <textarea
-                  name="description"
                   value={newService.description}
                   onChange={(e) => setNewService(prev => ({
                     ...prev,
@@ -219,37 +344,106 @@ export default function MyServices() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">Price (SC)</label>
-                  <input
-                    type="number"
-                    name="price"
-                    value={newService.price}
-                    onChange={(e) => setNewService(prev => ({
-                      ...prev,
-                      price: e.target.value
-                    }))}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                    required
-                  />
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Price (SC)</label>
+                <input
+                  type="number"
+                  value={newService.price}
+                  onChange={(e) => setNewService(prev => ({
+                    ...prev,
+                    price: e.target.value
+                  }))}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  required
+                />
+              </div>
+
+              {/* Availability Section */}
+              <div className="border-t pt-6">
+                <h3 className="text-sm font-medium text-gray-700 mb-4">Add Availability</h3>
+                
+                <div className="space-y-3 mb-4">
+                  <div>
+                    <label className="text-xs font-medium text-gray-600 mb-1 block">Day</label>
+                    <select
+                      value={tempAvailability.day}
+                      onChange={(e) => setTempAvailability(prev => ({
+                        ...prev,
+                        day: e.target.value
+                      }))}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    >
+                      <option value="">Select a day</option>
+                      {days.map(day => (
+                        <option key={day} value={day}>{day}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-medium text-gray-600 mb-1 block">Start Time</label>
+                      <input
+                        type="time"
+                        value={tempAvailability.startTime}
+                        onChange={(e) => setTempAvailability(prev => ({
+                          ...prev,
+                          startTime: e.target.value
+                        }))}
+                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-gray-600 mb-1 block">End Time</label>
+                      <input
+                        type="time"
+                        value={tempAvailability.endTime}
+                        onChange={(e) => setTempAvailability(prev => ({
+                          ...prev,
+                          endTime: e.target.value
+                        }))}
+                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={addAvailability}
+                    className="w-full px-4 py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 text-sm font-medium transition-colors"
+                  >
+                    Add Availability Slot
+                  </button>
                 </div>
 
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">Availability</label>
-                  <input
-                    type="text"
-                    name="availability"
-                    value={newService.availability}
-                    onChange={(e) => setNewService(prev => ({
-                      ...prev,
-                      availability: e.target.value
-                    }))}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                    placeholder="e.g., Mon-Fri"
-                    required
-                  />
-                </div>
+                {/* Display Added Availability */}
+                {newService.availability.length > 0 && (
+                  <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+                    <p className="text-xs font-medium text-gray-600 mb-3">Availability Slots:</p>
+                    {newService.availability.map((slot, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200"
+                      >
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">
+                            {slot.day}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {slot.startTime} - {slot.endTime}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeAvailability(index)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <XCircleIcon className="h-5 w-5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="pt-4 flex flex-col sm:flex-row gap-2 sm:gap-3">
@@ -262,8 +456,13 @@ export default function MyServices() {
                       title: "",
                       description: "",
                       price: "",
-                      availability: "",
+                      availability: [],
                       status: "Active",
+                    });
+                    setTempAvailability({
+                      day: "",
+                      startTime: "",
+                      endTime: "",
                     });
                   }}
                   className="flex-1 px-6 py-3 text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 text-sm font-medium transition-colors"
@@ -289,14 +488,12 @@ export default function MyServices() {
 
   return (
     <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen flex flex-col lg:flex-row w-full">
-      {/* Sidebar - Desktop (always visible) */}
+      {/* Sidebar - Desktop */}
       <div className="hidden lg:flex fixed inset-y-0 left-0 bg-gradient-to-b from-gray-50 to-white w-64 flex-col shadow-xl border-r z-30">
-        {/* Header - Fixed at top */}
         <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600">
           <h2 className="font-semibold text-white text-lg">Menu</h2>
         </div>
 
-        {/* Navigation - Scrollable */}
         <nav className="p-3 space-y-1 flex-1 overflow-y-auto">
           {navItems.map((item) => (
             <button
@@ -313,7 +510,7 @@ export default function MyServices() {
         </nav>
       </div>
 
-      {/* Sidebar - Mobile (toggle-based) */}
+      {/* Sidebar - Mobile */}
       <div
         className={`fixed inset-y-0 left-0 transform ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -347,7 +544,6 @@ export default function MyServices() {
         </nav>
       </div>
 
-      {/* Overlay */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
@@ -378,13 +574,33 @@ export default function MyServices() {
                 <span className="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
               </button>
               <button
-                onClick={() => setShowServiceModal(true)}
+                onClick={() => {
+                  setShowServiceModal(true);
+                  setEditingService(null);
+                  setNewService({
+                    title: "",
+                    description: "",
+                    price: "",
+                    availability: [],
+                    status: "Active",
+                  });
+                }}
                 className="hidden sm:flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-2 rounded-lg text-xs sm:text-sm hover:bg-white/20 transition-all"
               >
                 <PlusIcon className="h-4 w-4" /> Add Service
               </button>
               <button
-                onClick={() => setShowServiceModal(true)}
+                onClick={() => {
+                  setShowServiceModal(true);
+                  setEditingService(null);
+                  setNewService({
+                    title: "",
+                    description: "",
+                    price: "",
+                    availability: [],
+                    status: "Active",
+                  });
+                }}
                 className="sm:hidden flex items-center justify-center bg-white/10 backdrop-blur-sm p-2 rounded-lg hover:bg-white/20 transition-all"
               >
                 <PlusIcon className="h-5 w-5" />
@@ -409,52 +625,67 @@ export default function MyServices() {
                   </button>
                 </div>
               ) : (
-                services.map((service) => (
-                  <div
-                    key={service.id}
-                    className="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all flex flex-col"
-                  >
-                    {/* Status Badge */}
-                    <span
-                      className={`absolute top-3 right-3 px-2 sm:px-3 py-1 text-xs font-medium rounded-full ${
-                        service.status === "Active"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-200 text-gray-600"
-                      }`}
+                services.map((service) => {
+                  const availabilityArray = parseAvailability(service.availability);
+                  
+                  return (
+                    <div
+                      key={service.id}
+                      className="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all flex flex-col relative"
                     >
-                      {service.status || "Active"}
-                    </span>
+                      {/* Status Badge */}
+                      <span
+                        className={`absolute top-3 right-3 px-2 sm:px-3 py-1 text-xs font-medium rounded-full ${
+                          service.status === "Active"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-200 text-gray-600"
+                        }`}
+                      >
+                        {service.status || "Active"}
+                      </span>
 
-                    <h2 className="font-semibold text-sm sm:text-base text-gray-900 pr-16 line-clamp-1">{service.title}</h2>
-                    <p className="text-gray-600 text-xs sm:text-sm mt-1 line-clamp-2">{service.description}</p>
-                    
-                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
-                      <div>
-                        <p className="font-semibold text-blue-600 text-xs sm:text-sm">SC {service.price}</p>
-                        <p className="text-gray-500 text-xs mt-0.5 truncate">
-                          {service.availability}
-                        </p>
+                      <h2 className="font-semibold text-sm sm:text-base text-gray-900 pr-16 line-clamp-1">{service.title}</h2>
+                      <p className="text-gray-600 text-xs sm:text-sm mt-1 line-clamp-2">{service.description}</p>
+                      
+                      {/* Availability Slots */}
+                      <div className="mt-3 space-y-1.5">
+                        {availabilityArray.length > 0 ? (
+                          availabilityArray.map((slot, index) => (
+                            <div key={index} className="flex items-center gap-2 text-xs sm:text-sm">
+                              <span className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></span>
+                              <span className="text-gray-700">
+                                {slot.day} {slot.startTime}-{slot.endTime}
+                              </span>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-gray-400 text-xs">No availability set</p>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-end mt-3 pt-2 border-t border-gray-100">
+                        <p className="font-semibold text-blue-600 text-sm sm:text-base">SC {service.price}</p>
+                      </div>
+
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          onClick={() => handleEdit(service)}
+                          className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium"
+                        >
+                          <PencilIcon className="h-4 w-4" />
+                          <span>Edit</span>
+                        </button>
+                        <button
+                          onClick={() => handleDelete(service.id)}
+                          className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm font-medium"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                          <span>Delete</span>
+                        </button>
                       </div>
                     </div>
-
-                    <div className="flex gap-2 mt-2">
-                      <button
-                        onClick={() => handleEdit(service)}
-                        className="flex-1 flex items-center justify-center gap-1 p-1.5 sm:p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-xs sm:text-sm"
-                      >
-                        <PencilIcon className="h-4 w-4" />
-                        <span className="hidden sm:inline">Edit</span>
-                      </button>
-                      <button
-                        onClick={() => handleDelete(service.id)}
-                        className="flex-1 flex items-center justify-center gap-1 p-1.5 sm:p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-xs sm:text-sm"
-                      >
-                        <TrashIcon className="h-4 w-4" />
-                        <span className="hidden sm:inline">Delete</span>
-                      </button>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
 
@@ -481,4 +712,3 @@ export default function MyServices() {
     </div>
   );
 }
-

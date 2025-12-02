@@ -17,11 +17,11 @@ import {
   XMarkIcon,
   BookmarkIcon,
 } from "@heroicons/react/24/outline";
-import { useNavigate } from 'react-router-dom';//
+import { useNavigate } from 'react-router-dom';
 import { getAnnouncements, getUserServices } from '../../../services/api';
 
 export default function Dashboard() {
-  const navigate = useNavigate();//
+  const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userData, setUserData] = useState(null);
   const [announcements, setAnnouncements] = useState([]);
@@ -202,10 +202,36 @@ export default function Dashboard() {
                 {service.description}
               </div>
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-3 pt-3 border-t gap-2">
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                <div className="flex items-center flex-wrap gap-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                   <span className="text-sm text-gray-600">
-                    {service.availability}
+                    {(() => {
+                      try {
+                        const availability = typeof service.availability === 'string' 
+                          ? JSON.parse(service.availability) 
+                          : service.availability;
+                        
+                        const formatTime = (time) => {
+                          const [hours, minutes] = time.split(':');
+                          const h = parseInt(hours);
+                          const ampm = h >= 12 ? 'PM' : 'AM';
+                          const h12 = h % 12 || 12;
+                          return `${h12}:${minutes} ${ampm}`;
+                        };
+                        
+                        if (Array.isArray(availability) && availability.length > 0) {
+                          return availability.map((slot, idx) => (
+                            <span key={idx} className="inline-block mr-2">
+                              {slot.day} {formatTime(slot.startTime)}-{formatTime(slot.endTime)}
+                              {idx < availability.length - 1 ? ',' : ''}
+                            </span>
+                          ));
+                        }
+                        return 'No availability set';
+                      } catch (e) {
+                        return service.availability || 'No availability set';
+                      }
+                    })()}
                   </span>
                 </div>
                 <span className="font-bold text-blue-600">SC {service.price}</span>

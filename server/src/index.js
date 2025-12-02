@@ -18,6 +18,8 @@ const io = initializeSocket(server);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cors());
+app.use(express.json());
+
 
 // Routes
 const authRoutes = require('./routes/authRoutes');
@@ -28,6 +30,7 @@ const feedbackRoutes = require('./routes/feedbackRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const messageRoutes = require('./routes/messageRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/announcements', announcementRoutes);
@@ -38,6 +41,7 @@ app.use('/api/feedback', feedbackRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/api/test-db', async (req, res) => {
     try {

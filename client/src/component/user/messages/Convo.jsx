@@ -221,7 +221,18 @@ export default function Convo() {
     };
 
     // Check role compatibility
-    if (currentUser?.role?.toLowerCase() === otherUser?.role?.toLowerCase()) {
+    const currentRole = currentUser?.role?.toLowerCase();
+    const otherRole = otherUser?.role?.toLowerCase();
+
+    // Allow messaging if:
+    // 1. Roles are different (learner ↔ tutor)
+    // 2. Either user has "both" role
+    const canMessage = 
+      currentRole !== otherRole || 
+      currentRole === 'both' || 
+      otherRole === 'both';
+
+    if (!canMessage) {
       alert('You can only message users with different roles');
       return;
     }

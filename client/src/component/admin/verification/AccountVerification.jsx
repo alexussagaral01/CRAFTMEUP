@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  XMarkIcon,
   CheckCircleIcon,
   XCircleIcon,
-  XMarkIcon,
-  HomeIcon,
-  UsersIcon,
-  WalletIcon,
-  MegaphoneIcon,
-  ArrowRightOnRectangleIcon,
 } from "@heroicons/react/24/outline";
+import AdminSidebar from "../../AdminSidebar";
 import api from '../../../services/api';
 
 export default function AccountVerification() {
@@ -17,16 +13,8 @@ export default function AccountVerification() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
-
-  const sidebarItems = [
-    { name: "Dashboard", icon: <HomeIcon className="w-5 h-5" />, path: "/admin-dashboard" },
-    { name: "User Reports", icon: <UsersIcon className="w-5 h-5" />, path: "/user-reports" },
-    { name: "Account Verification", icon: <CheckCircleIcon className="w-5 h-5" />, path: "/account-verification" },
-    { name: "Wallet Requests", icon: <WalletIcon className="w-5 h-5" />, path: "/wallet-logs" },
-    { name: "Post Announcement", icon: <MegaphoneIcon className="w-5 h-5" />, path: "/announcements" },
-    { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
-  ];
+  const [studentIdPreview, setStudentIdPreview] = useState(null);
+  const [studyLoadPreview, setStudyLoadPreview] = useState(null);
 
   useEffect(() => {
     fetchUnverifiedUsers();
@@ -43,8 +31,22 @@ export default function AccountVerification() {
     }
   };
 
-  const handleViewDetails = (user) => {
+  const blobToDataUrl = (base64String) => {
+    if (!base64String) return null;
+    return `data:image/jpeg;base64,${base64String}`;
+  };
+
+  const handleViewDetails = async (user) => {
     setSelectedUser(user);
+    
+    if (user.student_id_file) {
+      setStudentIdPreview(blobToDataUrl(user.student_id_file));
+    }
+    
+    if (user.study_load_file) {
+      setStudyLoadPreview(blobToDataUrl(user.study_load_file));
+    }
+    
     setIsModalOpen(true);
   };
 
@@ -54,6 +56,8 @@ export default function AccountVerification() {
       fetchUnverifiedUsers();
       setIsModalOpen(false);
       setSelectedUser(null);
+      setStudentIdPreview(null);
+      setStudyLoadPreview(null);
     } catch (error) {
       console.error('Error verifying user:', error);
     }
@@ -62,48 +66,31 @@ export default function AccountVerification() {
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedUser(null);
+    setStudentIdPreview(null);
+    setStudyLoadPreview(null);
   };
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-50 to-white">
-      {/* Sidebar */}
-      <div className="w-72 bg-white shadow-xl z-20">
-        <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600">
-          <h1 className="text-xl font-bold text-white">Admin Dashboard</h1>
-          <p className="text-blue-100 text-sm mt-1">System Management</p>
-        </div>
-
-        <nav className="p-4 space-y-2">
-          {sidebarItems.map((item) => (
-            <button
-              key={item.name}
-              onClick={() => navigate(item.path)}
-              className="flex items-center w-full p-3 text-gray-600 hover:text-blue-600 rounded-xl transition-all duration-200 group hover:bg-gradient-to-r from-blue-50 to-indigo-50"
-            >
-              <div className="bg-white p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
-                {item.icon}
-              </div>
-              <span className="ml-3 font-medium">{item.name}</span>
-            </button>
-          ))}
-        </nav>
-      </div>
+      {/* Sidebar - UNIFIED NAVIGATION */}
+      <AdminSidebar />
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden flex flex-col">
         {/* Header */}
         <div className="bg-white border-b shadow-sm">
           <div className="flex items-center justify-between px-8 py-6">
             <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
               Account Verification
             </h2>
-            <div className="text-sm text-gray-600">
-              Pending: <span className="font-semibold text-blue-600">{users.length}</span>
+            <div className="text-sm text-gray-600 flex items-center space-x-2">
+              <span>Pending:</span>
+              <span className="font-semibold text-blue-600 text-lg">{users.length}</span>
             </div>
           </div>
         </div>
 
-        <div className="p-8 overflow-y-auto h-[calc(100vh-5rem)]">
+        <div className="flex-1 p-8 overflow-y-auto">
           {loading ? (
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
@@ -113,6 +100,7 @@ export default function AccountVerification() {
             <div className="text-center py-12 bg-white rounded-2xl shadow">
               <CheckCircleIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <p className="text-lg text-gray-600 font-medium">No pending verifications</p>
+              <p className="text-gray-500 text-sm mt-2">All users have been verified</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -127,9 +115,14 @@ export default function AccountVerification() {
                         <h3 className="font-semibold text-lg text-gray-800">{user.full_name}</h3>
                         <p className="text-sm text-gray-500 mt-1">{user.email}</p>
                       </div>
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center flex-shrink-0">
+                        <span className="text-white font-bold text-lg">
+                          {user.full_name?.[0]?.toUpperCase() || "U"}
+                        </span>
+                      </div>
                     </div>
                     
-                    <div className="space-y-2 mb-4">
+                    <div className="space-y-2 mb-6 bg-gray-50 p-4 rounded-lg">
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-500">Course:</span>
                         <span className="font-medium text-gray-700">{user.course}</span>
@@ -137,6 +130,18 @@ export default function AccountVerification() {
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-500">Year:</span>
                         <span className="font-medium text-gray-700">{user.year}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Role:</span>
+                        <span className={`font-medium px-2 py-1 rounded-full text-xs ${
+                          user.role === "Learner"
+                            ? "bg-blue-100 text-blue-700"
+                            : user.role === "Tutor"
+                            ? "bg-purple-100 text-purple-700"
+                            : "bg-green-100 text-green-700"
+                        }`}>
+                          {user.role}
+                        </span>
                       </div>
                     </div>
 
@@ -202,7 +207,15 @@ export default function AccountVerification() {
 
                     <div>
                       <label className="text-xs text-gray-500 font-medium uppercase">Role</label>
-                      <p className="font-medium text-gray-800 mt-1">{selectedUser.role}</p>
+                      <p className={`font-medium mt-1 px-3 py-1 rounded-full text-sm w-fit ${
+                        selectedUser.role === "Learner"
+                          ? "bg-blue-100 text-blue-700"
+                          : selectedUser.role === "Tutor"
+                          ? "bg-purple-100 text-purple-700"
+                          : "bg-green-100 text-green-700"
+                      }`}>
+                        {selectedUser.role}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -213,16 +226,16 @@ export default function AccountVerification() {
                   
                   <div>
                     <label className="text-sm text-gray-600 font-medium mb-2 block">Student ID</label>
-                    {selectedUser.student_id_file ? (
-                      <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
+                    {studentIdPreview ? (
+                      <div className="border-2 border-gray-200 rounded-lg overflow-hidden bg-gray-50">
                         <img 
-                          src={`http://localhost:5000${selectedUser.student_id_file}`}
+                          src={studentIdPreview}
                           alt="Student ID"
                           className="w-full object-contain max-h-48"
                         />
                       </div>
                     ) : (
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50">
                         <p className="text-gray-500 text-sm">No file uploaded</p>
                       </div>
                     )}
@@ -230,16 +243,16 @@ export default function AccountVerification() {
                   
                   <div>
                     <label className="text-sm text-gray-600 font-medium mb-2 block">Study Load</label>
-                    {selectedUser.study_load_file ? (
-                      <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
+                    {studyLoadPreview ? (
+                      <div className="border-2 border-gray-200 rounded-lg overflow-hidden bg-gray-50">
                         <img 
-                          src={`http://localhost:5000${selectedUser.study_load_file}`}
+                          src={studyLoadPreview}
                           alt="Study Load"
                           className="w-full object-contain max-h-48"
                         />
                       </div>
                     ) : (
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50">
                         <p className="text-gray-500 text-sm">No file uploaded</p>
                       </div>
                     )}

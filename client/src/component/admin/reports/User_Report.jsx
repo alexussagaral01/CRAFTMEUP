@@ -1,19 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  HomeIcon,
-  UsersIcon,
-  WalletIcon,
-  MegaphoneIcon,
   MagnifyingGlassIcon,
-  ArrowRightOnRectangleIcon,
-  CheckCircleIcon,
-  FunnelIcon,
+  ClockIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   XMarkIcon,
-  ClockIcon,
 } from "@heroicons/react/24/outline";
+import AdminSidebar from "../../AdminSidebar";
 import { getAllReports, updateReportStatus, getUserReportHistory, notifyUser } from "../../../services/api";
 
 const ReportDetailModal = ({ selectedReport, onClose, reportHistory, onResolve, violationTypes, getStatusBadgeClass }) => {
@@ -136,15 +130,6 @@ export default function UserReports() {
     thisWeek: 0
   });
 
-  const sidebarItems = [
-    { name: "Dashboard", icon: <HomeIcon className="w-5 h-5" />, path: "/admin-dashboard" },
-    { name: "User Reports", icon: <UsersIcon className="w-5 h-5" />, path: "/user-reports" },
-    { name: "Account Verification", icon: <CheckCircleIcon className="w-5 h-5" />, path: "/account-verification" },
-    { name: "Wallet Requests", icon: <WalletIcon className="w-5 h-5" />, path: "/wallet-logs" },
-    { name: "Post Announcement", icon: <MegaphoneIcon className="w-5 h-5" />, path: "/announcements" },
-    { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
-  ];
-
   const violationTypes = {
     minor: ['spam', 'rude_message', 'irrelevant_post'],
     serious: ['harassment', 'scamming', 'fake_credentials', 'offensive_behavior'],
@@ -184,51 +169,51 @@ export default function UserReports() {
   };
 
   const handleViewDetails = async (report) => {
-  try {
-    console.log('Opening modal for report:', report);
-    setSelectedReport(report);
-    setShowDetailModal(true);
-  } catch (error) {
-    console.error('Error showing report details:', error);
-  }
-};
+    try {
+      console.log('Opening modal for report:', report);
+      setSelectedReport(report);
+      setShowDetailModal(true);
+    } catch (error) {
+      console.error('Error showing report details:', error);
+    }
+  };
 
   const handleResolveReport = async (reportId, resolution) => {
-  try {
-    console.log('Resolving report:', reportId, resolution);
+    try {
+      console.log('Resolving report:', reportId, resolution);
 
-    const statusData = {
-      status: resolution,
-      violationType: selectedReport.violationType, // Use the existing violation type
-      adminNotes: resolution === 'invalid' 
-        ? 'No violation found' 
-        : `${selectedReport.violationType} violation confirmed`,
-      resolvedAt: new Date().toISOString()
-    };
+      const statusData = {
+        status: resolution,
+        violationType: selectedReport.violationType,
+        adminNotes: resolution === 'invalid' 
+          ? 'No violation found' 
+          : `${selectedReport.violationType} violation confirmed`,
+        resolvedAt: new Date().toISOString()
+      };
 
-    await updateReportStatus(reportId, statusData);
+      await updateReportStatus(reportId, statusData);
 
-    await Promise.all([
-      notifyUser(selectedReport.reporter_id, {
-        type: 'report_resolved',
-        message: `Your report has been reviewed and marked as ${resolution}.`
-      }),
-      resolution !== 'invalid' && notifyUser(selectedReport.reported_user_id, {
-        type: resolution,
-        message: `Your account has received a ${resolution} due to ${violationType} violation.`
-      })
-    ].filter(Boolean));
+      await Promise.all([
+        notifyUser(selectedReport.reporter_id, {
+          type: 'report_resolved',
+          message: `Your report has been reviewed and marked as ${resolution}.`
+        }),
+        resolution !== 'invalid' && notifyUser(selectedReport.reported_user_id, {
+          type: resolution,
+          message: `Your account has received a ${resolution} due to ${selectedReport.violationType} violation.`
+        })
+      ].filter(Boolean));
 
-    setShowDetailModal(false);
-    await fetchReports();
-    
-    alert(`Report has been marked as ${resolution}`);
-    
-  } catch (error) {
-    console.error('Error resolving report:', error);
-    alert('Failed to resolve report. Please try again.');
-  }
-};
+      setShowDetailModal(false);
+      await fetchReports();
+      
+      alert(`Report has been marked as ${resolution}`);
+      
+    } catch (error) {
+      console.error('Error resolving report:', error);
+      alert('Failed to resolve report. Please try again.');
+    }
+  };
 
   const getStatusBadgeClass = (status) => {
     switch(status) {
@@ -259,28 +244,8 @@ export default function UserReports() {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-50 to-white">
-      {/* Sidebar */}
-      <div className="w-72 bg-white shadow-xl z-20">
-        <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600">
-          <h1 className="text-xl font-bold text-white">Admin Dashboard</h1>
-          <p className="text-blue-100 text-sm mt-1">System Management</p>
-        </div>
-
-        <nav className="p-4 space-y-2">
-          {sidebarItems.map((item) => (
-            <button
-              key={item.name}
-              onClick={() => navigate(item.path)}
-              className="flex items-center w-full p-3 text-gray-600 hover:text-blue-600 rounded-xl transition-all duration-200 group hover:bg-gradient-to-r from-blue-50 to-indigo-50"
-            >
-              <div className="bg-white p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
-                {item.icon}
-              </div>
-              <span className="ml-3 font-medium">{item.name}</span>
-            </button>
-          ))}
-        </nav>
-      </div>
+      {/* Sidebar - CHANGED ONLY THIS */}
+      <AdminSidebar />
 
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">

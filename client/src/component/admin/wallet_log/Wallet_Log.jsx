@@ -2,17 +2,12 @@ import React, { useState, useEffect } from "react";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 import {
-  CheckCircleIcon,
-  HomeIcon,
-  UsersIcon,
-  WalletIcon,
-  MegaphoneIcon,
-  ArrowRightOnRectangleIcon,
   XMarkIcon,
   BanknotesIcon,
   CreditCardIcon,
   ClockIcon,
 } from "@heroicons/react/24/outline";
+import AdminSidebar from "../../AdminSidebar";
 import { getWalletRequests, updateWalletRequest } from '../../../services/api';
 
 export default function WalletLogs() {
@@ -24,15 +19,6 @@ export default function WalletLogs() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [loading, setLoading] = useState(true);
-
-  const sidebarItems = [
-    { name: "Dashboard", icon: <HomeIcon className="w-5 h-5" />, path: "/admin-dashboard" },
-    { name: "User Reports", icon: <UsersIcon className="w-5 h-5" />, path: "/user-reports" },
-    { name: "Account Verification", icon: <CheckCircleIcon className="w-5 h-5" />, path: "/account-verification" },
-    { name: "Wallet Transactions", icon: <WalletIcon className="w-5 h-5" />, path: "/wallet-logs" },
-    { name: "Post Announcement", icon: <MegaphoneIcon className="w-5 h-5" />, path: "/announcements" },
-    { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
-  ];
 
   useEffect(() => {
     fetchTransactions();
@@ -67,20 +53,20 @@ export default function WalletLogs() {
   };
 
   const fetchTransactionHistory = async () => {
-  try {
-    const response = await getWalletRequests({ includeCompleted: true });
-    // Filter out pending transactions
-    const completedTransactions = (response.data || []).filter(txn => 
-      txn.status === 'approved' || 
-      txn.status === 'rejected' || 
-      txn.status === 'completed'
-    );
-    setTransactionHistory(completedTransactions);
-  } catch (error) {
-    console.error('Error fetching transaction history:', error);
-    setTransactionHistory([]);
-  }
-};
+    try {
+      const response = await getWalletRequests({ includeCompleted: true });
+      // Filter out pending transactions
+      const completedTransactions = (response.data || []).filter(txn => 
+        txn.status === 'approved' || 
+        txn.status === 'rejected' || 
+        txn.status === 'completed'
+      );
+      setTransactionHistory(completedTransactions);
+    } catch (error) {
+      console.error('Error fetching transaction history:', error);
+      setTransactionHistory([]);
+    }
+  };
 
   const handleUpdateStatus = async (id, newStatus) => {
     try {
@@ -146,31 +132,11 @@ export default function WalletLogs() {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-50 to-white">
-      {/* Sidebar */}
-      <div className="w-72 bg-white shadow-xl z-20">
-        <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600">
-          <h1 className="text-xl font-bold text-white">Admin Dashboard</h1>
-          <p className="text-blue-100 text-sm mt-1">System Management</p>
-        </div>
-
-        <nav className="p-4 space-y-2">
-          {sidebarItems.map((item) => (
-            <button
-              key={item.name}
-              onClick={() => navigate(item.path)}
-              className="flex items-center w-full p-3 text-gray-600 hover:text-blue-600 rounded-xl transition-all duration-200 group hover:bg-gradient-to-r from-blue-50 to-indigo-50"
-            >
-              <div className="bg-white p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
-                {item.icon}
-              </div>
-              <span className="ml-3 font-medium">{item.name}</span>
-            </button>
-          ))}
-        </nav>
-      </div>
+      {/* Sidebar - UNIFIED NAVIGATION */}
+      <AdminSidebar />
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden flex flex-col">
         {/* Header */}
         <div className="bg-white border-b shadow-sm">
           <div className="flex items-center justify-between px-8 py-6">
@@ -180,13 +146,13 @@ export default function WalletLogs() {
             <div className="flex items-center space-x-6">
               <div className="text-sm text-gray-600 flex items-center space-x-2">
                 <span>Pending Requests:</span>
-                <span className="font-semibold text-blue-600">
+                <span className="font-semibold text-blue-600 text-lg">
                   {transactions.filter(t => t.status === 'pending').length}
                 </span>
               </div>
               <button
                 onClick={() => setShowHistory(true)}
-                className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-medium"
               >
                 <ClockIcon className="w-5 h-5" />
                 <span>Transaction History</span>
@@ -195,7 +161,7 @@ export default function WalletLogs() {
           </div>
         </div>
 
-        <div className="p-8 overflow-y-auto h-[calc(100vh-5rem)]">
+        <div className="flex-1 p-8 overflow-y-auto">
           {loading ? (
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
@@ -206,229 +172,231 @@ export default function WalletLogs() {
               {transactions.filter(txn => txn.status === 'pending').length === 0 ? (
                 <div className="text-center py-16 text-gray-500 bg-white rounded-xl shadow">
                   <p className="text-lg font-medium">No Top-Up or Cash-Out Requests at the moment</p>
+                  <p className="text-sm mt-2">All pending requests have been processed</p>
                 </div>
               ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {transactions
-              .filter(txn => txn.status === 'pending')
-              .map((txn) => (
-                <div
-                  key={txn.id}
-                  className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all border border-gray-100 overflow-hidden"
-                >
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-2">
-                        <div className={`p-2 rounded-lg ${txn.type === 'top-up' ? 'bg-green-50' : 'bg-blue-50'}`}>
-                          {getTransactionTypeIcon(txn.type)}
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-800">
-                            {txn.type === 'top-up' ? 'Top Up' : 'Cash Out'}
-                          </h3>
-                          <p className="text-sm text-gray-500">#{txn.id}</p>
-                        </div>
-                      </div>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(txn.status)}`}>
-                        {txn.status}
-                      </span>
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {transactions
+                    .filter(txn => txn.status === 'pending')
+                    .map((txn) => (
+                      <div
+                        key={txn.id}
+                        className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all border border-gray-100 overflow-hidden"
+                      >
+                        <div className="p-6">
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center space-x-2">
+                              <div className={`p-2 rounded-lg ${txn.type === 'top-up' ? 'bg-green-50' : 'bg-blue-50'}`}>
+                                {getTransactionTypeIcon(txn.type)}
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-gray-800">
+                                  {txn.type === 'top-up' ? 'Top Up' : 'Cash Out'}
+                                </h3>
+                                <p className="text-sm text-gray-500">#{txn.id}</p>
+                              </div>
+                            </div>
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(txn.status)}`}>
+                              {txn.status}
+                            </span>
+                          </div>
 
-                    <div className="space-y-3">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">User:</span>
-                        <span className="font-medium text-gray-900">{txn.full_name}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Amount:</span>
-                        <span className="font-medium text-gray-900">₱{txn.amount}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Reference:</span>
-                        <span className="font-medium text-gray-900">{txn.reference_number}</span>
-                      </div>
-                    </div>
+                          <div className="space-y-3 bg-gray-50 p-4 rounded-lg mb-4">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-500">User:</span>
+                              <span className="font-medium text-gray-900">{txn.full_name}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-500">Amount:</span>
+                              <span className="font-medium text-gray-900">₱{txn.amount}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-500">Reference:</span>
+                              <span className="font-medium text-gray-900">{txn.reference_number}</span>
+                            </div>
+                          </div>
 
-                    <button
-                      onClick={() => handleViewDetails(txn)}
-                      className="w-full mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all"
-                    >
-                      View Details
-                    </button>
-                  </div>
+                          <button
+                            onClick={() => handleViewDetails(txn)}
+                            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all font-medium"
+                          >
+                            View Details
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                 </div>
-              ))}
-            </div>
-           )}
-          </>
-        )}
+              )}
+            </>
+          )}
         </div>
       </div>
 
       {/* Transaction Details Modal */}
       {isModalOpen && selectedTxn && (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full">
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 flex items-center justify-between rounded-t-2xl">
-          <div className="flex items-center space-x-4">
-            {viewingFromHistory && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full">
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 flex items-center justify-between rounded-t-2xl">
+              <div className="flex items-center space-x-4">
+                {viewingFromHistory && (
+                  <button
+                    onClick={handleCloseDetails}
+                    className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
+                  >
+                    <ArrowLeftIcon className="w-6 h-6" />
+                  </button>
+                )}
+                <h3 className="text-xl font-bold text-white">Transaction Details</h3>
+              </div>
               <button
-                onClick={handleCloseDetails}
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setSelectedTxn(null);
+                }}
                 className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
               >
-                <ArrowLeftIcon className="w-6 h-6" />
-              </button>
-            )}
-            <h3 className="text-xl font-bold text-white">Transaction Details</h3>
-          </div>
-          <button
-            onClick={() => {
-              setIsModalOpen(false);
-                setSelectedTxn(null);
-              }}
-              className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
-              >
-              <XMarkIcon className="w-6 h-6" />
+                <XMarkIcon className="w-6 h-6" />
               </button>
             </div>
 
-              <div className="p-6">
-                <div className="space-y-4">
+            <div className="p-6">
+              <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-500">Transaction ID</p>
-                  <p className="font-medium mt-1">#{selectedTxn.id}</p>
+                    <p className="text-sm text-gray-500">Transaction ID</p>
+                    <p className="font-medium mt-1">#{selectedTxn.id}</p>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-500">Type</p>
-                  <p className="font-medium mt-1 capitalize">{selectedTxn.type}</p>
+                    <p className="text-sm text-gray-500">Type</p>
+                    <p className="font-medium mt-1 capitalize">{selectedTxn.type}</p>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-500">Amount</p>
-                  <p className="font-medium mt-1">₱{selectedTxn.amount}</p>
+                    <p className="text-sm text-gray-500">Amount</p>
+                    <p className="font-medium mt-1">₱{selectedTxn.amount}</p>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-500">Reference Number</p>
-                  <p className="font-medium mt-1">{selectedTxn.reference_number}</p>
+                    <p className="text-sm text-gray-500">Reference Number</p>
+                    <p className="font-medium mt-1">{selectedTxn.reference_number}</p>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg col-span-2">
-                  <p className="text-sm text-gray-500">User</p>
-                  <p className="font-medium mt-1">{selectedTxn.full_name}</p>
-                  <p className="text-sm text-gray-500 mt-1">{selectedTxn.email}</p>
+                    <p className="text-sm text-gray-500">User</p>
+                    <p className="font-medium mt-1">{selectedTxn.full_name}</p>
+                    <p className="text-sm text-gray-500 mt-1">{selectedTxn.email}</p>
                   </div>
                 </div>
 
                 {selectedTxn.proof_image && (
-                  <div className="mt-2">
-                  <p className="text-sm text-gray-500 mb-2">Proof of Payment</p>
-                  <div className="bg-gray-100 p-2 rounded-lg flex items-center justify-center">
-                    <img
-                    src={selectedTxn.proof_image_url}
-                    alt="Proof of Payment"
-                    className="max-h-[20vh] max-w-full w-auto object-contain rounded-lg"
-                    onError={(e) => {
-                      console.error('Image failed to load:', e);
-                      e.target.src = '/placeholder-image.png';
-                    }}
-                    />
-                  </div>
+                  <div className="mt-4">
+                    <p className="text-sm text-gray-500 mb-2">Proof of Payment</p>
+                    <div className="bg-gray-100 p-2 rounded-lg flex items-center justify-center">
+                      <img
+                        src={selectedTxn.proof_image_url}
+                        alt="Proof of Payment"
+                        className="max-h-[20vh] max-w-full w-auto object-contain rounded-lg"
+                        onError={(e) => {
+                          console.error('Image failed to load:', e);
+                          e.target.src = '/placeholder-image.png';
+                        }}
+                      />
+                    </div>
                   </div>
                 )}
-                </div>
+              </div>
 
-                {selectedTxn.status === 'pending' && (
+              {selectedTxn.status === 'pending' && (
                 <div className="flex space-x-4 mt-6">
                   {selectedTxn.type === 'top-up' ? (
-                  <>
-                    <button
-                    onClick={() => handleUpdateStatus(selectedTxn.id, 'approved')}
-                    className="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition-colors"
-                    >
-                    Approve
-                    </button>
-                    <button
-                    onClick={() => handleUpdateStatus(selectedTxn.id, 'rejected')}
-                    className="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors"
-                    >
-                    Reject
-                    </button>
-                  </>
+                    <>
+                      <button
+                        onClick={() => handleUpdateStatus(selectedTxn.id, 'approved')}
+                        className="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition-colors font-medium"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => handleUpdateStatus(selectedTxn.id, 'rejected')}
+                        className="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors font-medium"
+                      >
+                        Reject
+                      </button>
+                    </>
                   ) : (
-                  <button
-                    onClick={() => handleUpdateStatus(selectedTxn.id, 'completed')}
-                    className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors"
-                  >
-                    Mark as Complete
-                  </button>
+                    <button
+                      onClick={() => handleUpdateStatus(selectedTxn.id, 'completed')}
+                      className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                    >
+                      Mark as Complete
+                    </button>
                   )}
                 </div>
-                )}
-              </div>
-              </div>
+              )}
             </div>
-            )}
+          </div>
+        </div>
+      )}
 
+      {/* Transaction History Modal */}
       {showHistory && (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 flex items-center justify-between rounded-t-2xl">
-          <h3 className="text-xl font-bold text-white">Transaction History</h3>
-          <button
-            onClick={() => setShowHistory(false)}
-            className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
-          >
-            <XMarkIcon className="w-6 h-6" />
-          </button>
-        </div>
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 flex items-center justify-between rounded-t-2xl">
+              <h3 className="text-xl font-bold text-white">Transaction History</h3>
+              <button
+                onClick={() => setShowHistory(false)}
+                className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
 
-        <div className="p-6 overflow-y-auto max-h-[calc(80vh-8rem)]">
-          {transactionHistory.length > 0 ? (
-            <div className="grid grid-cols-1 gap-4">
-              {transactionHistory.map((txn) => (
-                <div 
-                  key={txn.id} 
-                  className="bg-white p-4 rounded-xl border border-gray-100 hover:shadow-md transition-all"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className={`p-2 rounded-lg ${txn.type === 'top-up' ? 'bg-green-100' : 'bg-blue-100'}`}>
-                        {getTransactionTypeIcon(txn.type)}
-                      </div>
-                      <div>
-                        <p className="font-medium">{txn.full_name}</p>
-                        <p className="text-sm text-gray-500">
-                          {new Date(txn.created_at).toLocaleDateString()} - {txn.reference_number}
-                        </p>
+            <div className="p-6 overflow-y-auto max-h-[calc(80vh-8rem)]">
+              {transactionHistory.length > 0 ? (
+                <div className="grid grid-cols-1 gap-4">
+                  {transactionHistory.map((txn) => (
+                    <div 
+                      key={txn.id} 
+                      className="bg-white p-4 rounded-xl border border-gray-100 hover:shadow-md transition-all"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <div className={`p-2 rounded-lg ${txn.type === 'top-up' ? 'bg-green-100' : 'bg-blue-100'}`}>
+                            {getTransactionTypeIcon(txn.type)}
+                          </div>
+                          <div>
+                            <p className="font-medium">{txn.full_name}</p>
+                            <p className="text-sm text-gray-500">
+                              {new Date(txn.created_at).toLocaleDateString()} - {txn.reference_number}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                          <span className="font-medium">₱{txn.amount}</span>
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(txn.status)}`}>
+                            {txn.status}
+                          </span>
+                          <button
+                            onClick={() => {
+                              handleViewDetails(txn, true);
+                              setShowHistory(false);
+                            }}
+                            className="px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium"
+                          >
+                            View Details
+                          </button>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-4">
-                      <span className="font-medium">₱{txn.amount}</span>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(txn.status)}`}>
-                        {txn.status}
-                      </span>
-                      <button
-                        onClick={() => {
-                          handleViewDetails(txn, true);
-                          setShowHistory(false);
-                        }}
-                        className="px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                      >
-                        View Details
-                      </button>
-                    </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <p className="text-lg font-medium">No completed transactions found</p>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              No completed transactions found
-            </div>
-          )}
+          </div>
         </div>
-      </div>
-    </div>
-   )}
+      )}
     </div>
   );
 }

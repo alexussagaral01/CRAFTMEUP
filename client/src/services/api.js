@@ -22,13 +22,16 @@ export const register = (formData) => {
 };
 
 // Add interceptor to handle tokens
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 // Profile update endpoints
 export const updateProfile = async (userId, userData) => {
@@ -456,6 +459,63 @@ export const markMessageAsRead = async (messageId) => {
 export const getUserById = async (userId) => {
    const response = await api.get(`/auth/user/${userId}`);
    return response.data;
+};
+
+export const requestPasswordReset = async (email) => {
+  try {
+    const response = await api.post('/auth/forgot-password', { email });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const verifyResetCode = async (email, code) => {
+  try {
+    const response = await api.post('/auth/verify-reset-code', { email, code });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const resetPassword = async (email, code, newPassword) => {
+  try {
+    const response = await api.post('/auth/reset-password', { email, code, newPassword });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getAllUsers = async () => {
+  try {
+    const response = await api.get("/admin/all-users");
+    return response.data;
+  } catch (error) {
+    console.error("Get all users error:", error);
+    throw error;
+  }
+};
+
+export const getUserConversations = async (userId) => {
+  try {
+    const response = await api.get(`/admin/user-conversations/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Get user conversations error:", error);
+    throw error;
+  }
+};
+
+export const getConversationMessages = async (userId, otherUserId) => {
+  try {
+    const response = await api.get(`/admin/conversation-messages/${userId}/${otherUserId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Get conversation messages error:", error);
+    throw error;
+  }
 };
 
 

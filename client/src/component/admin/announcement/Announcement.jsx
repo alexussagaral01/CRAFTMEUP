@@ -12,18 +12,12 @@ import {
   PencilIcon
 } from "@heroicons/react/24/outline";
 import { createAnnouncement, getAnnouncements, deleteAnnouncement, updateAnnouncement } from '../../../services/api';
+import AdminSidebar from "../../AdminSidebar";
 
 export default function Announcements() {
   const navigate = useNavigate();
 
-  const sidebarItems = [
-    { name: "Dashboard", icon: <HomeIcon className="w-5 h-5" />, path: "/admin-dashboard" },
-    { name: "User Reports", icon: <UsersIcon className="w-5 h-5" />, path: "/user-reports" },
-    { name: "Account Verification", icon: <CheckCircleIcon className="w-5 h-5" />, path: "/account-verification" },
-    { name: "Wallet Requests", icon: <WalletIcon className="w-5 h-5" />, path: "/wallet-logs" },
-    { name: "Post Announcement", icon: <MegaphoneIcon className="w-5 h-5" />, path: "/announcements" },
-    { name: "Log Out", icon: <ArrowRightOnRectangleIcon className="h-5 w-5" />, path: "/" },
-  ];
+
 
   const [formData, setFormData] = useState({
     title: '',
@@ -98,27 +92,7 @@ export default function Announcements() {
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-50 to-white">
       {/* Sidebar */}
-      <div className="w-72 bg-white shadow-xl z-20">
-        <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600">
-          <h1 className="text-xl font-bold text-white">Admin Dashboard</h1>
-          <p className="text-blue-100 text-sm mt-1">System Management</p>
-        </div>
-
-        <nav className="p-4 space-y-2">
-          {sidebarItems.map((item) => (
-            <button
-              key={item.name}
-              onClick={() => navigate(item.path)}
-              className="flex items-center w-full p-3 text-gray-600 hover:text-blue-600 rounded-xl transition-all duration-200 group hover:bg-gradient-to-r from-blue-50 to-indigo-50"
-            >
-              <div className="bg-white p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform duration-200">
-                {item.icon}
-              </div>
-              <span className="ml-3 font-medium">{item.name}</span>
-            </button>
-          ))}
-        </nav>
-      </div>
+      <AdminSidebar />
 
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
@@ -244,12 +218,6 @@ export default function Announcements() {
                     disabled={loading}
                   >
                     {loading ? 'Publishing...' : 'Publish Announcement'}
-                  </button>
-                  <button className="border px-4 py-2 rounded-md text-sm">
-                    Preview
-                  </button>
-                  <button className="border px-4 py-2 rounded-md text-sm">
-                    Save Draft
                   </button>
                 </div>
               </form>
